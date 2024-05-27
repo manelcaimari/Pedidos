@@ -7,7 +7,7 @@ class Title extends HTMLElement {
     connectedCallback () {
       
       this.data = {
-        title: "Bienvenido"
+        title: "Pedidos"
       }
   
       this.render()
@@ -15,20 +15,16 @@ class Title extends HTMLElement {
   
     render () {
       this.shadow.innerHTML =
-        `
+         /*html*/`
         <style>
-            h2 {   
-              color: hsl(0, 0%, 0%);
-              font-family: 'Roboto', sans-serif;
-              font-size: 2em;
-              font-weight: 600;
-              margin: 0;
-              text-decoration: none;
-              text-align:center;
-            }
+        h1{
+          font-size:1.5rem ;
+          text-transform: capitalize;
+          text-align:center;
+        }
         </style>
   
-        <h2>${this.data.title}</h2>
+        <h1>${this.data.title}</h1>
         `
       }
   }
