@@ -17,10 +17,7 @@ class order extends HTMLElement {
       this.shadow.innerHTML =
          /*html*/`
         <style>
-            main{
-    display: grid;
-
-}
+       
 
 .order-item {
     padding:1.5rem 1rem;
@@ -138,7 +135,7 @@ class order extends HTMLElement {
 }
         </style>
 
-<main>
+
 <div class="order-item">
     <div class="item-details">
         <p class="item-name">Cocacola</p>
@@ -158,7 +155,6 @@ class order extends HTMLElement {
         <a href="#"><button>ver pedido</button></a>
     </div>
 </div> 
-</main>
         `
       }
   }

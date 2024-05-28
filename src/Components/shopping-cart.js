@@ -17,10 +17,6 @@ class shoppingcart extends HTMLElement {
       this.shadow.innerHTML =
          /*html*/`
          <style>
-         main{
-    display: grid;
-    
-}
 
 .order-item {
     padding: 1rem;
@@ -159,7 +155,6 @@ class shoppingcart extends HTMLElement {
     font-weight: 600;
 }
          </style>
-        <main>
             <div class="order-item">
                 <div class="item-details">
                     <p class="item-name">Cocacola</p>
@@ -186,7 +181,7 @@ class shoppingcart extends HTMLElement {
                     <a href="#"><button>finalizar pedido</button></a>
                 </div>
             </div>
-        </main> 
+       
         
         `
       }

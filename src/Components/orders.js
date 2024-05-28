@@ -16,16 +16,6 @@ class orders extends HTMLElement {
       this.shadow.innerHTML =
          /*html*/`
         <style>
-        main{
-            display: grid;
-            
-            justify-content: center;
-            align-items: center;
-            height: 80vh;
-         
-     
-        }
-
         .order-title h2::first-letter{
             text-transform: capitalize;
         }
@@ -41,7 +31,7 @@ class orders extends HTMLElement {
         }
         .order-text{
             text-align:center;
-            font-size:18px;
+            font-size:16px;
         
         }
         .go-home{
@@ -64,7 +54,7 @@ class orders extends HTMLElement {
             font-weight: 700;
         }
         </style>
-        <main>
+      
             <div class="order-title">
                 <h2>pedido realizado con èxito.</h2>
             </div>
@@ -74,7 +64,7 @@ class orders extends HTMLElement {
             <div class="go-home">
                 <a href="#"><button>volver a inicio</button></a>
             </div>
-        <main>
+     
         `
       }
   }

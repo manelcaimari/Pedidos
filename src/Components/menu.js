@@ -49,7 +49,6 @@ class menu extends HTMLElement {
             font-weight: 600;
         }
         </style>
-        <main >
             <div class="menu">
                 <div class="orders">
                     <a href="#"><button>nuevo pedido</button></a>
@@ -58,7 +57,6 @@ class menu extends HTMLElement {
                     <a href="#"><button>pedidos anteriores</button></a>
                 </div>
             </div>
-        </main>
         
         `
       }

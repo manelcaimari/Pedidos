@@ -17,11 +17,7 @@ class sesion extends HTMLElement {
       this.shadow.innerHTML =
          /*html*/`
         <style>
-        .login{
-    display:grid;
-    gap:1rem;
 
-}
 
 .order h1{
     font-size:1.5rem ;
@@ -91,7 +87,6 @@ input[type="password"]{
 
 }
         </style>
-        <section class="login">
             <div class="order">
                 <h1>pedidos</h1>
             </div>
@@ -111,7 +106,7 @@ input[type="password"]{
             <div class="remember">
                 <a href="#">Olvidé mi contraseña</a>
             </div>
-        </section>
+       
         
         `
       }
