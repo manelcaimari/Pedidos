@@ -16,8 +16,7 @@ class form extends HTMLElement {
       this.shadow.innerHTML =
          /*html*/`
         <style>
-       .orders{
-        form{
+       form{
     display: grid;
     gap: 1rem;
     padding:0 0 1rem 0;
