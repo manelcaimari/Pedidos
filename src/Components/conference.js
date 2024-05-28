@@ -19,7 +19,7 @@ class conference extends HTMLElement {
 .all{
     display: grid;
     gap: 0.2rem;
-    padding: 1em; 
+    padding: 0.3em; 
 }
 .sop{
     display: grid;
