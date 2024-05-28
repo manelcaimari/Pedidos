@@ -121,29 +121,31 @@ main{
 }
 
 .quantity-control  {
+    align-items: center;
     border: none;
     cursor: pointer;
+    display: flex;
     font-size: 18px;
- 
+    height: 1.5rem;
 }
 
 .quantity-control span {
+    box-sizing: border-box;
     width: 40px;
     color: white;
     text-align: center;
     margin: 0 ;
     background-color: hsla(213, 43%, 55%, 0.76);
     border:none;
-    height: 25px;
-
+    height: 100%;
+    padding: 0.1rem;
 }
 
 .quantity-control button{
     width: 2rem;
-    height: 25px;
+    height: 100%;
     border:0;
     padding:0;
-
 }
 
 .button-order{
