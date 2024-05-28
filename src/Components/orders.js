@@ -54,16 +54,15 @@ class orders extends HTMLElement {
             font-weight: 700;
         }
         </style>
-      
-            <div class="order-title">
-                <h2>pedido realizado con èxito.</h2>
-            </div>
-            <div class="order-text">
-                <p>en breve recibirá un correo con los detalles. La rederencia de su pedido es 00000000002</p>
-            </div>
-            <div class="go-home">
-                <a href="#"><button>volver a inicio</button></a>
-            </div>
+        <div class="order-title">
+            <h2>pedido realizado con èxito.</h2>
+        </div>
+        <div class="order-text">
+            <p>en breve recibirá un correo con los detalles. La rederencia de su pedido es 00000000002</p>
+        </div>
+        <div class="go-home">
+            <a href="#"><button>volver a inicio</button></a>
+        </div>
      
         `
       }
