@@ -19,15 +19,16 @@ class conference extends HTMLElement {
         .all{
             display: grid;
             gap: 0.2rem;
-            padding: 0.3em; 
+            padding:0.3rem 0.5rem;
         }
         .sop{
             display: grid;
             gap: 1rem;
-            padding:0 0 1rem 0;
+            padding:1rem 0;
             border-bottom: 1px solid white; 
         }
         .form-text, .form-date {
+            
             display: flex;
             justify-content: space-between;
         }
@@ -35,10 +36,11 @@ class conference extends HTMLElement {
         input[type='date']{
             padding: 3px;
             border: none;
+            font-size: 11px;
             outline: none;
             color: #000000;
             background-color: #fff;
-            width: 50%;
+            width: 45%;
         }
         .sop button::first-letter{
             text-transform: capitalize;
@@ -51,8 +53,8 @@ class conference extends HTMLElement {
             padding: 5px 0;
             text-align: center;
             text-decoration: none;
-            font-size: 13px;
-            width: 45%; 
+            font-size: 11px;
+            width: 40%; 
             cursor: pointer;
             font-weight: 700;
         }
@@ -72,8 +74,8 @@ class conference extends HTMLElement {
             font-weight:bold;
         }
         .order-details p{
-            font-weight: 700;
-            font-size: 18px;
+            font-weight: 600;
+            font-size: 16px;
         }
         .detail-name .detail-price {
             font-size: 18px;

@@ -44,7 +44,7 @@ class menu extends HTMLElement {
             text-align: center;
             text-decoration: none;
             font-size: 16px;
-            width: 300px; 
+            width: 250px; 
             cursor: pointer;
             font-weight: 600;
         }
