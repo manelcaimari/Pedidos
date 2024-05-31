@@ -4,12 +4,30 @@ class conference extends HTMLElement {
       this.shadow = this.attachShadow({ mode: 'open' })
     }
   
-    connectedCallback () {
-      
-      this.data = {
-      }
-  
-      this.render()
+    loadData () {
+        this.data = [
+          {
+            "reference": "00000000002",
+            "total": "180",
+            "date": "20-05-2024",
+            "hour": "11:13",
+            "measurementTotal": "€"
+          },
+          {
+            "reference": "00000000003",
+            "total": "270",
+            "date": "13-05-2024",
+            "hour": "17:09",
+            "measurementTotal": "€"
+          }, 
+          {
+            "reference": "00000000002",
+            "total": "270",
+            "date": "13-05-2024",
+            "hour": "17:09",
+            "measurementTotal": "€"
+          }
+        ]
     }
   
     render () {

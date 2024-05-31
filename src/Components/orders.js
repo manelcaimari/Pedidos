@@ -4,12 +4,15 @@ class orders extends HTMLElement {
       this.shadow = this.attachShadow({ mode: 'open' })
     }
   
-    connectedCallback () {
-      
-      this.data = {
+    async connectedCallback () {
+        await this.loadData()
+        await this.render()
       }
-  
-      this.render()
+    
+    loadData () {
+        this.data = {
+            "reference": "00000000002",
+        }
     }
   
     render () {
@@ -58,13 +61,25 @@ class orders extends HTMLElement {
             <h2>pedido realizado con èxito.</h2>
         </div>
         <div class="order-text">
-            <p>en breve recibirá un correo con los detalles. La rederencia de su pedido es 00000000002</p>
+            <!-- <p>en breve recibirá un correo con los detalles. La rederencia de su pedido es 00000000002</p> -->
         </div>
         <div class="go-home">
             <a href="#"><button>volver a inicio</button></a>
         </div>
      
         `
+        this.data(reference => {
+
+            const referencesContainer = this.shadow.querySelector('.order-text')
+            const referenceContainer = document.createElement('div')
+            referenceContainer.classList.add('number')
+            
+            const title = document.createElement('p')
+            title.textContent = item.title
+            itemContainer.appendChild(title)
+      
+            referencesContainer.appendChild(referenceContainer)
+          })
       }
   }
   

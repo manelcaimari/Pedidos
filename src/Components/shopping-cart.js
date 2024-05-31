@@ -4,13 +4,25 @@ class shoppingcart extends HTMLElement {
       this.shadow = this.attachShadow({ mode: 'open' })
     }
   
-    connectedCallback () {
-      
-      this.data = {
-        title: ""
+    async connectedCallback () {
+        await this.loadData()
+        await this.render()
       }
-  
-      this.render()
+    
+    loadData () {
+        this.data = [
+          {
+            "title": "Cocacola",
+            "total": "180.00",
+            "unities": "16",
+            "quantity": "330",
+            "price": "90.00",
+            "measurementQuantity": "ml",
+            "measurementUnities": "u",
+            "measurementPrice" :"€" ,
+            "measurementTotal": "€"
+          }
+        ]
     }
   
     render () {

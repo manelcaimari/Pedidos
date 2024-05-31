@@ -1,26 +1,16 @@
-class detail extends HTMLElement {
+class order extends HTMLElement {
     constructor () {
       super()
       this.shadow = this.attachShadow({ mode: 'open' })
     }
   
-    async connectedCallback () {
-        await this.loadData()
-        await this.render()
+    connectedCallback () {
+      
+      this.data = {
+       
       }
-    
-    loadData () {
-        this.data = [
-          {
-            "title": "Cocacola",
-            "price": "90.00",
-            "unities": "16",
-            "quantity": "330",
-            "measurementQuantity":" ml",
-            "measurementUnitied":" u",
-            "measurementPrice":" € "
-          }
-        ]
+  
+      this.render()
     }
   
     render () {
@@ -63,10 +53,6 @@ class detail extends HTMLElement {
             justify-content: space-between;
             align-items: center;
             
-        }
-        .quantity{
-            display:flex;
-            gap:10px;
         }
 
         .item-quantity span{
@@ -147,59 +133,26 @@ class detail extends HTMLElement {
         }
         </style>
         <div class="order-item">
-           <div class="item-details">
-               <!-- <p class="item-name">Cocacola</p>
-               <p class="item-price">90.00 €</p> -->
-           </div>
-           <div class="item-quantity">
-                <div class="quantity">
-               <!-- <span>16u, 330ml</span> -->
+            <div class="item-details">
+                <p class="item-name">Cocacola</p>
+                <p class="item-price">90.00 €</p>
+            </div>
+            <div class="item-quantity">
+                <span>16u, 330ml</span>
+                <div class="quantity-control">
+                    <button>-</button>
+                    <span>1</span>
+                    <button >+</button>
                 </div>
-               <div class="quantity-control">
-                   <button>-</button>
-                   <span>1</span>
-                   <button >+</button>
-               </div>
-           </div>
+            </div>
         </div>  
         <div class="button-order">
-           <div class="orders">
-               <a href="#"><button>ver pedido</button></a>
-           </div>
+            <div class="orders">
+                <a href="#"><button>ver pedido</button></a>
+            </div>
         </div> 
-
         `
-        this.data.forEach(item => {
-
-            const itemsContainer = this.shadow.querySelector('.order-item')
-            const itemContainer = document.createElement('div')
-            itemContainer.classList.add('item-details')
-            
-            const title = document.createElement('p')
-            title.textContent = item.title
-            itemContainer.appendChild(title)
-      
-            const price = document.createElement('p')
-            price.textContent = item.price
-            itemContainer.appendChild(price)
-
-            const Containeritems = this.shadow.querySelector('.item-quantity')
-            const Containeritem = document.createElement('div')
-            Containeritem.classList.add('quantity')
-
-            const unities = document.createElement('p')
-            unities.textContent = item.unities
-            Containeritem.appendChild(unities)
-
-            const quantity = document.createElement('p')
-            quantity.textContent = item.quantity
-            Containeritem.appendChild(quantity)
-
-            itemsContainer.appendChild(itemContainer)
-            Containeritems.appendChild(Containeritem)
-          })
       }
   }
   
-  customElements.define('detail-component', detail)
- 
+  customElements.define('order-component', order)
