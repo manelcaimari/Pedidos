@@ -61,25 +61,16 @@ class orders extends HTMLElement {
             <h2>pedido realizado con èxito.</h2>
         </div>
         <div class="order-text">
-            <!-- <p>en breve recibirá un correo con los detalles. La rederencia de su pedido es 00000000002</p> -->
+            <p>en breve recibirá un correo con los detalles. La rederencia de su pedido es <span class="reference"></span></p>
         </div>
         <div class="go-home">
             <a href="#"><button>volver a inicio</button></a>
         </div>
      
         `
-        this.data(reference => {
-
-            const referencesContainer = this.shadow.querySelector('.order-text')
-            const referenceContainer = document.createElement('div')
-            referenceContainer.classList.add('number')
-            
-            const title = document.createElement('p')
-            title.textContent = item.title
-            itemContainer.appendChild(title)
-      
-            referencesContainer.appendChild(referenceContainer)
-          })
+         const referenceElement = this.shadow.querySelector('.order-text .reference')
+         referenceElement.textContent = this.data.reference
+         
       }
   }
   
