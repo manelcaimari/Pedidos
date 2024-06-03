@@ -3,29 +3,33 @@ class conference extends HTMLElement {
       super()
       this.shadow = this.attachShadow({ mode: 'open' })
     }
-  
-    loadData () {
+    
+    async connectedCallback () {
+        await this.loadData()
+        await this.render()
+      }
+    async loadData () {
         this.data = [
           {
             "reference": "00000000002",
             "total": "180",
             "date": "20-05-2024",
             "hour": "11:13",
-            "measurementTotal": "€"
+            "measurementtotal": "€"
           },
           {
             "reference": "00000000003",
             "total": "270",
             "date": "13-05-2024",
             "hour": "17:09",
-            "measurementTotal": "€"
+            "measurementtotal": "€"
           }, 
           {
             "reference": "00000000002",
             "total": "270",
             "date": "13-05-2024",
             "hour": "17:09",
-            "measurementTotal": "€"
+            "measurementtotal": "€"
           }
         ]
     }
@@ -34,49 +38,7 @@ class conference extends HTMLElement {
       this.shadow.innerHTML =
          /*html*/`
         <style>
-        .all{
-            display: grid;
-            gap: 0.2rem;
-            padding:0.3rem 0.5rem;
-        }
-        .sop{
-            display: grid;
-            gap: 1rem;
-            padding:1rem 0;
-            border-bottom: 1px solid white; 
-        }
-        .form-text, .form-date {
-            
-            display: flex;
-            justify-content: space-between;
-        }
-        input[type='text'],
-        input[type='date']{
-            padding: 3px;
-            border: none;
-            font-size: 11px;
-            outline: none;
-            color: #000000;
-            background-color: #fff;
-            width: 45%;
-        }
-        .sop button::first-letter{
-            text-transform: capitalize;
-        }
-        button{
-            background-color: white;
-            color:  hsl(240, 33%, 1%);
-            border: none;
-            border-radius: 5px;
-            padding: 5px 0;
-            text-align: center;
-            text-decoration: none;
-            font-size: 11px;
-            width: 40%; 
-            cursor: pointer;
-            font-weight: 700;
-        }
-            .orders {
+        .orders {
             display:grid;
             align-content: center;
             width: 100%;
@@ -102,6 +64,7 @@ class conference extends HTMLElement {
         .order-quantity {
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
         .order-quantity span{
             font-weight: 700;
@@ -132,57 +95,60 @@ class conference extends HTMLElement {
             
         }
         </style>
-        <div class="all">
-            <div class="sop">
-                <div class="form-text">
-                    <input type="text" placeholder="Referencia del pedido">
-                    <button type="submit">buscar por referencia</button>
-                </div>
-                <div class="form-date">
-                    <input type="date" placeholder="dd/mm/aaaa">
-                    <button type="submit">buscar por fecha</button>
-                </div>
+            <div class="orders">      
             </div>
-            <div class="orders">
-                <div class="order">
-                    <div class="order-details">
-                        <p class="detail-name">00000000002</p>
-                        <p class="detail-price">180 €</p>
-                    </div>
-                    <div class="order-quantity">
-                        <span>20-05-2024 11:13</span>
-                        <div class="quantity-control">
-                            <a href="#"><button>ver pedido</button></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="order">
-                    <div class="order-details">
-                        <p class="detail-name">00000000003</p>
-                        <p class="detail-price">270 €</p>
-                    </div>
-                    <div class="order-quantity">
-                        <span>13-05-2024 17:09</span>
-                        <div class="quantity-control">
-                        <a href="#"><button>ver pedido</button></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="order">
-                    <div class="order-details">
-                        <p class="detail-name">00000000002</p>
-                        <p class="detail-price">270 €</p>
-                    </div>
-                    <div class="order-quantity">
-                        <span>13-05-2024 17:09</span>
-                        <div class="quantity-control">
-                            <a href="#"><button>ver pedido</button></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
         `
+            const ordersContainer = this.shadow.querySelector('.orders');
+            this.data.forEach(order => {
+              const orderContainer = document.createElement('div');
+              orderContainer.classList.add('order');
+      
+              const orderDetails = document.createElement('div');
+              orderDetails.classList.add('order-details');
+      
+              const reference = document.createElement('p');
+              reference.classList.add('detail-reference');
+              reference.textContent = order.reference;
+              orderDetails.appendChild(reference);
+      
+              const total = document.createElement('p');
+              total.classList.add('detail-price');
+              total.textContent = `${order.total} ${order.measurementtotal}`;
+              orderDetails.appendChild(total);
+      
+              orderContainer.appendChild(orderDetails);
+      
+              const orderQuantity = document.createElement('div');
+              orderQuantity.classList.add('order-quantity');
+      
+              const dateTimeContainer = document.createElement('div');
+              dateTimeContainer.classList.add('date-time-container');
+      
+              const date = document.createElement('span');
+              date.classList.add('detail-date');
+              date.textContent = order.date;
+              dateTimeContainer.appendChild(date);
+      
+              const hour = document.createElement('span');
+              hour.classList.add('detail-hour');
+              hour.textContent = order.hour;
+              dateTimeContainer.appendChild(hour);
+      
+              orderQuantity.appendChild(dateTimeContainer);
+      
+              const quantityControlContainer = document.createElement('div');
+              quantityControlContainer.classList.add('quantity-control');
+      
+              const button = document.createElement('button');
+              button.textContent = 'ver pedido';
+              quantityControlContainer.appendChild(button);
+      
+              orderQuantity.appendChild(quantityControlContainer);
+              orderContainer.appendChild(orderQuantity);
+              ordersContainer.appendChild(orderContainer);
+            
+          })
+
       }
   }
   

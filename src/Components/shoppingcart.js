@@ -9,7 +9,7 @@ class shoppingcart extends HTMLElement {
         await this.render()
       }
     
-    loadData () {
+    async loadData () {
         this.data = [
           {
             "title": "Cocacola",
@@ -17,142 +17,131 @@ class shoppingcart extends HTMLElement {
             "unities": "16",
             "quantity": "330",
             "price": "90.00",
+            "pack":"2",
             "measurementQuantity": "ml",
             "measurementUnities": "u",
             "measurementPrice" :"€" ,
             "measurementTotal": "€"
-          }
-        ]
+
+          },
+          {
+            "title": "Cocacola",
+            "total": "180.00",
+            "unities": "16",
+            "quantity": "330",
+            "price": "90.00",
+            "pack":"3",
+            "measurementQuantity": "ml",
+            "measurementUnities": "u",
+            "measurementPrice" :"€" ,
+            "measurementTotal": "€"
+
+          },
+    
+         
+        ];
+        this.calculateTotalPrice();
+        }
+
+    calculateTotalPrice() {
+        this.totalPrice = this.data.reduce((total, item) => {
+            return total + (parseFloat(item.price) * parseFloat(item.pack));
+        }, 0);
     }
-  
+
     render () {
       this.shadow.innerHTML =
          /*html*/`
          <style>
-
         .order-item {
             padding: 1rem;
             display: flex;
             flex-direction: column;
             min-height: 70vh;
             max-height: 70vh;
-
         }
-
         .item-details {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-weight:bold;
-
         }
-
         .item-name {
             font-size: 17px;
             margin: 0;
-
         }
-
         .item-price {
             font-size: 18px;
             margin: 0;
-
         }
-
         .item-quantity {
             display: flex;
             justify-content: space-between;
             align-items: center;
-
         }
         .item-quantity span{
             font-weight:700;
             font-size: 14px;
-
         }
-
-
         .quantity-control {
             display: flex;
             align-items: center;
             justify-content: center;
-
         }
-
-
         .quantity-control  {
             border: none;
             cursor: pointer;
             font-size: 14px;
-
         }
-
-
         .quantity-control input {
             width: 40px;
             color: white;
             text-align: center;
             margin: 0 ;
             background-color: hsla(214, 87%, 56%, 0.966);
-
         }
-
         .bottom{
             border: none;
             gap: 20px; 
             width: 100%;
-
         }
-
         .total {
             padding: 0.5rem 1rem;
-
         }
-
         .item-total {
             display: flex;
             justify-content: space-between;
             align-items: center;
-
         }
-
+        .total-title::first-letter{
+            text-transform: capitalize;
+        }
         .total-title {
             font-size: 20px;
             margin: 0;
             font-weight: 600;
-
         }
-
         .total-price {
             font-size: 18px;
             margin: 0;
             font-weight: 600;
-
         }
-
         .total-quantity  ::first-letter{
             text-transform: capitalize;
-
         }
-
         .total-quantity {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-weight: 500;
-
         }
-
         .orders{
             margin-top: 5px;
             text-align: center;
-
         }
-
         .orders button::first-letter{
             text-transform: capitalize;
         }
-
         .orders button{
             background-color: white;
             color:  hsl(0, 0%, 0%);
@@ -167,23 +156,13 @@ class shoppingcart extends HTMLElement {
             font-weight: 600;
         }
          </style>
-            <div class="order-item">
-                <div class="item-details">
-                    <p class="item-name">Cocacola</p>
-                    <p class="item-price">180.00 €</p>
-                </div>
-                <div class="item-quantity">
-                    <span>16u, 330ml</span>
-                    <div class="quantity-control">
-                        <p>2 x 90.00€</p>
-                    </div>
-                </div>
-            </div>   
+           <div class="order-item">
+           </div>
             <div class="bottom">
                 <div class="total">
                     <div class="item-total">
-                        <p class="total-title">Cocacola</p>
-                        <p class="total-price">180.00 €</p>
+                        <p class="total-title">total</p>
+                        <p class="tota-price">${this.totalPrice.toFixed(2)} € </p>
                     </div>
                     <div class="total-quantity">
                         <p>impuesto no incluidos</p>
@@ -193,10 +172,47 @@ class shoppingcart extends HTMLElement {
                     <a href="#"><button>finalizar pedido</button></a>
                 </div>
             </div>
-       
-        
         `
+            const itemsContainer = this.shadow.querySelector('.order-item');
+            this.data.forEach(item => {
+             const itemContainer = document.createElement('div');
+             itemContainer.classList.add('item');
+     
+             const itemDetails = document.createElement('div');
+             itemDetails.classList.add('item-details');
+     
+             const title = document.createElement('p');
+             title.classList.add('item-name');
+             title.textContent = item.title;
+             itemDetails.appendChild(title);
+     
+             const price = document.createElement('p');
+             price.classList.add('item-price');
+             price.textContent = `${(parseFloat(item.price) * parseFloat(item.pack)).toFixed(2)} €`;
+             itemDetails.appendChild(price);
+     
+             const itemQuantity = document.createElement('div');
+             itemQuantity.classList.add('item-quantity');
+     
+             const unities = document.createElement('p');
+             unities.classList.add('item-unities');
+             unities.textContent = `${item.unities} ${item.measurementUnities}, ${item.quantity} ${item.measurementQuantity}`;
+             itemQuantity.appendChild(unities);
+     
+             const quantityControl = document.createElement('div');
+             quantityControl.classList.add('quantity-control');
+     
+             const quantity = document.createElement('p');
+             quantity.textContent = `${item.pack} x ${item.price}${item.measurementPrice}`;
+             quantityControl.appendChild(quantity);
+             itemQuantity.appendChild(quantityControl);
+     
+             itemContainer.appendChild(itemDetails);
+             itemContainer.appendChild(itemQuantity);
+             itemsContainer.appendChild(itemContainer);
+
+        });
+        
       }
   }
-  
   customElements.define('shoppingcart-component', shoppingcart)

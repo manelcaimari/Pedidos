@@ -7,19 +7,40 @@ class detail extends HTMLElement {
     async connectedCallback () {
         await this.loadData()
         await this.render()
+        this.createOrderElements()
       }
     
-    loadData () {
+    async loadData () {
         this.data = [
           {
             "title": "Cocacola",
             "price": "90.00",
             "unities": "16",
             "quantity": "330",
-            "measurementQuantity":" ml",
-            "measurementUnitied":" u",
-            "measurementPrice":" € "
+            "measurementQuantity": "ml",
+            "measurementunities": "u",
+            "measurementPrice": "€"
+          },
+          {
+            "title": "Pepsi",
+            "price": "80.00",
+            "unities": "12",
+            "quantity": "500",
+            "measurementQuantity": "ml",
+            "measurementunities": "u",
+            "measurementPrice": "€"
+          },
+          {
+            "title": "Fanta",
+            "price": "70.00",
+            "unities": "20",
+            "quantity": "250",
+            "measurementQuantity": "ml",
+            "measurementunities": "u",
+            "measurementPrice": "€"
           }
+          
+          
         ]
     }
   
@@ -58,18 +79,13 @@ class detail extends HTMLElement {
             
         }
 
-        .item-quantity {
+        .item-detail {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            
         }
-        .quantity{
-            display:flex;
-            gap:10px;
-        }
-
-        .item-quantity span{
+    
+        .item-detail span{
             font-weight: 700;
 
         }
@@ -147,58 +163,76 @@ class detail extends HTMLElement {
         }
         </style>
         <div class="order-item">
-           <div class="item-details">
-               <!-- <p class="item-name">Cocacola</p>
-               <p class="item-price">90.00 €</p> -->
-           </div>
-           <div class="item-quantity">
-                <div class="quantity">
-               <!-- <span>16u, 330ml</span> -->
-                </div>
-               <div class="quantity-control">
-                   <button>-</button>
-                   <span>1</span>
-                   <button >+</button>
-               </div>
-           </div>
         </div>  
         <div class="button-order">
-           <div class="orders">
-               <a href="#"><button>ver pedido</button></a>
-           </div>
-        </div> 
-
+            <div class="orders">
+                <a href="#"><button>ver pedido</button></a>
+            </div>
+        </div>
         `
-        this.data.forEach(item => {
-
-            const itemsContainer = this.shadow.querySelector('.order-item')
-            const itemContainer = document.createElement('div')
-            itemContainer.classList.add('item-details')
-            
-            const title = document.createElement('p')
-            title.textContent = item.title
-            itemContainer.appendChild(title)
       
-            const price = document.createElement('p')
-            price.textContent = item.price
-            itemContainer.appendChild(price)
-
-            const Containeritems = this.shadow.querySelector('.item-quantity')
-            const Containeritem = document.createElement('div')
-            Containeritem.classList.add('quantity')
-
-            const unities = document.createElement('p')
-            unities.textContent = item.unities
-            Containeritem.appendChild(unities)
-
-            const quantity = document.createElement('p')
-            quantity.textContent = item.quantity
-            Containeritem.appendChild(quantity)
-
-            itemsContainer.appendChild(itemContainer)
-            Containeritems.appendChild(Containeritem)
-          })
       }
+      createOrderElements() {
+        const ordersContainer = this.shadow.querySelector('.order-item');
+
+        this.data.forEach(order => {
+            const orderDiv = document.createElement('div');
+            orderDiv.classList.add('order');
+
+            const orderDetailsDiv = document.createElement('div');
+            orderDetailsDiv.classList.add('item-details');
+
+            const titleP = document.createElement('p');
+            titleP.classList.add('detail-title');
+            titleP.textContent = order.title;
+
+            const priceP = document.createElement('p');
+            priceP.classList.add('detail-price');
+            priceP.textContent = `${order.price}${order.measurementPrice}`;
+
+            orderDetailsDiv.appendChild(titleP);
+            orderDetailsDiv.appendChild(priceP);
+
+            const itemDetailDiv = document.createElement('div');
+            itemDetailDiv.classList.add('item-detail');
+
+            const detailDiv = document.createElement('div');
+            detailDiv.classList.add('detail');
+
+            const unitiesSpan = document.createElement('span');
+            unitiesSpan.classList.add('item-united');
+            unitiesSpan.textContent = `${order.unities}${order.measurementunities}`;
+
+            const quantitySpan = document.createElement('span');
+            quantitySpan.classList.add('item-quantity');
+            quantitySpan.textContent = `${order.quantity}${order.measurementQuantity}`;
+
+            detailDiv.appendChild(unitiesSpan);
+            detailDiv.appendChild(quantitySpan);
+
+            const quantityControlDiv = document.createElement('div');
+            quantityControlDiv.classList.add('quantity-control');
+
+            const minusButton = document.createElement('button');
+            minusButton.textContent = '-';
+            const quantitySpan2 = document.createElement('span');
+            quantitySpan2.textContent = '1';
+            const plusButton = document.createElement('button');
+            plusButton.textContent = '+';
+
+            quantityControlDiv.appendChild(minusButton);
+            quantityControlDiv.appendChild(quantitySpan2);
+            quantityControlDiv.appendChild(plusButton);
+
+            itemDetailDiv.appendChild(detailDiv);
+            itemDetailDiv.appendChild(quantityControlDiv);
+
+            orderDiv.appendChild(orderDetailsDiv);
+            orderDiv.appendChild(itemDetailDiv);
+
+            ordersContainer.appendChild(orderDiv);
+        });
+    }
   }
   
   customElements.define('detail-component', detail)
