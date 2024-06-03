@@ -3,7 +3,6 @@ class title extends HTMLElement {
       super()
       this.shadow = this.attachShadow({ mode: 'open' })
       this.title = this.getAttribute('title')
-
     }
 
     
@@ -28,7 +27,7 @@ class title extends HTMLElement {
         </style>
   
         <div class="title">
-            <h2>${this.title}</h2>
+          <h2>${this.title}</h2>
         </div>
         `
       }

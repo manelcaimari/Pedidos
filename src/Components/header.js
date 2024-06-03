@@ -28,7 +28,7 @@ class header extends HTMLElement {
    
     </style>
         <header>
-            <slot></slot>
+          <slot></slot>
         </header>
         `
       }
