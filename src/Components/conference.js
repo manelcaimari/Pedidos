@@ -37,64 +37,64 @@ class conference extends HTMLElement {
     render () {
       this.shadow.innerHTML =
          /*html*/`
-        <style>
-        .orders {
-            display:grid;
-            align-content: center;
-            width: 100%;
-        }
-        .order:not(:last-child) {
-            padding:0 0 10px 0;
-            border-bottom: 1px solid white; 
-        }
-        .order-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight:bold;
-        }
-        .order-details p{
-            font-weight: 600;
-            font-size: 16px;
-        }
-        .detail-name .detail-price {
-            font-size: 18px;
-            margin: 0;
-        }
-        .order-quantity {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .order-quantity span{
-            font-weight: 700;
-            font-size: 14px;
-        }
-        .quantity-control{
-            width: 100px;
+            <style>
+                .orders {
+                    display:grid;
+                    align-content: center;
+                    width: 100%;
+                }
+                .order:not(:last-child) {
+                    padding:0 0 10px 0;
+                    border-bottom: 1px solid white; 
+                }
+                .order-details {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-weight:bold;
+                }
+                .order-details p{
+                    font-weight: 600;
+                    font-size: 16px;
+                }
+                .detail-name .detail-price {
+                    font-size: 18px;
+                    margin: 0;
+                }
+                .order-quantity {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .order-quantity span{
+                    font-weight: 700;
+                    font-size: 14px;
+                }
+                .quantity-control{
+                    width: 100px;
 
-        }
+                }
 
-        .order button::first-letter{
-            text-transform: capitalize;
+                .order button::first-letter{
+                    text-transform: capitalize;
 
-        }
+                }
 
-        .order button{
-            background-color: white;
-            color:  hsl(0, 0%, 0%);
-            border: none;
-            border-radius: 3px;
-            padding: 5px 0;
-            text-align: center;
-            text-decoration: none;
-            font-size: 14px;
-            width: 100%; 
-            cursor: pointer;
-            font-weight: 600;
-            
-        }
-        </style>
+                .order button{
+                    background-color: white;
+                    color:  hsl(0, 0%, 0%);
+                    border: none;
+                    border-radius: 3px;
+                    padding: 5px 0;
+                    text-align: center;
+                    text-decoration: none;
+                    font-size: 14px;
+                    width: 100%; 
+                    cursor: pointer;
+                    font-weight: 600;
+                    
+                }
+            </style>
             <div class="orders">      
             </div>
         `
