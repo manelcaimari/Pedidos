@@ -61,6 +61,10 @@ class conference extends HTMLElement {
                     font-size: 18px;
                     margin: 0;
                 }
+                .date-time-container{
+                    display:flex;
+                    gap:0.5rem;
+                }
                 .order-quantity {
                     display: flex;
                     justify-content: space-between;
