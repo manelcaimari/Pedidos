@@ -37,3 +37,10 @@ main.gop{
     align-items: center;
     
 }
+main.table{
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 1fr 2fr;
+    padding: 1rem;
+
+}

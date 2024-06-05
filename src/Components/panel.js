@@ -17,12 +17,7 @@ class panel extends HTMLElement {
       this.shadow.innerHTML =
          /*html*/`
         <style>
-        .case {
-            display: grid;
-            gap: 2rem;
-            grid-template-columns: 1fr 2fr;
-            padding: 1rem;
-        }
+        
 
         details {
             width: 100%;
@@ -148,18 +143,7 @@ class panel extends HTMLElement {
         }
         </style>
         <div class="case">
-         <div class="filter">
-             <details>
-                 <summary>
-                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M11 11L16.76 3.62A1 1 0 0 0 16.59 2.22A1 1 0 0 0 16 2H2A1 1 0 0 0 1.38 2.22A1 1 0 0 0 1.21 3.62L7 11V16.87A1 1 0 0 0 7.29 17.7L9.29 19.7A1 1 0 0 0 10.7 19.7A1 1 0 0 0 11 18.87V11M13 16L18 21L23 16Z" /></svg>     
-                 </summary>
-                 <form action="" method="">
-                     <input type="search" contenteditable="true">
-                     <button type="submit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z" /></svg></button>
-                     <button type="reset"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" /></svg></button>
-                 </form>
-             </details>
-         </div>
+        
          <div class="result">
              <div class="result-general" >
                  <form name="general_result" action="" method="">

@@ -7,7 +7,7 @@ class sesion extends HTMLElement {
     connectedCallback () {
       
       this.data = {
-        title: ""
+
       }
   
       this.render()
