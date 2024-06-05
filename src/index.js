@@ -1,7 +1,6 @@
 import './components/sesion.js'
 import './components/header.js'
 import './components/menu.js'
-import './components/order.js'
 import './components/shoppingcart.js'
 import './components/detail.js'
 import './components/orders.js'
