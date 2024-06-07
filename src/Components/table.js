@@ -10,7 +10,8 @@ class TableComponent extends HTMLElement {
     }
 
     render() {
-        this.shadow.innerHTML = `
+        this.shadow.innerHTML = 
+            /*html*/`
             <style>
                 details {
                     width: 100%;
@@ -117,7 +118,8 @@ class TableComponent extends HTMLElement {
                     </div>
                 </details>
             </div>
-        `;
+            `
+        ;
     }
 
 
