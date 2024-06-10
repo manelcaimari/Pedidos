@@ -4,9 +4,21 @@ class TableComponent extends HTMLElement {
         this.shadow = this.attachShadow({ mode: 'open' });
     }
 
-    connectedCallback() {
+    async connectedCallback() {
+        await this.loadData();
         this.render();
         this.addEventListeners();
+    }
+
+    async loadData() {
+        this.data = [
+            {
+                name: 'Carlos',
+                email: 'carlossedagambin@gmail.com',
+                creationDate: '2024-04-22',
+                updateDate: '2024-04-22'
+            }
+        ];
     }
 
     render() {
@@ -61,8 +73,9 @@ class TableComponent extends HTMLElement {
                     height: 24px;
                 }
                 .container {
-                    padding: 20px;
+                    padding: 1rem 6rem 0 3rem;
                 }
+           
                 table {
                     display: flex;
                     width: 100%;
@@ -107,22 +120,35 @@ class TableComponent extends HTMLElement {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Carlos</td>
-                                    <td>carlossedagambin@gmail.com</td>
-                                    <td>2024-04-22</td>
-                                    <td>2024-04-22</td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </details>
             </div>
-            `
-        ;
+        `;
+         const tbody = this.shadow.querySelector('#myTable tbody');
+         this.data.forEach(customer => {
+             const tr = document.createElement('tr');
+
+             const nameCell = document.createElement('td');
+             nameCell.textContent = customer.name;
+             tr.appendChild(nameCell);
+
+             const emailCell = document.createElement('td');
+             emailCell.textContent = customer.email;
+             tr.appendChild(emailCell);
+
+             const creationDateCell = document.createElement('td');
+             creationDateCell.textContent = customer.creationDate;
+             tr.appendChild(creationDateCell);
+
+             const updateDateCell = document.createElement('td');
+             updateDateCell.textContent = customer.updateDate;
+             tr.appendChild(updateDateCell);
+
+             tbody.appendChild(tr);
+        });
     }
-
-
 }
 
 customElements.define('table-component', TableComponent);
