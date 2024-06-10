@@ -51,7 +51,7 @@ class TableComponent extends HTMLElement {
                     justify-content: center;
                 }
                 input[type="text"] {
-                    width: calc(100% - 120px);
+                    width: calc(100% - 30px);
                     padding: 12px 20px;
                     box-sizing: border-box;
                     border: 0;
@@ -73,7 +73,7 @@ class TableComponent extends HTMLElement {
                     height: 24px;
                 }
                 .container {
-                    padding: 1rem 6rem 0 3rem;
+                    padding: 1rem 2rem 0 2rem;
                 }
            
                 table {
