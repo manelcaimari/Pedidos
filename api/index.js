@@ -35,18 +35,3 @@
 // app.listen(8080, () => {
 //   console.log(`El servidor está corriendo en el puerto 8080.`)
 // })
-const express = require('express');
-const path = require('path');
-const app = express();
-const PORT = 8080;
-
-// Servir archivos estáticos desde el directorio 'client'
-app.use(express.static(path.join(__dirname, 'client')));
-
-// Establecer rutas para tus endpoints API u otras rutas
-app.use('/api/admin/users', require('./api/index'));
-
-// Escuchar en el puerto definido
-app.listen(PORT, () => {
-  console.log(`El servidor está corriendo en el puerto ${PORT}.`);
-});
