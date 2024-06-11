@@ -110,14 +110,8 @@ class TableComponent extends HTMLElement {
                             <button type="submit" id="searchButton"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z" /></svg></button>
                             <button type="reset" id="resetButton"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0 0 18,19V7H6V19Z" /></svg></button>
                         </div>
-                        <table id="myTable">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Email</th>
-                                    <th>Fecha de creación</th>
-                                    <th>Fecha de actualización</th>
-                                </tr>
+                        <table >
+                            <thead>  
                             </thead>
                             <tbody>
                             </tbody>
@@ -126,7 +120,24 @@ class TableComponent extends HTMLElement {
                 </details>
             </div>
         `;
-         const tbody = this.shadow.querySelector('#myTable tbody');
+     
+            this.createTableHeader()
+            this.createTableBody() 
+      }
+
+      createTableHeader () {
+        const thead = this.shadow.querySelector('thead');
+        const tr = document.createElement('tr');
+        thead.appendChild(tr);
+
+        Object.keys(this.data[0]).forEach(key => {
+            const th = document.createElement('th')
+            th.textContent = key.toUpperCase()
+            tr.appendChild(th)
+          })
+    }
+    createTableBody () {
+        const tbody = this.shadow.querySelector('tbody')
          this.data.forEach(customer => {
              const tr = document.createElement('tr');
 
