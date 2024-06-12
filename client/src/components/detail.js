@@ -48,8 +48,8 @@ class detail extends HTMLElement {
                     display: flex;
                     flex-direction: column;
                     gap:1rem;
-                    min-height: 80vh;
-                    max-height: 80vh;
+                    min-height: 75vh;
+                    max-height: 75vh;
                     font-weight: 600;
 
                 }

@@ -52,8 +52,8 @@ class shoppingcart extends HTMLElement {
                     padding: 1rem;
                     display: flex;
                     flex-direction: column;
-                    min-height: 70vh;
-                    max-height: 70vh;
+                    min-height: 65vh;
+                    max-height: 65vh;
                 }
                 .item{
                     padding: 10px 0;

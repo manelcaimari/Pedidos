@@ -1,23 +1,18 @@
 class menu extends HTMLElement {
-    constructor () {
-      super()
-      this.shadow = this.attachShadow({ mode: 'open' })
+    constructor() {
+        super();
+        this.shadow = this.attachShadow({ mode: 'open' });
     }
-  
-    connectedCallback () {
-      
-      this.data = {
 
-      }
-  
-      this.render()
+    connectedCallback() {
+        this.data = {};
+        this.render();
     }
-  
-    render () {
-      this.shadow.innerHTML =
-         /*html*/`
+
+    render() {
+        this.shadow.innerHTML = /*html*/`
         <style>
-        .menu{
+        .menu {
             text-align: center;
             border: none;
             gap: 20px; 
@@ -26,40 +21,56 @@ class menu extends HTMLElement {
             display: flex;
             flex-direction: column;
         }
-        .orders{
+        .orders {
             width: 300px;
             display: grid;
-            align-items: center ;
-            justify-content:center;
+            align-items: center;
+            justify-content: center;
         }
-        .orders button::first-letter{
+        .orders button::first-letter {
             text-transform: capitalize;
         }
-        .orders button{
+        .orders button {
             background-color: white;
-            color:  hsl(273, 80%, 27%);
+            color: hsl(273, 80%, 27%);
             border: none;
             border-radius: 13px;
             padding: 7px 0;
             text-align: center;
             text-decoration: none;
             font-size: 16px;
-            width: 250px; 
+            width: 250px;
             cursor: pointer;
             font-weight: 600;
         }
         </style>
-            <div class="menu">
-                <div class="orders">
-                    <a href="#"><button>nuevo pedido</button></a>
-                </div>
-                <div class="orders">
-                    <a href="#"><button>pedidos anteriores</button></a>
-                </div>
-            </div>
-        
-        `
-      }
-  }
-  
-  customElements.define('menu-component', menu)
+        `;
+
+        const menuContainer = document.createElement('div');
+        menuContainer.classList.add('menu');
+
+        const newOrderDiv = document.createElement('div');
+        newOrderDiv.classList.add('orders');
+        const newOrderLink = document.createElement('a');
+        newOrderLink.href = '#';
+        const newOrderButton = document.createElement('button');
+        newOrderButton.textContent = 'nuevo pedido';
+        newOrderLink.appendChild(newOrderButton);
+        newOrderDiv.appendChild(newOrderLink);
+        menuContainer.appendChild(newOrderDiv);
+
+        const previousOrdersDiv = document.createElement('div');
+        previousOrdersDiv.classList.add('orders');
+        const previousOrdersLink = document.createElement('a');
+        previousOrdersLink.href = '#';
+        const previousOrdersButton = document.createElement('button');
+        previousOrdersButton.textContent = 'pedidos anteriores';
+        previousOrdersLink.appendChild(previousOrdersButton);
+        previousOrdersDiv.appendChild(previousOrdersLink);
+        menuContainer.appendChild(previousOrdersDiv);
+
+        this.shadow.appendChild(menuContainer);
+    }
+}
+
+customElements.define('menu-component', menu);
