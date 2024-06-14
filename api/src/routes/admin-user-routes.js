@@ -1,36 +1,13 @@
 module.exports = (app) => {
-  
+
     const router = require('express').Router()
-
-    router.get('/', (req, res) => {
-        console.log("Parámetros")
-        console.log(req.params)
-
-        console.log("Query")
-        console.log(req.query)
-
-    res.send('GET request to the homepage')
-    })
-
-    router.get('/:id', (req, res) => {
-
-        console.log("Parámetros id , soy yo")
-        console.log(req.params.id)
-
-        console.log("Query")
-        console.log(req.query)
-
-
-    res.send('GET request to the homepage')
-    })
-
-    router.put('/:id', (req, res) => {
-        console.log(req.params.id)
-        console.log(req.body)
-
-
-        res.send('PUT request to the homepage')
-    })
-
+    const controller = require('../controllers/admin/user-controller.js')
+  
+    router.post('/', controller.create)
+    router.get('/', controller.findAll)
+    router.get('/:id', controller.findOne)
+    router.put('/:id', controller.update)
+    router.delete('/:id', controller.delete)
+  
     app.use('/api/admin/users', router)
 }
