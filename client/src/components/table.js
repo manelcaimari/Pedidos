@@ -13,10 +13,10 @@ class TableComponent extends HTMLElement {
     async loadData() {
         this.data = [
             {
-                "name": 'Carlos',
-                "email": 'carlossedagambin@gmail.com',
-                "creationDate": '2024-04-22',
-                "updateDate": '2024-04-22'
+                "Name": 'Carlos',
+                "Email": 'carlossedagambin@gmail.com',
+                "Fecha de creación": '2024-04-22',
+                "Fecha de actualización": '2024-04-22'
             }
         ];
     }
@@ -32,13 +32,13 @@ class TableComponent extends HTMLElement {
                     justify-content: center;
                 }
                 .filter summary {
-                    display: grid;
+                    display: flex;
                     width: 34rem;
                 }
                 .filter details summary {
                     cursor: pointer;
                     list-style: none;
-                    background-color: aliceblue;
+                    background-color: white;
                     padding: 0.1rem 0.5rem;
                     margin-bottom: 1rem;
                 }
@@ -75,28 +75,16 @@ class TableComponent extends HTMLElement {
                     height: 24px;
                 }
                 .filter-content{
+                    display:grid;
+                    gap:0;
                     padding: 1rem 2rem 0 2rem
                 }
-           
-                table {
-                    display: flex;
-                    align-content:center;
-                    width: 100%;
-                    border-collapse: collapse;
-                    background-color: black;
+                .data-container{
+                    background-color:black;
                 }
-                th, td {
-                    padding: 8px;
-                    display: grid;
-                }
-                th {
-                    text-align: left;
-                }
-                tr:nth-child(even) {
-                    background-color: #3e0073;
-                }
-                tr:hover {
-                    background-color: #5e00a3;
+                .data-container p{
+                    font-size:16px;
+                    font-weight: 600;
                 }
                 .filter-icon {
                     margin-right: 10px;
@@ -117,7 +105,13 @@ class TableComponent extends HTMLElement {
             svgIcon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
             svgIcon.setAttribute("viewBox", "0 0 24 24");
             svgIcon.innerHTML = '<title></title><path d="M11 11L16.76 3.62A1 1 0 0 0 16.59 2.22A1 1 0 0 0 16 2H2A1 1 0 0 0 1.38 2.22A1 1 0 0 0 1.21 3.62L7 11V16.87A1 1 0 0 0 7.29 17.7L9.29 19.7A1 1 0 0 0 10.7 19.7A1 1 0 0 0 11 18.87V11M13 16L18 21L23 16Z" />';
+            
+            const summaryInput = document.createElement('input');
+            summaryInput.type = 'text';
+            summaryInput.placeholder = '';
+            
             summary.appendChild(svgIcon);
+            summary.appendChild(summaryInput);
          
             const file = document.createElement('div');
             file.classList.add('file');
@@ -143,55 +137,37 @@ class TableComponent extends HTMLElement {
             resetSvgIcon.innerHTML = '<title></title><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />';
             resetButton.appendChild(resetSvgIcon);
          
-            const table = document.createElement('table');
-            table.classList.add('table');
-         
-            this.createTableHeader(table);
-            this.createTableBody(table);
-         
+            const dataContainer = document.createElement('div');
+            dataContainer.classList.add('data-container');
+            
+            this.createParagraphs(dataContainer);
+            
             file.appendChild(input);
             file.appendChild(searchButton);
             file.appendChild(resetButton);
-         
+            
             filterContentDiv.appendChild(file); 
-            filterContentDiv.appendChild(table); 
-         
+            filterContentDiv.appendChild(dataContainer); 
+            
             filterDiv.appendChild(details);
             details.appendChild(summary);
             details.appendChild(filterContentDiv); 
             this.shadow.appendChild(filterDiv);
         }
-         
-        createTableHeader(table) {
-             const thead = document.createElement('thead');
-             const tr = document.createElement('tr');
-         
-             Object.keys(this.data[0]).forEach(key => {
-                 const th = document.createElement('th');
-                 th.textContent = key.toUpperCase();
-                 tr.appendChild(th);
-             });
-         
-             thead.appendChild(tr);
-             table.appendChild(thead);
-        }
-         
-        createTableBody(table) {
-            const tbody = document.createElement('tbody');
-         
+        
+        createParagraphs(container) {
             this.data.forEach(customer => {
-                const tr = document.createElement('tr');
-         
-                Object.values(customer).forEach(value => {
-                    const td = document.createElement('td');
-                    td.textContent = value;
-                    tr.appendChild(td);
+                const customerDiv = document.createElement('div');
+                customerDiv.classList.add('customer-data');
+                
+                Object.entries(customer).forEach(([key, value]) => {
+                    const p = document.createElement('p');
+                    p.textContent = `${key}: ${value}`;
+                    customerDiv.appendChild(p);
                 });
-         
-                tbody.appendChild(tr);
+                
+                container.appendChild(customerDiv);
             });
-         
-            table.appendChild(tbody);
         }
 }
    
