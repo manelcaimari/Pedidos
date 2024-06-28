@@ -1,5 +1,5 @@
 module.exports = function (sequelize, DataTypes) {
-    const ProductCategory = sequelize.define('ProductCategory',
+    const Product_Category = sequelize.define('Product_Category',
         {
             id: {
             type: DataTypes.INTEGER,
@@ -35,9 +35,9 @@ module.exports = function (sequelize, DataTypes) {
         }
     )
   
-    ProductCategory.associate = function (models) {
+    Product_Category.associate = function (models) {
      
     }
   
-    return  ProductCategory
+    return  Product_Category
 }
