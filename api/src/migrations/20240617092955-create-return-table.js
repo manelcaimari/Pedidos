@@ -3,16 +3,20 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('sales', {
+    await queryInterface.createTable('returns', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false
       },
-      customerId: {
+      saleId: {
           type: Sequelize.INTEGER,
           allowNull: false
+      },
+      customerId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
       reference: {
           type: Sequelize.STRING,
@@ -22,11 +26,11 @@ module.exports = {
           type: Sequelize.DECIMAL(10, 2), 
           allowNull: false
       },
-      saleDate: {
+      returnDate: {
           type: Sequelize.DATEONLY,
           allowNull: false
       },
-      saleTime: {
+      returnTime: {
           type: Sequelize.TIME,
           allowNull: true 
       },
@@ -45,6 +49,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('sales')
+    await queryInterface.dropTable('returns')
   }
 }
