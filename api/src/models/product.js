@@ -7,6 +7,10 @@ module.exports = function (sequelize, DataTypes) {
                 primaryKey: true,
                 allowNull: false
               },
+              productId: {
+                type: DataTypes.INTEGER,
+                allowNull: false
+              },
               name: {
                 type: DataTypes.STRING,
                 allowNull: false
@@ -48,8 +52,15 @@ module.exports = function (sequelize, DataTypes) {
                     unique: true,
                     using: 'BTREE',
                     fields: [
-                        { name: 'id' }
+                      { name: 'id' }
                     ]
+                },
+                {
+                  name: 'products_productCategoryId_fk',
+                  using: 'BTREE',
+                  fields: [
+                    { name: 'productCategoryId' }
+                  ]
                 }
             ]
         }

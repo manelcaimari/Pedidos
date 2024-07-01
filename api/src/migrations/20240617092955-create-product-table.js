@@ -10,6 +10,10 @@ module.exports = {
         primaryKey: true,
         allowNull: false
       },
+      productId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
       name: {
         type: Sequelize.STRING,
         allowNull: false
@@ -45,6 +49,9 @@ module.exports = {
       deletedAt: {
         type: Sequelize.DATE
       }
+    })
+    await queryInterface.addIndex('products', ['productCategoryId'], {
+      name: 'products_productCategoryId_index'
     })
   },
 
