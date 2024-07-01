@@ -29,7 +29,8 @@ module.exports = function (sequelize, DataTypes) {
             updatedAt: {
                 type: DataTypes.DATE
             }
-        }, {
+        }, 
+        {
             sequelize,
             tableName: 'customer_credentials',
             timestamps: true,
@@ -41,6 +42,13 @@ module.exports = function (sequelize, DataTypes) {
                     using: 'BTREE',
                     fields: [
                         { name: 'id' }
+                    ]
+                },
+                {
+                    name: 'customer_credentials_customerId_fk',
+                    using: 'BTREE',
+                    fields: [
+                      { name: 'customerId' }
                     ]
                 }
             ]

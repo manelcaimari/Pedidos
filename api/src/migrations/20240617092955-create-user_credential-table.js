@@ -12,9 +12,15 @@ module.exports = {
         autoIncrement: true,
         allowNull: false
       },
-      userld: {
+      userId: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'NO ACTION'
       },
       email: {
         type: Sequelize.STRING,
@@ -39,6 +45,9 @@ module.exports = {
       deletedAt: {
         type: Sequelize.DATE
       }
+    })
+    await queryInterface.addIndex('user_credentials', ['userId'], {
+      name: 'user_credentials_userId_index'
     })
   },
 

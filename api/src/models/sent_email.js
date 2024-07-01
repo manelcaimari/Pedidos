@@ -7,7 +7,7 @@ module.exports = function (sequelize, DataTypes) {
             primaryKey: true,
             allowNull: false
             },
-            userld: {
+            userId: {
                 type: DataTypes.INTEGER,
                 allowNull: false
             },
@@ -46,6 +46,13 @@ module.exports = function (sequelize, DataTypes) {
                     using: 'BTREE',
                     fields: [
                         { name: 'id' }
+                    ]
+                },
+                {
+                    name: 'sent_emails_userId_fk',
+                    using: 'BTREE',
+                    fields: [
+                      { name: 'userId' }
                     ]
                 }
             ]

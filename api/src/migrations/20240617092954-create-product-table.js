@@ -1,36 +1,46 @@
 'use strict'
 
-const { sequelize } = require('../models')
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('customer_activation_tokens', {
+    await queryInterface.createTable('products', {
       id: {
         type: Sequelize.INTEGER,
-        primaryKey: true,
         autoIncrement: true,
+        primaryKey: true,
         allowNull: false
       },
-      customerId: {
+      productCategoryId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'customers',
+          model: 'products',
           key: 'id'
         },
         onUpdate: 'CASCADE',
         onDelete: 'NO ACTION'
       },
-      token: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      expirationDate: {
-        type: Sequelize.DATE,
+      reference: {
+        type: Sequelize.STRING,
         allowNull: false
       },
-      used : {
+      units: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      measurementUnit: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      measurement: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      visible: {
         type: Sequelize.BOOLEAN,
         allowNull: false
       },
@@ -46,12 +56,12 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
-    await queryInterface.addIndex('customer_activation_tokens', ['customerId'], {
-      name: 'customer_activation_tokens_customerId_index'
+    await queryInterface.addIndex('products', ['productCategoryId'], {
+      name: 'products_productCategoryId_index'
     })
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('customer_activation_tokens')
+    await queryInterface.dropTable('products')
   }
 }
