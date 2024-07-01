@@ -1,5 +1,5 @@
 module.exports = function (sequelize, DataTypes) {
-    const Customer_reset_password_token = sequelize.define('Customer_reset_password_token',
+    const CustomerResetPasswordToken = sequelize.define('CustomerResetPasswordToken',
         {
             id: {
                 type: DataTypes.INTEGER,
@@ -47,9 +47,9 @@ module.exports = function (sequelize, DataTypes) {
         }
     )
   
-    Customer_reset_password_token.associate = function (models) {
+    CustomerResetPasswordToken.associate = function (models) {
      
     }
   
-    return Customer_reset_password_token
+    return CustomerResetPasswordToken
 }

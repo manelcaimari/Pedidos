@@ -1,5 +1,5 @@
 module.exports = function (sequelize, DataTypes) {
-    const User_credential = sequelize.define('User_credential',
+    const UserCredential = sequelize.define('UserCredential',
         {
             id: {
                 type: DataTypes.INTEGER,
@@ -47,9 +47,9 @@ module.exports = function (sequelize, DataTypes) {
         }
     )
   
-    User_credential.associate = function (models) {
+    UserCredential.associate = function (models) {
      
     }
   
-    return User_credential
+    return UserCredential
 }
