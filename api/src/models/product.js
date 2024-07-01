@@ -7,7 +7,7 @@ module.exports = function (sequelize, DataTypes) {
                 primaryKey: true,
                 allowNull: false
               },
-              productId: {
+              productCategoryId: {
                 type: DataTypes.INTEGER,
                 allowNull: false
               },
@@ -67,6 +67,9 @@ module.exports = function (sequelize, DataTypes) {
     )
   
     Product.associate = function (models) {
+      Product.belongsTo(models.ProductCategory, { as: 'productCategory', foreignKey: 'productCategoryId' })
+      Product.hasMany(models.SaleDetail, { as: 'saledetails', foreignKey: 'productId' })
+      Product.hasMany(models.Price, { as: 'prices', foreignKey: 'productId' })
      
     }
   

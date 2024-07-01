@@ -56,7 +56,7 @@ module.exports = function (sequelize, DataTypes) {
     )
   
     CustomerResetPasswordToken.associate = function (models) {
-     
+        CustomerResetPasswordToken.belongsTo(models.Customer, { as: 'customer', foreignKey: 'customerId' })
     }
   
     return CustomerResetPasswordToken

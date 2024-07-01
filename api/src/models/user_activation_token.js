@@ -55,6 +55,9 @@ module.exports = function (sequelize, DataTypes) {
     )
   
     UserActivationToken.associate = function (models) {
+        UserActivationToken.belongsTo(models.User, { as: 'user', foreignKey: 'userId' })
+        UserActivationToken.hasMany(models.Return, { as: 'returns', foreignKey: 'saleId' })
+        UserActivationToken.hasMany(models.SaleDetail, { as: 'saleDetails', foreignKey: 'saleId' })
      
     }
   

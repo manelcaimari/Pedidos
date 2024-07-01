@@ -55,6 +55,7 @@ module.exports = function (sequelize, DataTypes) {
     )
   
     UserCredential.associate = function (models) {
+        UserCredential.belongsTo(models.User, { as: 'user', foreignKey: 'userId' })
      
     }
   

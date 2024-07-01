@@ -56,7 +56,7 @@ module.exports = function (sequelize, DataTypes) {
     )
   
     CustomerActivationToken.associate = function (models) {
-     
+        CustomerActivationToken.belongsTo(models.Customer, { as: 'customer', foreignKey: 'customerId' })
     }
   
     return CustomerActivationToken

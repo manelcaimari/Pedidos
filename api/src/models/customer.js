@@ -40,6 +40,11 @@ module.exports = function (sequelize, DataTypes) {
     )
   
     Customer.associate = function (models) {
+        Customer.hasMany(models.CustomerActivationToken, { as: 'customerActivationTokens', foreignKey: 'customerId' })
+        Customer.hasMany(models.CustomerCredential, { as: 'customerCredentials', foreignKey: 'customerId' })
+        Customer.hasMany(models.CustomerResetPasswordToken, { as: 'customerResetPasswordTokens', foreignKey: 'customerId' })
+        Customer.hasMany(models.Return, { as: 'returns', foreignKey: 'customerId' })
+        Customer.hasMany(models.Sale, { as: 'sales', foreignKey: 'customerId' })
      
     }
   
