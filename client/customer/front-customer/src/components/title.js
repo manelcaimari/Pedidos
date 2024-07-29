@@ -1,21 +1,20 @@
 class Title extends HTMLElement {
-    constructor () {
-      super()
-      this.shadow = this.attachShadow({ mode: 'open' })
-      this.title = this.getAttribute('title')
-    }
+  constructor () {
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+    this.title = this.getAttribute('title')
+  }
 
-    
-    connectedCallback () {
-        this.data = {
-            title:"title"
-           }
-      this.render()
+  connectedCallback () {
+    this.data = {
+      title: 'title'
     }
-  
-    render () {
-      this.shadow.innerHTML =
-         /*html*/`
+    this.render()
+  }
+
+  render () {
+    this.shadow.innerHTML =
+      /* html */`
         <style>
         h2::first-letter{
             text-transform: capitalize;
@@ -30,7 +29,7 @@ class Title extends HTMLElement {
           <h2>${this.title}</h2>
         </div>
         `
-      }
   }
-  
-  customElements.define('title-component', Title)
+}
+
+customElements.define('title-component', Title)

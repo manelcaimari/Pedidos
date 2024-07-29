@@ -4,15 +4,17 @@ class Title extends HTMLElement {
     this.shadow = this.attachShadow({ mode: 'open' })
     this.title = this.getAttribute('title')
   }
+
   connectedCallback () {
     this.data = {
-      title:"title"
-        }
+      title: 'title'
+    }
     this.render()
   }
+
   render () {
     this.shadow.innerHTML =
-      /*html*/`
+      /* html */`
       <style>
         h2::first-letter{
           text-transform: capitalize;
@@ -28,5 +30,5 @@ class Title extends HTMLElement {
     `
   }
 }
-  
+
 customElements.define('title-component', Title)

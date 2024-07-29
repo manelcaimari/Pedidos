@@ -1,15 +1,15 @@
 class Form extends HTMLElement {
-    constructor() {
-        super();
-        this.shadow = this.attachShadow({ mode: 'open' });
-    }
+  constructor () {
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+  }
 
-    connectedCallback() {
-        this.render();
-    }
+  connectedCallback () {
+    this.render()
+  }
 
-    render() {
-        this.shadow.innerHTML =/*html*/ `
+  render () {
+    this.shadow.innerHTML =/* html */ `
         <style>
             a{
                 text-decoration: none;
@@ -104,9 +104,8 @@ class Form extends HTMLElement {
                 </div>
         </form>
         </section>
-        `;
-
-    }
+        `
+  }
 }
 
-customElements.define('form-component', Form);
+customElements.define('form-component', Form)

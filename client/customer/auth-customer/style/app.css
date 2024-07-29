@@ -17,30 +17,3 @@ body{
     margin: 0;   
 }
 
-main.center{
-    display:grid;
-    justify-content: center;
-    align-items: center;
-    height: 80vh;
-
-}
-main.mid{
-    display:grid;
-    align-items: center;
-    height: 80vh;
-    padding: 0 13px;
-
-}
-main.gop{
-    display:grid;
-    justify-content: center;
-    align-items: center;
-    
-}
-main.table{
-    display: grid;
-    gap: 2rem;
-    grid-template-columns: 1fr 2fr;
-    padding: 1rem;
-
-}

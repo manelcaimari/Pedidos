@@ -30,7 +30,7 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false
       },
-      used : {
+      used: {
         type: Sequelize.BOOLEAN,
         allowNull: false
       },

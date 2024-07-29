@@ -2,19 +2,15 @@ class homebutton extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-
-
   }
 
-    
   connectedCallback () {
-        
     this.render()
   }
-  
+
   render () {
     this.shadow.innerHTML =
-      /*html*/`
+      /* html */`
       <style>
         .svg {
               height: 1.8rem;
@@ -49,7 +45,7 @@ class homebutton extends HTMLElement {
             <button> <a href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>home</title><path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" /></svg></a></button>
         </div>
         `
-    }
   }
-  
-  customElements.define('homebutton-component', homebutton)
+}
+
+customElements.define('homebutton-component', homebutton)

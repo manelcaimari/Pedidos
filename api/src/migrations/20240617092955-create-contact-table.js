@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -18,7 +18,7 @@ module.exports = {
           key: 'id'
         },
         onUpdate: 'CASCADE',
-        onDelete: 'NO ACTION' 
+        onDelete: 'NO ACTION'
       },
       name: {
         type: Sequelize.STRING,
@@ -47,14 +47,14 @@ module.exports = {
       deletedAt: {
         type: Sequelize.DATE
       }
-    });
+    })
 
     await queryInterface.addIndex('contacts', ['fingerprintId'], {
       name: 'contacts_fingerprintId_index'
-    });
+    })
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('contacts');
+    await queryInterface.dropTable('contacts')
   }
-};
+}

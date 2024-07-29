@@ -1,52 +1,50 @@
 class Shoppingcart extends HTMLElement {
-    constructor () {
-      super()
-      this.shadow = this.attachShadow({ mode: 'open' })
-    }
-  
-    async connectedCallback () {
-        await this.loadData()
-        await this.render()
+  constructor () {
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+  }
+
+  async connectedCallback () {
+    await this.loadData()
+    await this.render()
+  }
+
+  async loadData () {
+    this.data = [
+      {
+        title: 'Cocacola',
+        total: '180.00€',
+        unities: '16u',
+        quantity: '330',
+        price: '90.00€',
+        pack: '2',
+        measurementQuantity: 'ml'
+
+      },
+      {
+        title: 'Cocacola',
+        total: '180.00€',
+        unities: '16u',
+        quantity: '330',
+        price: '90.00€',
+        pack: '3',
+        measurementQuantity: 'ml'
+
       }
-    
-    async loadData () {
-        this.data = [
-          {
-            "title": "Cocacola",
-            "total": "180.00€",
-            "unities": "16u",
-            "quantity": "330",
-            "price": "90.00€",
-            "pack":"2",
-            "measurementQuantity": "ml",
-        
-          },
-          {
-            "title": "Cocacola",
-            "total": "180.00€",
-            "unities": "16u",
-            "quantity": "330",
-            "price": "90.00€",
-            "pack":"3",
-            "measurementQuantity": "ml",
-           
 
-          },
-    
-         
-        ];
-        this.calculateTotalPrice();
-        }
+    ]
+    this.calculateTotalPrice()
+  }
 
-    calculateTotalPrice() {
-        this.totalPrice = this.data.reduce((total, item) => {
-            return total + (parseFloat(item.price) * parseFloat(item.pack));
-        }, 0);
-    }
+  calculateTotalPrice () {
+    this.totalPrice = this.data.reduce((total, item) => {
+      return total + (parseFloat(item.price) * parseFloat(item.pack))
+    }, 0)
+  }
 
-    render () {
-      this.shadow.innerHTML =
-         /*html*/`
+  render () {
+    this.shadow.innerHTML =
+      /* html */`
             <style>
                 .order-item {
                     padding: 1rem;
@@ -170,49 +168,48 @@ class Shoppingcart extends HTMLElement {
                     <button>finalizar pedido</button>
                 </div>
             </div>
-         `;
-           const orderItem = document.createElement('div');
-           orderItem.classList.add('order-item');
-   
-           this.data.forEach(item => {
-               const itemContainer = document.createElement('div');
-               itemContainer.classList.add('item');
-   
-               const itemDetails = document.createElement('div');
-               itemDetails.classList.add('item-details');
-   
-               const title = document.createElement('p');
-               title.classList.add('item-name');
-               title.textContent = item.title;
-               itemDetails.appendChild(title);
-   
-               const price = document.createElement('p');
-               price.classList.add('item-price');
-               price.textContent = `${(parseFloat(item.price) * parseFloat(item.pack)).toFixed(2)} €`;
-               itemDetails.appendChild(price);
-   
-               const itemQuantity = document.createElement('div');
-               itemQuantity.classList.add('item-quantity');
-   
-               const unities = document.createElement('p');
-               unities.classList.add('item-unities');
-               unities.textContent = `${item.unities} , ${item.quantity} ${item.measurementQuantity}`;
-               itemQuantity.appendChild(unities);
-   
-               const quantityControl = document.createElement('div');
-               quantityControl.classList.add('quantity-control');
-   
-               const quantity = document.createElement('p');
-               quantity.textContent = `${item.pack} x ${item.price}`;
-               quantityControl.appendChild(quantity);
-               itemQuantity.appendChild(quantityControl);
-   
-               itemContainer.appendChild(itemDetails);
-               itemContainer.appendChild(itemQuantity);
-               orderItem.appendChild(itemContainer);
-           });
-   
-       }
-   }
-   
-   customElements.define('shoppingcart-component', Shoppingcart);
+         `
+    const orderItem = document.createElement('div')
+    orderItem.classList.add('order-item')
+
+    this.data.forEach(item => {
+      const itemContainer = document.createElement('div')
+      itemContainer.classList.add('item')
+
+      const itemDetails = document.createElement('div')
+      itemDetails.classList.add('item-details')
+
+      const title = document.createElement('p')
+      title.classList.add('item-name')
+      title.textContent = item.title
+      itemDetails.appendChild(title)
+
+      const price = document.createElement('p')
+      price.classList.add('item-price')
+      price.textContent = `${(parseFloat(item.price) * parseFloat(item.pack)).toFixed(2)} €`
+      itemDetails.appendChild(price)
+
+      const itemQuantity = document.createElement('div')
+      itemQuantity.classList.add('item-quantity')
+
+      const unities = document.createElement('p')
+      unities.classList.add('item-unities')
+      unities.textContent = `${item.unities} , ${item.quantity} ${item.measurementQuantity}`
+      itemQuantity.appendChild(unities)
+
+      const quantityControl = document.createElement('div')
+      quantityControl.classList.add('quantity-control')
+
+      const quantity = document.createElement('p')
+      quantity.textContent = `${item.pack} x ${item.price}`
+      quantityControl.appendChild(quantity)
+      itemQuantity.appendChild(quantityControl)
+
+      itemContainer.appendChild(itemDetails)
+      itemContainer.appendChild(itemQuantity)
+      orderItem.appendChild(itemContainer)
+    })
+  }
+}
+
+customElements.define('shoppingcart-component', Shoppingcart)

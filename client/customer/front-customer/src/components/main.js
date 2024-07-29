@@ -1,20 +1,17 @@
 class Main extends HTMLElement {
-    constructor () {
-      super()
-      this.shadow = this.attachShadow({ mode: 'open' })
-      this.position =this.getAttribute('position')
-    }
-  
-    connectedCallback () {
-      
-     
-  
-      this.render()
-    }
-  
-    render () {
-      this.shadow.innerHTML =
-         /*html*/`
+  constructor () {
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+    this.position = this.getAttribute('position')
+  }
+
+  connectedCallback () {
+    this.render()
+  }
+
+  render () {
+    this.shadow.innerHTML =
+      /* html */`
     <style>
         main.center {
           display:grid;
@@ -39,7 +36,7 @@ class Main extends HTMLElement {
             <slot></slot>
             </main>
         `
-      }
   }
-  
-  customElements.define('main-component', Main)
+}
+
+customElements.define('main-component', Main)

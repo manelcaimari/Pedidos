@@ -3,14 +3,14 @@ class backbutton extends HTMLElement {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
   }
-  
+
   connectedCallback () {
     this.render()
   }
 
   render () {
     this.shadow.innerHTML =
-      /*html*/`
+      /* html */`
         <style>
           .svg {
               height: 1.8rem;
@@ -47,5 +47,5 @@ class backbutton extends HTMLElement {
       `
   }
 }
-  
+
 customElements.define('backbutton-component', backbutton)

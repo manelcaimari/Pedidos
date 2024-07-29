@@ -1,16 +1,16 @@
 class menu extends HTMLElement {
-    constructor() {
-        super();
-        this.shadow = this.attachShadow({ mode: 'open' });
-    }
+  constructor () {
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+  }
 
-    connectedCallback() {
-        this.data = {};
-        this.render();
-    }
+  connectedCallback () {
+    this.data = {}
+    this.render()
+  }
 
-    render() {
-        this.shadow.innerHTML = /*html*/`
+  render () {
+    this.shadow.innerHTML = /* html */`
         <style>
         .menu {
             text-align: center;
@@ -44,33 +44,33 @@ class menu extends HTMLElement {
             font-weight: 600;
         }
         </style>
-        `;
+        `
 
-        const menuContainer = document.createElement('div');
-        menuContainer.classList.add('menu');
+    const menuContainer = document.createElement('div')
+    menuContainer.classList.add('menu')
 
-        const newOrderDiv = document.createElement('div');
-        newOrderDiv.classList.add('orders');
-        const newOrderLink = document.createElement('a');
-        newOrderLink.href = '#';
-        const newOrderButton = document.createElement('button');
-        newOrderButton.textContent = 'nuevo pedido';
-        newOrderLink.appendChild(newOrderButton);
-        newOrderDiv.appendChild(newOrderLink);
-        menuContainer.appendChild(newOrderDiv);
+    const newOrderDiv = document.createElement('div')
+    newOrderDiv.classList.add('orders')
+    const newOrderLink = document.createElement('a')
+    newOrderLink.href = '#'
+    const newOrderButton = document.createElement('button')
+    newOrderButton.textContent = 'nuevo pedido'
+    newOrderLink.appendChild(newOrderButton)
+    newOrderDiv.appendChild(newOrderLink)
+    menuContainer.appendChild(newOrderDiv)
 
-        const previousOrdersDiv = document.createElement('div');
-        previousOrdersDiv.classList.add('orders');
-        const previousOrdersLink = document.createElement('a');
-        previousOrdersLink.href = '#';
-        const previousOrdersButton = document.createElement('button');
-        previousOrdersButton.textContent = 'pedidos anteriores';
-        previousOrdersLink.appendChild(previousOrdersButton);
-        previousOrdersDiv.appendChild(previousOrdersLink);
-        menuContainer.appendChild(previousOrdersDiv);
+    const previousOrdersDiv = document.createElement('div')
+    previousOrdersDiv.classList.add('orders')
+    const previousOrdersLink = document.createElement('a')
+    previousOrdersLink.href = '#'
+    const previousOrdersButton = document.createElement('button')
+    previousOrdersButton.textContent = 'pedidos anteriores'
+    previousOrdersLink.appendChild(previousOrdersButton)
+    previousOrdersDiv.appendChild(previousOrdersLink)
+    menuContainer.appendChild(previousOrdersDiv)
 
-        this.shadow.appendChild(menuContainer);
-    }
+    this.shadow.appendChild(menuContainer)
+  }
 }
 
-customElements.define('menu-component', menu);
+customElements.define('menu-component', menu)

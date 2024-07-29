@@ -1,16 +1,16 @@
-class mainmid extends HTMLElement {
-    constructor () {
-      super()
-      this.shadow = this.attachShadow({ mode: 'open' })
-    }
-  
-    connectedCallback () {
-      this.render()
-    }
-  
-    render () {
-      this.shadow.innerHTML =
-        /*html*/`
+class Main extends HTMLElement {
+  constructor () {
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+  }
+
+  connectedCallback () {
+    this.render()
+  }
+
+  render () {
+    this.shadow.innerHTML =
+      /* html */`
         <style>
           main {
             display:grid;
@@ -23,7 +23,7 @@ class mainmid extends HTMLElement {
           <slot></slot>
         </main>
         `
-      }
   }
-  
-  customElements.define('main-component', Main)
+}
+
+customElements.define('main-component', Main)

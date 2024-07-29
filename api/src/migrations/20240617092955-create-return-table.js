@@ -11,14 +11,14 @@ module.exports = {
         allowNull: false
       },
       saleId: {
-          type: Sequelize.INTEGER,
-          allowNull: false,
-          references: {
-            model: 'sales',
-            key: 'id'
-          },
-          onUpdate: 'CASCADE',
-          onDelete: 'NO ACTION'
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'sales',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'NO ACTION'
       },
       customerId: {
         type: Sequelize.INTEGER,
@@ -31,31 +31,31 @@ module.exports = {
         onDelete: 'NO ACTION'
       },
       reference: {
-          type: Sequelize.STRING,
-          allowNull: false
+        type: Sequelize.STRING,
+        allowNull: false
       },
       totalBasePrice: {
-          type: Sequelize.DECIMAL(10, 2), 
-          allowNull: false
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false
       },
       returnDate: {
-          type: Sequelize.DATEONLY,
-          allowNull: false
+        type: Sequelize.DATEONLY,
+        allowNull: false
       },
       returnTime: {
-          type: Sequelize.TIME,
-          allowNull: true 
+        type: Sequelize.TIME,
+        allowNull: true
       },
       createdAt: {
-          type: Sequelize.DATE,
-          allowNull: false
+        type: Sequelize.DATE,
+        allowNull: false
       },
       updatedAt: {
-          type: Sequelize.DATE,
-          allowNull: false
+        type: Sequelize.DATE,
+        allowNull: false
       },
       deletedAt: {
-          type: Sequelize.DATE
+        type: Sequelize.DATE
       }
     })
     await queryInterface.addIndex('returns', ['saleId'], {
@@ -64,7 +64,6 @@ module.exports = {
     await queryInterface.addIndex('returns', ['customerId'], {
       name: 'returns_customerId_index'
     })
-
   },
 
   down: async (queryInterface, Sequelize) => {

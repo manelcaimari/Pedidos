@@ -1,43 +1,43 @@
 class DetailComponent extends HTMLElement {
-    constructor() {
-      super();
-      this.shadow = this.attachShadow({ mode: 'open' });
-    }
-  
-    async connectedCallback() {
-      await this.loadData();
-      await this.render();
-      this.createOrderElements();
-    }
-  
-    async loadData() {
-      this.data = [
-        {
-          title: "Cocacola",
-          price: "90.00€",
-          unities: "16u",
-          quantity: "330",
-          measurementQuantity: "ml",
-        },
-        {
-          title: "Pepsi",
-          price: "80.00€",
-          unities: "12u",
-          quantity: "500",
-          measurementQuantity: "ml"
-        },
-        {
-          title: "Fanta",
-          price: "70.00€",
-          unities: "20u",
-          quantity: "250",
-          measurementQuantity: "ml"
-        }
-      ];
-    }
-  
-    render() {
-      this.shadow.innerHTML = /*html*/`
+  constructor () {
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+  }
+
+  async connectedCallback () {
+    await this.loadData()
+    await this.render()
+    this.createOrderElements()
+  }
+
+  async loadData () {
+    this.data = [
+      {
+        title: 'Cocacola',
+        price: '90.00€',
+        unities: '16u',
+        quantity: '330',
+        measurementQuantity: 'ml'
+      },
+      {
+        title: 'Pepsi',
+        price: '80.00€',
+        unities: '12u',
+        quantity: '500',
+        measurementQuantity: 'ml'
+      },
+      {
+        title: 'Fanta',
+        price: '70.00€',
+        unities: '20u',
+        quantity: '250',
+        measurementQuantity: 'ml'
+      }
+    ]
+  }
+
+  render () {
+    this.shadow.innerHTML = /* html */`
         <style>
           .order-item {
             padding: 1.5rem 1rem;
@@ -150,66 +150,65 @@ class DetailComponent extends HTMLElement {
             <a href="#"><button>ver pedido</button></a>
           </div>
         </div>
-      `;
-    }
-  
-    createOrderElements() {
-      const ordersContainer = this.shadow.querySelector('.order-item');
-  
-      this.data.forEach(order => {
-        const orderElement = document.createElement('div');
-        orderElement.classList.add('order');
-  
-        const orderDetails = document.createElement('div');
-        orderDetails.classList.add('item-details');
-  
-        const titleP = document.createElement('p');
-        titleP.classList.add('detail-title');
-        titleP.textContent = order.title;
-  
-        const priceP = document.createElement('p');
-        priceP.classList.add('detail-price');
-        priceP.textContent = `${order.price}`;
-  
-        orderDetails.appendChild(titleP);
-        orderDetails.appendChild(priceP);
-  
-        const itemDetail = document.createElement('div');
-        itemDetail.classList.add('item-detail');
-  
-        const detailContents = document.createElement('div');
-        detailContents.classList.add('detail');
-  
-        const unitiesSpan = document.createElement('span');
-        unitiesSpan.classList.add('item-united');
-        unitiesSpan.textContent = `${order.unities}, ${order.quantity} ${order.measurementQuantity}`;
-  
-        detailContents.appendChild(unitiesSpan);
-  
-        const quantityControl = document.createElement('div');
-        quantityControl.classList.add('quantity-control');
-  
-        const minusButton = document.createElement('button');
-        minusButton.textContent = '-';
-        const quantitySpan = document.createElement('span');
-        quantitySpan.textContent = '1';
-        const plusButton = document.createElement('button');
-        plusButton.textContent = '+';
-  
-        quantityControl.appendChild(minusButton);
-        quantityControl.appendChild(quantitySpan);
-        quantityControl.appendChild(plusButton);
-  
-        itemDetail.appendChild(detailContents);
-        itemDetail.appendChild(quantityControl);
-  
-        orderElement.appendChild(orderDetails);
-        orderElement.appendChild(itemDetail);
-  
-        ordersContainer.appendChild(orderElement);
-      });
-    }
+      `
   }
-  
-  customElements.define('detail-component', DetailComponent);
- 
+
+  createOrderElements () {
+    const ordersContainer = this.shadow.querySelector('.order-item')
+
+    this.data.forEach(order => {
+      const orderElement = document.createElement('div')
+      orderElement.classList.add('order')
+
+      const orderDetails = document.createElement('div')
+      orderDetails.classList.add('item-details')
+
+      const titleP = document.createElement('p')
+      titleP.classList.add('detail-title')
+      titleP.textContent = order.title
+
+      const priceP = document.createElement('p')
+      priceP.classList.add('detail-price')
+      priceP.textContent = `${order.price}`
+
+      orderDetails.appendChild(titleP)
+      orderDetails.appendChild(priceP)
+
+      const itemDetail = document.createElement('div')
+      itemDetail.classList.add('item-detail')
+
+      const detailContents = document.createElement('div')
+      detailContents.classList.add('detail')
+
+      const unitiesSpan = document.createElement('span')
+      unitiesSpan.classList.add('item-united')
+      unitiesSpan.textContent = `${order.unities}, ${order.quantity} ${order.measurementQuantity}`
+
+      detailContents.appendChild(unitiesSpan)
+
+      const quantityControl = document.createElement('div')
+      quantityControl.classList.add('quantity-control')
+
+      const minusButton = document.createElement('button')
+      minusButton.textContent = '-'
+      const quantitySpan = document.createElement('span')
+      quantitySpan.textContent = '1'
+      const plusButton = document.createElement('button')
+      plusButton.textContent = '+'
+
+      quantityControl.appendChild(minusButton)
+      quantityControl.appendChild(quantitySpan)
+      quantityControl.appendChild(plusButton)
+
+      itemDetail.appendChild(detailContents)
+      itemDetail.appendChild(quantityControl)
+
+      orderElement.appendChild(orderDetails)
+      orderElement.appendChild(itemDetail)
+
+      ordersContainer.appendChild(orderElement)
+    })
+  }
+}
+
+customElements.define('detail-component', DetailComponent)

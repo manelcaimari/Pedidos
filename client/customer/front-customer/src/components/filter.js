@@ -1,14 +1,13 @@
 class filter extends HTMLElement {
-    constructor () {
-        super()
-        this.shadow = this.attachShadow({ mode: 'open' })
-        this.render() 
-    }
+  constructor () {
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+    this.render()
+  }
 
-  
-    render () {
-      this.shadow.innerHTML =
-         /*html*/`
+  render () {
+    this.shadow.innerHTML =
+      /* html */`
         <style>
        
         .filter{
@@ -62,9 +61,7 @@ class filter extends HTMLElement {
             </div>
            
         `
-
-
-      }
   }
-  
-  customElements.define('filter-component', filter)
+}
+
+customElements.define('filter-component', filter)

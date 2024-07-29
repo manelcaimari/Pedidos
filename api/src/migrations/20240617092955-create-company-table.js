@@ -28,7 +28,7 @@ module.exports = {
       },
       vatNumber: {
         type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: true
       },
       createdAt: {
         type: Sequelize.DATE,

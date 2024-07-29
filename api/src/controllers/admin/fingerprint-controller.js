@@ -34,7 +34,7 @@ exports.findAll = (req, res) => {
 
   Fingerprint.findAndCountAll({
     where: condition,
-    attributes: ['id',  'customerId', 'fingerprint', 'createdAt', 'updatedAt'],
+    attributes: ['id', 'customerId', 'fingerprint', 'createdAt', 'updatedAt'],
     limit,
     offset,
     order: [['createdAt', 'DESC']]

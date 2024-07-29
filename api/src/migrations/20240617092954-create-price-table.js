@@ -21,13 +21,13 @@ module.exports = {
         },
         onUpdate: 'CASCADE',
         onDelete: 'NO ACTION'
-        
+
       },
       basePrice: {
         type: Sequelize.DECIMAL,
         allowNull: false
       },
-      current :{
+      current: {
         type: Sequelize.BOOLEAN,
         allowNull: false
       },
@@ -46,7 +46,6 @@ module.exports = {
     await queryInterface.addIndex('prices', ['productId'], {
       name: 'prices_productId_index'
     })
-
   },
 
   down: async (queryInterface, Sequelize) => {

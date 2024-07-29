@@ -1,28 +1,26 @@
 class Login extends HTMLElement {
-    constructor() {
-        super();
-        this.shadow = this.attachShadow({ mode: 'open' });
+  constructor () {
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+  }
+
+  connectedCallback () {
+    this.data = {
+      email: '',
+      password: ''
     }
 
-    connectedCallback() {
-        this.data = {
-            email: "",
-            password: ""
-        };
+    this.render()
+  }
 
-        this.render();
-    }
-
-
-    render() {
-        this.shadow.innerHTML = /*html*/`
+  render () {
+    this.shadow.innerHTML = /* html */`
         <style>
         .order h1 {
             font-size: 1.5rem;
             text-transform: capitalize;
             text-align: center;
         }
-
         .login {
             display: flex;
             flex-direction: column;
@@ -30,12 +28,10 @@ class Login extends HTMLElement {
             gap: 20px;
             column-gap: 0;
         }
-
         label {
             align-self: flex-start;
             display: grid;
         }
-
         input[type="email"],
         input[type="password"] {
             width: 300px;
@@ -45,8 +41,7 @@ class Login extends HTMLElement {
             color: white;
             border-right: 1px solid #3333ff;
         }
-
-        .form-button button {
+        .form-button input {
             width: 300px;
             padding: 8px;
             border: none;
@@ -56,13 +51,11 @@ class Login extends HTMLElement {
             font-size: 13px;
             cursor: pointer;
         }
-
         .remember {
             text-align: center;
             padding:1rem;
             border: none;
         }
-
         .remember a {
             font-size: 15px;
             color: hsl(0, 0%, 100%);
@@ -82,16 +75,13 @@ class Login extends HTMLElement {
                     <input type="password"  name="password">
                 </div>
                 <div class="form-button">
-                    <button type="submit">Enviar</button>
+                    <input type="submit">Enviar>
                 </div>
             </form>
             <div class="remember">
                 <a href="#">Olvidé mi contraseña</a>
             </div>
-        `;
-
-        
-    }
+        `
+  }
 }
-
-customElements.define('login-component', Login);
+customElements.define('login-component', Login)

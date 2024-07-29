@@ -25,7 +25,7 @@ module.exports = {
         allowNull: false
       },
       totalBasePrice: {
-        type: Sequelize.DECIMAL(10, 2), 
+        type: Sequelize.DECIMAL(10, 2),
         allowNull: false
       },
       saleDate: {
@@ -34,7 +34,7 @@ module.exports = {
       },
       saleTime: {
         type: Sequelize.TIME,
-        allowNull: true 
+        allowNull: true
       },
       createdAt: {
         type: Sequelize.DATE,

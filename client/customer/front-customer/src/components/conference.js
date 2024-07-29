@@ -1,42 +1,43 @@
 class conference extends HTMLElement {
-    constructor () {
-      super()
-      this.shadow = this.attachShadow({ mode: 'open' })
-    }
-    
-    async connectedCallback () {
-        await this.loadData()
-        await this.render()
+  constructor () {
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+  }
+
+  async connectedCallback () {
+    await this.loadData()
+    await this.render()
+  }
+
+  async loadData () {
+    this.data = [
+      {
+        reference: '00000000002',
+        total: '180',
+        date: '20-05-2024',
+        hour: '11:13',
+        measurementtotal: '€'
+      },
+      {
+        reference: '00000000003',
+        total: '270',
+        date: '13-05-2024',
+        hour: '17:09',
+        measurementtotal: '€'
+      },
+      {
+        reference: '00000000002',
+        total: '270',
+        date: '13-05-2024',
+        hour: '17:09',
+        measurementtotal: '€'
       }
-    async loadData () {
-        this.data = [
-          {
-            "reference": "00000000002",
-            "total": "180",
-            "date": "20-05-2024",
-            "hour": "11:13",
-            "measurementtotal": "€"
-          },
-          {
-            "reference": "00000000003",
-            "total": "270",
-            "date": "13-05-2024",
-            "hour": "17:09",
-            "measurementtotal": "€"
-          }, 
-          {
-            "reference": "00000000002",
-            "total": "270",
-            "date": "13-05-2024",
-            "hour": "17:09",
-            "measurementtotal": "€"
-          }
-        ]
-    }
-  
-    render () {
-      this.shadow.innerHTML =
-         /*html*/`
+    ]
+  }
+
+  render () {
+    this.shadow.innerHTML =
+      /* html */`
             <style>
                 .orders {
                     display:grid;
@@ -102,58 +103,56 @@ class conference extends HTMLElement {
             <div class="orders">      
             </div>
         `
-            const ordersContainer = this.shadow.querySelector('.orders');
-            this.data.forEach(order => {
-              const orderContainer = document.createElement('div');
-              orderContainer.classList.add('order');
-      
-              const orderDetails = document.createElement('div');
-              orderDetails.classList.add('order-details');
-      
-              const reference = document.createElement('p');
-              reference.classList.add('detail-reference');
-              reference.textContent = order.reference;
-              orderDetails.appendChild(reference);
-      
-              const total = document.createElement('p');
-              total.classList.add('detail-price');
-              total.textContent = `${order.total} ${order.measurementtotal}`;
-              orderDetails.appendChild(total);
-      
-              orderContainer.appendChild(orderDetails);
-      
-              const orderQuantity = document.createElement('div');
-              orderQuantity.classList.add('order-quantity');
-      
-              const dateTimeContainer = document.createElement('div');
-              dateTimeContainer.classList.add('date-time-container');
-      
-              const date = document.createElement('span');
-              date.classList.add('detail-date');
-              date.textContent = order.date;
-              dateTimeContainer.appendChild(date);
-      
-              const hour = document.createElement('span');
-              hour.classList.add('detail-hour');
-              hour.textContent = order.hour;
-              dateTimeContainer.appendChild(hour);
-      
-              orderQuantity.appendChild(dateTimeContainer);
-      
-              const quantityControlContainer = document.createElement('div');
-              quantityControlContainer.classList.add('quantity-control');
-      
-              const button = document.createElement('button');
-              button.textContent = 'ver pedido';
-              quantityControlContainer.appendChild(button);
-      
-              orderQuantity.appendChild(quantityControlContainer);
-              orderContainer.appendChild(orderQuantity);
-              ordersContainer.appendChild(orderContainer);
-            
-          })
+    const ordersContainer = this.shadow.querySelector('.orders')
+    this.data.forEach(order => {
+      const orderContainer = document.createElement('div')
+      orderContainer.classList.add('order')
 
-      }
+      const orderDetails = document.createElement('div')
+      orderDetails.classList.add('order-details')
+
+      const reference = document.createElement('p')
+      reference.classList.add('detail-reference')
+      reference.textContent = order.reference
+      orderDetails.appendChild(reference)
+
+      const total = document.createElement('p')
+      total.classList.add('detail-price')
+      total.textContent = `${order.total} ${order.measurementtotal}`
+      orderDetails.appendChild(total)
+
+      orderContainer.appendChild(orderDetails)
+
+      const orderQuantity = document.createElement('div')
+      orderQuantity.classList.add('order-quantity')
+
+      const dateTimeContainer = document.createElement('div')
+      dateTimeContainer.classList.add('date-time-container')
+
+      const date = document.createElement('span')
+      date.classList.add('detail-date')
+      date.textContent = order.date
+      dateTimeContainer.appendChild(date)
+
+      const hour = document.createElement('span')
+      hour.classList.add('detail-hour')
+      hour.textContent = order.hour
+      dateTimeContainer.appendChild(hour)
+
+      orderQuantity.appendChild(dateTimeContainer)
+
+      const quantityControlContainer = document.createElement('div')
+      quantityControlContainer.classList.add('quantity-control')
+
+      const button = document.createElement('button')
+      button.textContent = 'ver pedido'
+      quantityControlContainer.appendChild(button)
+
+      orderQuantity.appendChild(quantityControlContainer)
+      orderContainer.appendChild(orderQuantity)
+      ordersContainer.appendChild(orderContainer)
+    })
   }
-  
-  customElements.define('conference-component', conference)
+}
+
+customElements.define('conference-component', conference)

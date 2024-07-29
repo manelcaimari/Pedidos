@@ -1,23 +1,23 @@
 class orders extends HTMLElement {
-    constructor () {
-      super()
-      this.shadow = this.attachShadow({ mode: 'open' })
+  constructor () {
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+  }
+
+  async connectedCallback () {
+    await this.loadData()
+    await this.render()
+  }
+
+  loadData () {
+    this.data = {
+      reference: '00000000002'
     }
-  
-    async connectedCallback () {
-        await this.loadData()
-        await this.render()
-      }
-    
-    loadData () {
-        this.data = {
-            "reference": "00000000002"
-        }
-    }
-  
-    render () {
-      this.shadow.innerHTML =
-         /*html*/`
+  }
+
+  render () {
+    this.shadow.innerHTML =
+      /* html */`
         <style>
             .order-title h2::first-letter{
                 text-transform: capitalize;
@@ -67,7 +67,7 @@ class orders extends HTMLElement {
             <a href="#"><button>volver a inicio</button></a>
         </div>
         `
-      }
   }
-  
-  customElements.define('orders-component', orders)
+}
+
+customElements.define('orders-component', orders)
