@@ -1,5 +1,0 @@
-import './components/header.js'
-import './components/panel.js'
-import './components/table.js'
-import './components/title.js'
-import './components/svg.js'
