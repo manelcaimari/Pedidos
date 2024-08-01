@@ -1,6 +1,6 @@
 module.exports = (app) => {
   const router = require('express').Router()
-  const controller = require('../controllers/admin/ProductCategory-controller.js')
+  const controller = require('../controllers/admin/product-category-controller.js')
 
   router.post('/', controller.create)
   router.get('/', controller.findAll)

@@ -75,7 +75,7 @@ class Login extends HTMLElement {
                     <input type="password"  name="password">
                 </div>
                 <div class="form-button">
-                    <input type="submit">Enviar>
+                    <input type="submit">
                 </div>
             </form>
             <div class="remember">
