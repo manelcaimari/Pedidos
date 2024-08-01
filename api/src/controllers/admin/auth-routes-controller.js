@@ -1,7 +1,7 @@
 exports.findAll = (req, res) => {
   const routes = {
-    '/client/login': 'login.html',
-    '/client/login/reset': 'reset.html'
+    '/admin/login': 'login.html',
+    '/admin/login/reset': 'reset.html'
   }
 
   res.status(200).send(routes)

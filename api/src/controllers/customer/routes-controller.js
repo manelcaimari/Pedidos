@@ -1,10 +1,9 @@
 exports.findAll = (req, res) => {
-
-    const routes = {
-      '/cliente': 'home.html',
-      '/cliente/nuevo-pedido': 'order.html',
-      '/cliente/pedidos-anteriores': 'history.html',
-    }
-  
-    res.status(200).send(routes)
+  const routes = {
+    '/cliente': 'menu.html',
+    '/cliente/nuevo-pedido': 'new-orders.html',
+    '/cliente/pedidos-anteriores': 'previous-orders.html'
   }
+
+  res.status(200).send(routes)
+}
