@@ -6,38 +6,12 @@ class Table extends HTMLElement {
 
   async connectedCallback () {
     await this.loadData()
-    this.render()
-    this.updateTableBody()
+    await this.render()
   }
 
   async loadData () {
-    this.data = [
-      {
-        name: 'Blabla',
-        email: 'blabla@gmail.com',
-        created_at: '07/06/2024',
-        updated_at: '10/07/2024'
-      },
-      {
-        name: 'Bloblo',
-        email: 'bloblo@gmail.com',
-        created_at: '10/06/2024',
-        updated_at: '12/07/2024'
-      },
-      {
-        name: 'Blublu',
-        email: 'blublu@gmail.com',
-        created_at: '15/06/2024',
-        updated_at: '17/07/2024'
-      },
-      {
-        name: 'Blibli',
-        email: 'blibli@gmail.com',
-        created_at: '21/06/2024',
-        updated_at: '23/07/2024'
-      }
-
-    ]
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users`)
+    this.data = await response.json
     this.info = {
       reference: '1',
       result: '10'
@@ -114,24 +88,25 @@ class Table extends HTMLElement {
                 }
             </style>
             <section class="table">
-                <div class="table-header">
-                    <div class="table-header-buttons">
-                        <ul>
-                            <li class="filter-button">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M11 11L16.76 3.62A1 1 0 0 0 16.59 2.22A1 1 0 0 0 16 2H2A1 1 0 0 0 1.38 2.22A1 1 0 0 0 1.21 3.62L7 11V16.87A1 1 0 0 0 7.29 17.7L9.29 19.7A1 1 0 0 0 10.7 19.7A1 1 0 0 0 11 18.87V11M13 16L18 21L23 16Z" /></svg>     
-                            </li>
-                        </ul>
-                    </div>
+              <div class="table-header">
+                <div class="table-header-buttons">
+                  <ul>
+                    <li class="filter-button">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M11 11L16.76 3.62A1 1 0 0 0 16.59 2.22A1 1 0 0 0 16 2H2A1 1 0 0 0 1.38 2.22A1 1 0 0 0 1.21 3.62L7 11V16.87A1 1 0 0 0 7.29 17.7L9.29 19.7A1 1 0 0 0 10.7 19.7A1 1 0 0 0 11 18.87V11M13 16L18 21L23 16Z" /></svg>     
+                    </li>
+                  </ul>
                 </div>
-                <div class="table-body">
+              </div>
+              <div class="table-body">
+              </div>
+              <div class="table-footer">
+                <div class="table-info-registers">
+                  <span>${this.info.reference} registro en total, mostrando ${this.info.result} por página</span>
                 </div>
-                <div class="table-footer">
-                    <div class="table-info-registers">
-                        <span>${this.info.reference} registro en total, mostrando ${this.info.result} por página</span>
-                    </div>
-                </div>
+              </div>
             </section>
             `
+    this.updateTableBody()
   }
 
   updateTableBody () {

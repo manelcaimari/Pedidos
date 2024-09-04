@@ -44,16 +44,16 @@ class Form extends HTMLElement {
                 padding: 0.5rem;
                 background-color: rgb(90, 14, 90);
             }
-            .categori_bottom {
+            .categori_button {
                 background-color: white;
                 border: 0;
                 padding: 0 0.5rem;
                 display:flex;
             }
-            .header_categori .categori_bottom svg {
+            .header_categori .categori_button svg {
                 fill: hsl(229, 86%, 41%);
             }
-            .editer {
+            form {
                 width: 100%;
                 display: flex;
                 box-sizing: border-box;
@@ -64,13 +64,14 @@ class Form extends HTMLElement {
                 display:grid;
                 gap:0.5rem;
             }
-            .editer .email input,
-            .editer .name input {
+             .email input,
+             .name input {
                 background-color: #476bb9;
                 color: white;
                 border-right: 1px solid #476bb9;
+                padding:0.5rem;
             }
-            .categori_bottom svg {
+            .categori_button svg {
                 width: 40px;
                 height: 40px;
                 padding: 0;
@@ -84,27 +85,55 @@ class Form extends HTMLElement {
                     
                     </ul>
                 </div>
-                <div class="categori_bottom">
-                    <div class="reset">
+                <div class="categori_button">
+                    <div class="button_reset">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M19.36,2.72L20.78,4.14L15.06,9.85C16.13,11.39 16.28,13.24 15.38,14.44L9.06,8.12C10.26,7.22 12.11,7.37 13.65,8.44L19.36,2.72M5.93,17.57C3.92,15.56 2.69,13.16 2.35,10.92L7.23,8.83L14.67,16.27L12.58,21.15C10.34,20.81 7.94,19.58 5.93,17.57Z" /></svg>
                     </div>
-                    <div class="save">
+                    <div class="button_save">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" /></svg>
                     </div>
                 </div>
             </div>
-            <form class="editer">
+            <form >
                 <div class="name">
                     <label>Nombre</label>
-                    <input type="text" >
+                    <input type="text" name="name" >
                 </div>
                 <div class="email">
                     <label >Email</label>
-                    <input type="email">
+                    <input type="email" name="email">
                 </div>
         </form>
         </section>
         `
+    this.button_save()
+  }
+
+  button_save () {
+    this.shadow.querySelector('.button_save').addEventListener('click', async (event) => {
+      event.preventDefault()
+
+      const form = this.shadow.querySelector('form')
+
+      const formData = new FormData(form)
+
+      const formDataJson = {}
+
+      for (const [key, value] of formData.entries()) {
+        formDataJson[key] = value !== '' ? value : null
+      }
+      try {
+        const endpoint = `${import.meta.env.VITE_API_URL}/api/admin/users`
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formDataJson)
+        })
+      } catch { console.error(error) }
+    })
   }
 }
 
