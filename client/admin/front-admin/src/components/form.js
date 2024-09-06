@@ -1,10 +1,24 @@
+import isEqual from 'lodash-es/isEqual'
+import { store } from '../redux/store.js'
+
 class Form extends HTMLElement {
   constructor () {
     super()
+    this.unsubscribe = null
+    this.formElementData = null
     this.shadow = this.attachShadow({ mode: 'open' })
   }
 
   connectedCallback () {
+    this.unsubscribe = store.subscribe(() => {
+      const currentState = store.getState()
+
+      if (currentState.crud.formElement && !isEqual(this.formElementData, currentState.crud.formElement.data)) {
+        this.formElementData = currentState.crud.formElement.data
+        this.showElement(this.formElementData)
+      }
+    })
+
     this.render()
   }
 
@@ -134,6 +148,9 @@ class Form extends HTMLElement {
         })
       } catch { console.error(error) }
     })
+  }
+
+  showElement = async element => {
   }
 }
 
