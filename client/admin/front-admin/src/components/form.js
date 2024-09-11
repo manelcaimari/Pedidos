@@ -8,6 +8,7 @@ class Form extends HTMLElement {
     this.unsubscribe = null
     this.formElementData = null
     this.shadow = this.attachShadow({ mode: 'open' })
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/users`
   }
 
   connectedCallback () {
@@ -110,6 +111,7 @@ class Form extends HTMLElement {
           </div>
         </div>
         <form >
+          <input type="hidden" name="id">
           <div class="name">
             <label>Nombre</label>
             <input type="text" name="name" >
@@ -122,6 +124,15 @@ class Form extends HTMLElement {
       </section>
       `
     this.button_save()
+    this.button_reset()
+  }
+
+  button_reset () {
+    this.shadow.querySelector('.button_reset').addEventListener('click', async (event) => {
+      const form = this.shadow.querySelector('form')
+      form.reset()
+      this.shadow.querySelector("[name='id']").value = ''
+    })
   }
 
   button_save () {
@@ -137,18 +148,22 @@ class Form extends HTMLElement {
       for (const [key, value] of formData.entries()) {
         formDataJson[key] = value !== '' ? value : null
       }
-      try {
-        const endpoint = `${import.meta.env.VITE_API_URL}/api/admin/users`
 
+      const method = formDataJson.id ? 'PUT' : 'POST'
+      const endpoint = formDataJson.id ? `${this.endpoint}/${formDataJson.id}` : this.endpoint
+
+      try {
         const response = await fetch(endpoint, {
-          method: 'POST',
+          method,
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(formDataJson)
         })
 
-        store.dispatch(refreshTable(endpoint))
+        store.dispatch(refreshTable(this.endpoint))
+        this.shadow.querySelector("[name='id']").value = ''
+        form.reset()
       } catch {
         console.error(error)
       }
@@ -156,6 +171,11 @@ class Form extends HTMLElement {
   }
 
   showElement = async element => {
+    Object.entries(element).forEach(([key, value]) => {
+      if (this.shadow.querySelector(`[name="${key}"]`)) {
+        this.shadow.querySelector(`[name="${key}"]`).value = value
+      }
+    })
   }
 }
 
