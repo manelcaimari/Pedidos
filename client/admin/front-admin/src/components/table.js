@@ -7,9 +7,19 @@ class Table extends HTMLElement {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.data = []
+    this.unsubscribe = null
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/users`
   }
 
   async connectedCallback () {
+    this.unsubscribe = store.subscribe(async () => {
+      const currentState = store.getState()
+
+      if (currentState.crud.tableEndpoint && isEqual(this.endpoint, currentState.crud.tableEndpoint)) {
+        await this.loadData()
+        await this.render()
+      }
+    })
     await this.loadData()
     await this.render()
   }
@@ -34,70 +44,60 @@ class Table extends HTMLElement {
           height: 90vh;
           grid-template-rows: auto 1fr auto; 
         }
-
         .filter-button{
           background-color:white;
         }
-
         .table-body {
-            align-items: center;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            overflow-y: auto; 
+          align-items: center;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          overflow-y: auto; 
         }
-
         .table-register {
-            width: calc(98% - 30px);
-            box-sizing: border-box;
-            border: 0;
+          width: calc(98% - 30px);
+          box-sizing: border-box;
+          border: 0;
         }
-
         .table-register-buttons ul {
-            display: flex;
-            justify-content: right;
-            background-color: #fff;
+          display: flex;
+          justify-content: right;
+          background-color: #fff;
         }
-
         svg {
-            fill: hsl(229, 86%, 41%);
-            padding: 7px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height:40px;
-            box-sizing: border-box;
-            border: 0;
+          fill: hsl(229, 86%, 41%);
+          padding: 7px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height:40px;
+          box-sizing: border-box;
+          border: 0;
         }
         .table-register-data{
-            display:grid;
-            gap:4rem;
-            border: 0;
-            padding:0;
+          display:grid;
+          gap:4rem;
+          border: 0;
+          padding:0;
         }
-
         .table-register-data li{
-            background-color: black;
+          background-color: black;
         }
-
         .table-register-data li{
-            font-size: 16px;
-            font-weight: 600;
-            padding:0.2rem;
-            padding-left:0.5rem;
+          font-size: 16px;
+          font-weight: 600;
+          padding:0.2rem;
+          padding-left:0.5rem;
         }
-
         .table-footer {
-            background-color: white; 
-            padding: 10px;
+          background-color: white; 
+          padding: 10px;
         }
-
         .table-info-registers span{
-            color:black;
+          color:black;
         }
       </style>
-
       <section class="table">
         <div class="table-header">
           <div class="table-header-buttons">

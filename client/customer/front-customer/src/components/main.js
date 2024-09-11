@@ -32,10 +32,10 @@ class Main extends HTMLElement {
         }
    
     </style>
-        <main class="${this.position}">
-            <slot></slot>
-            </main>
-        `
+      <main class="${this.position}">
+        <slot></slot>
+      </main>
+    `
   }
 }
 
