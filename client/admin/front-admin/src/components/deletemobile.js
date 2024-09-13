@@ -1,86 +1,104 @@
-class deletemobile extends HTMLElement {
+class DeleteMobile extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
   }
 
-  async connectedCallback () {
+  connectedCallback () {
     this.render()
-    this.showModal()
-    this.addEventListeners()
-  }
-
-  showModal () {
-    const modal = this.shadow.getElementById('myModal')
-    modal.style.display = 'block'
-  }
-
-  addEventListeners () {
-    const saveBtn = this.shadow.getElementById('saveBtn')
-    const deleteBtn = this.shadow.getElementById('deleteBtn')
-    const modal = this.shadow.getElementById('myModal')
-
-    saveBtn.addEventListener('click', () => {
-      alert('Guardado!')
-      modal.style.display = 'none'
-    })
-
-    deleteBtn.addEventListener('click', () => {
-      alert('Borrado!')
-      modal.style.display = 'none'
-    })
   }
 
   render () {
-    this.shadow.innerHTML =
-      /* html */`
-       <style>
-       .modal {
-          display: none; 
+    this.shadow.innerHTML = /* html */ `
+      <style>
+        .register {
           position: fixed;
-          z-index: 1;
-          left: 0;
-          top: 0;
           width: 100%;
           height: 100%;
-          background-color: rgba(0, 0, 0, 0.5); 
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
-        
-        .modal-content {
+
+        .register.visible {
+          opacity: 1;
+          pointer-events: auto;
+        }
+        .register-content {
           background-color: #fefefe;
-          margin: 15% auto;
           padding: 20px;
           border: 1px solid #888;
           width: 300px;
           text-align: center;
         }
-
-        .modal-button {
+        .register-content p {
+          color: black;
+        }
+        .buttons{
+          display:flex;
+          justify-content:center;
+        }
+        .saveBtn, .deleteBtn {
           margin: 10px;
           padding: 10px 20px;
           border: none;
           cursor: pointer;
           border-radius: 5px;
+          transition: background-color 0.3s;
         }
-
-        .save-button {
+        .saveBtn {
           background-color: #4CAF50;
           color: white;
         }
-
-        .delete-button {
+        .saveBtn:hover {
+          background-color: #45a049;
+        }
+        .deleteBtn {
           background-color: #f44336;
           color: white;
         }
-       </style>
-       <div id="myModal" class="modal">
-        <div class="modal-content">
-          <p>¿Deseas guardar o borrar?</p>
-          <button class="modal-button save-button" id="saveBtn">Guardar</button>
-          <button class="modal-button delete-button" id="deleteBtn">Borrar</button>
+        .deleteBtn:hover {
+          background-color: #e53935;
+        }  
+      </style>
+        <div class="register">
+          <div class="register-content">
+            <p>¿Deseas eliminar el registro ?</p>
+            <div class="buttons">
+              <button class="saveBtn">si</button>
+              <button class="deleteBtn">no</button>
+            </div>
+          </div>
         </div>
-    </div>
-      `
+    `
+    this.checkVisibility(true)
+    this.addEventListeners()
+  }
+
+  checkVisibility (show) {
+    const modal = this.shadow.querySelector('.register')
+    if (show) {
+      modal.classList.add('visible')
+    } else {
+      modal.classList.remove('visible')
+    }
+  }
+
+  addEventListeners () {
+    const saveBtn = this.shadow.querySelector('.saveBtn')
+    const deleteBtn = this.shadow.querySelector('.deleteBtn')
+
+    saveBtn.addEventListener('click', () => {
+      alert('Guardado')
+      this.checkVisibility(false)
+    })
+
+    deleteBtn.addEventListener('click', () => {
+      alert('Borrado')
+      this.checkVisibility(false)
+    })
   }
 }
-customElements.define('deletemobile-component', deletemobile)
+
+customElements.define('deletemobile-component', DeleteMobile)
