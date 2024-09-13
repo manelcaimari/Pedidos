@@ -4,6 +4,7 @@ import crudReducer from './crud-slice'
 export const store = configureStore({
   reducer: {
     crud: crudReducer
+
   }
 })
 

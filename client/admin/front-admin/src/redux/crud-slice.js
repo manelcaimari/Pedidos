@@ -7,6 +7,7 @@ export const crudSlice = createSlice({
       data: null
     },
     tableEndpoint: null
+
   },
   reducers: {
     showFormElement: (state, action) => {
@@ -15,6 +16,7 @@ export const crudSlice = createSlice({
     refreshTable: (state, action) => {
       state.tableEndpoint = action.payload
     }
+
   }
 })
 

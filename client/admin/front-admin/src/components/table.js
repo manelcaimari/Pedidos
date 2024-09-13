@@ -190,7 +190,12 @@ class Table extends HTMLElement {
         const id = event.target.closest('.delete-button').dataset.id
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users/${id}`)
         const element = await response.json()
-        console.log(element)
+        document.dispatchEvent(new CustomEvent('message', {
+          detail: {
+            message: 'se ha borrado  correctamente',
+            type: 'success'
+          }
+        }))
       }
     })
   }
