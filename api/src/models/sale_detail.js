@@ -9,27 +9,75 @@ module.exports = function (sequelize, DataTypes) {
       },
       saleId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       productId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       priceId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       productName: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       basePrice: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       quantity: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       createdAt: {
         type: DataTypes.DATE

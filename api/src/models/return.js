@@ -9,23 +9,63 @@ module.exports = function (sequelize, DataTypes) {
       },
       saleId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       customerId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       reference: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       totalBasePrice: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       returnDate: {
         type: DataTypes.DATEONLY,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       returnTime: {
         type: DataTypes.TIME,

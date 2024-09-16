@@ -1,3 +1,6 @@
+import { store } from '../redux/store.js'
+import { refreshTable, showFormElement } from '../redux/crud-slice.js'
+
 class DeleteModal extends HTMLElement {
   constructor () {
     super()
@@ -5,7 +8,14 @@ class DeleteModal extends HTMLElement {
   }
 
   connectedCallback () {
+    document.addEventListener('showDeleteModal', this.handleMessage.bind(this))
     this.render()
+  }
+
+  handleMessage (event) {
+    this.endpoint = event.detail.endpoint
+    this.element = event.detail.element
+    this.shadow.querySelector('.register').classList.add('visible')
   }
 
   render () {
@@ -68,7 +78,7 @@ class DeleteModal extends HTMLElement {
         }
        
       </style>
-      <div class="register">
+      <div class="register ">
         <div class="register-content">
           <p>¿Deseas eliminar el registro?</p>
           <div class="buttons">
@@ -79,19 +89,32 @@ class DeleteModal extends HTMLElement {
         </div>
       </div>
     `
-    this.addEventListeners()
-  }
-
-  addEventListeners () {
     const deleteButton = this.shadow.querySelector('.delete-button')
     const cancelButton = this.shadow.querySelector('.cancel-button')
     const register = this.shadow.querySelector('.register')
 
-    deleteButton.addEventListener('click', () => {
-      this.showMessenger()
-      register.classList.remove('visible')
+    deleteButton.addEventListener('click', async () => {
+      const response = await fetch(this.element, {
+        method: 'DELETE'
+      })
+      store.dispatch(refreshTable(this.endpoint))
+
+      const formElement = {
+        data: null
+      }
+
+      store.dispatch(showFormElement(formElement))
+      if (response.ok) {
+        document.dispatchEvent(new CustomEvent('message', {
+          detail: {
+            message: 'Registro eliminado correctamente'
+          }
+        }))
+        this.shadow.querySelector('.register').classList.remove('visible')
+      }
     })
 
+    register.classList.remove('visible')
     cancelButton.addEventListener('click', () => {
       register.classList.remove('visible')
     })

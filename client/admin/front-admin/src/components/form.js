@@ -17,7 +17,12 @@ class Form extends HTMLElement {
 
       if (currentState.crud.formElement && !isEqual(this.formElementData, currentState.crud.formElement.data)) {
         this.formElementData = currentState.crud.formElement.data
-        this.showElement(this.formElementData)
+
+        if (this.formElementData) {
+          this.showElement(this.formElementData)
+        } else {
+          this.resetForm()
+        }
       }
     })
 
@@ -54,6 +59,23 @@ class Form extends HTMLElement {
           background-color: rgb(90, 14, 90);
           padding: 0 1rem;
           align-content: center;
+        }
+        .validation-errors{
+          background-color: hsl(0, 93%, 66%);
+          display: none;
+          margin-bottom: 1rem;
+          padding: 1rem;
+        }
+        .validation-errors.active{
+          display: block;
+        }
+        .validation-errors ul{
+          margin: 0;
+          padding: 0;
+        }
+        .validation-errors li{
+          color: hsl(0, 0%, 100%);
+          font-weight: 600;
         }
         .editer input {
           width: 96%;
@@ -110,6 +132,9 @@ class Form extends HTMLElement {
             </div>
           </div>
         </div>
+        <div class="validation-errors">
+          <ul></ul>
+        </div>
         <form >
           <input type="hidden" name="id">
           <div class="name">
@@ -123,26 +148,18 @@ class Form extends HTMLElement {
         </form>
       </section>
       `
-    this.button_save()
-    this.button_reset()
+    this.setupEventListeners()
   }
 
-  button_reset () {
-    this.shadow.querySelector('.button_reset').addEventListener('click', async (event) => {
-      const form = this.shadow.querySelector('form')
-      form.reset()
-      this.shadow.querySelector("[name='id']").value = ''
+  setupEventListeners () {
+    this.shadow.querySelector('.button_reset').addEventListener('click', () => {
+      this.resetForm()
     })
-  }
 
-  button_save () {
     this.shadow.querySelector('.button_save').addEventListener('click', async (event) => {
       event.preventDefault()
-
       const form = this.shadow.querySelector('form')
-
       const formData = new FormData(form)
-
       const formDataJson = {}
 
       for (const [key, value] of formData.entries()) {
@@ -161,6 +178,10 @@ class Form extends HTMLElement {
           body: JSON.stringify(formDataJson)
         })
 
+        if (response.status === 500 || response.status === 422) {
+          throw response
+        }
+
         document.dispatchEvent(new CustomEvent('message', {
           detail: {
             message: 'Datos guardados correctamente',
@@ -168,18 +189,65 @@ class Form extends HTMLElement {
           }
         }))
         store.dispatch(refreshTable(this.endpoint))
-        this.shadow.querySelector("[name='id']").value = ''
-        form.reset()
-      } catch {
-        console.error(error)
+        this.resetForm()
+      } catch (error) {
+        const data = await error.json()
+
+        if (error.status === 500) {
+          document.dispatchEvent(new CustomEvent('message', {
+            detail: {
+              message: data.message
+            }
+          }))
+        }
+
+        if (error.status === 422) {
+          const validationErrorsDiv = this.shadow.querySelector('.validation-errors')
+          const errorList = validationErrorsDiv.querySelector('ul')
+
+          errorList.innerHTML = ''
+
+          validationErrorsDiv.classList.add('active')
+
+          this.shadow.querySelectorAll('input.error').forEach(input => {
+            input.classList.remove('error')
+          })
+
+          data.message.forEach(errorMessage => {
+            const input = this.shadow.querySelector(`[name='${errorMessage.path}']`)
+
+            if (input) {
+              input.classList.add('error')
+            }
+
+            const li = document.createElement('li')
+            li.textContent = errorMessage.message
+            errorList.appendChild(li)
+          })
+        }
       }
     })
   }
 
-  showElement = async element => {
+  resetForm = () => {
+    this.shadow.querySelector('.validation-errors').classList.remove('active')
+    const errorList = this.shadow.querySelector('.validation-errors ul')
+    errorList.innerHTML = ''
+
+    this.shadow.querySelectorAll('input.error').forEach(input => {
+      input.classList.remove('error')
+    })
+
+    this.shadow.querySelector('form').reset()
+    this.shadow.querySelector("[name='id']").value = ''
+  }
+
+  showElement (element) {
+    this.resetForm()
     Object.entries(element).forEach(([key, value]) => {
-      if (this.shadow.querySelector(`[name="${key}"]`)) {
-        this.shadow.querySelector(`[name="${key}"]`).value = value
+      const input = this.shadow.querySelector(`[name="${key}"]`)
+      if (input) {
+        input.value = value
       }
     })
   }

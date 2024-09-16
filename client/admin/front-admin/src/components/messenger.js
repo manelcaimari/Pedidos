@@ -20,8 +20,7 @@ class messenger extends HTMLElement {
 
     setTimeout(() => {
       messenger.classList.remove('visible')
-      this.remove()
-    }, 3000)
+    }, 1000)
   }
 
   render () {

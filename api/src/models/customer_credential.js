@@ -9,19 +9,51 @@ module.exports = function (sequelize, DataTypes) {
       },
       customerId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       email: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       password: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       lastPasswodChange: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          },
+          notEmpty: {
+            msg: 'Por favor, rellena el campo "Nombre".'
+          }
+        }
       },
       createdAt: {
         type: DataTypes.DATE

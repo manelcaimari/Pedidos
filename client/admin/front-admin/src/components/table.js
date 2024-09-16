@@ -20,6 +20,7 @@ class Table extends HTMLElement {
         await this.render()
       }
     })
+
     await this.loadData()
     await this.render()
   }
@@ -187,13 +188,13 @@ class Table extends HTMLElement {
         store.dispatch(showFormElement(formElement))
       }
       if (event.target.closest('.delete-button')) {
-        const id = event.target.closest('.delete-button').dataset.id
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users/${id}`)
-        const element = await response.json()
-        document.dispatchEvent(new CustomEvent('message', {
+        const deleteButton = event.target.closest('.delete-button')
+        const element = `${this.endpoint}/${deleteButton.dataset.id}`
+
+        document.dispatchEvent(new CustomEvent('showDeleteModal', {
           detail: {
-            message: 'se ha borrado  correctamente',
-            type: 'success'
+            endpoint: this.endpoint,
+            element
           }
         }))
       }
