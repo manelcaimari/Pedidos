@@ -53,5 +53,4 @@ class PageComponent extends HTMLElement {
     })
   }
 }
-
 customElements.define('page-component', PageComponent)

@@ -9,3 +9,5 @@ import './components/page.js'
 import './components/error.js'
 import './components/deletemodal.js'
 import './components/messenger.js'
+import './components/filtermodal.js'
+
