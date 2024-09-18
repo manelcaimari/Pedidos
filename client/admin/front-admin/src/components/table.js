@@ -172,7 +172,17 @@ class Table extends HTMLElement {
     tableBody.appendChild(fragment)
 
     this.renderRegisterButtons()
+    this.renderFilterButton()
   }
+
+  
+  renderFilterButton() {
+    const filterButton = this.shadow.querySelector('.filter-button')
+    filterButton.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('showFilterModal'))
+    })
+  }
+  
 
   async renderRegisterButtons () {
     this.shadow.querySelector('.table-body').addEventListener('click', async (event) => {

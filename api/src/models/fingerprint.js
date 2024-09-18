@@ -9,15 +9,7 @@ module.exports = function (sequelize, DataTypes) {
       },
       customerId: {
         type: DataTypes.INTEGER,
-        allowNull: true,
-        validate: {
-          notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
-          },
-          notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
-          }
-        }
+        allowNull: true
       },
       fingerprint: {
         type: DataTypes.STRING,
