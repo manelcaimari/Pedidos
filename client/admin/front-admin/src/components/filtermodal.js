@@ -1,23 +1,27 @@
 import { store } from '../redux/store.js'
-import { refreshTable } from '../redux/crud-slice.js'
+import { applyFilter } from '../redux/crud-slice.js'
 
 class FilterButton extends HTMLElement {
-  constructor() {
+  constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/users` // Define el endpoint
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/users`
   }
 
-  connectedCallback() {
+  connectedCallback () {
     document.addEventListener('showFilterModal', this.handleMessage.bind(this))
     this.render()
   }
 
-  handleMessage(event) {
+  disconnectedCallback () {
+    document.removeEventListener('showFilterModal', this.handleMessage.bind(this))
+  }
+
+  handleMessage (event) {
     this.shadow.querySelector('.filter-modal').classList.add('visible')
   }
 
-  render() {
+  render () {
     this.shadow.innerHTML = /* html */ `
       <style>
         .filter-modal {
@@ -36,6 +40,7 @@ class FilterButton extends HTMLElement {
         .filter-modal.visible {
           opacity: 1;
           visibility: visible;
+
         }
 
         .filter-content {
@@ -45,13 +50,20 @@ class FilterButton extends HTMLElement {
           width: 300px;
           text-align: center;
         }
+        .form-group{
+         display:flex;
+         gap:1rem;
+        }
+        .filter-content p {
+          color: black;
+        }
 
         .buttons {
           display: flex;
           justify-content: center;
         }
 
-        .apply-filter, .cancel-button {
+        .apply-filter, .reset-filter {
           margin: 10px;
           padding: 10px 20px;
           border: none;
@@ -69,27 +81,38 @@ class FilterButton extends HTMLElement {
           background-color: #45a049;
         }
 
-        .cancel-button {
+        .reset-filter {
           background-color: #f44336;
           color: white;
         }
 
-        .cancel-button:hover {
+        .reset-filter:hover {
           background-color: #e53935;
         }
 
-        .input-field {
+        form {
+          display: grid;
+          background-color: white;
+          width: 20rem;
+          height: 10rem;
+          justify-content: space-around;
+          align-items: end;
+          justify-items: end;
+
+        }
+
+        .filter-email, .filter-name {
           display: flex;
-          flex-direction: column;
           margin-bottom: 10px;
         }
 
-        .input-field label {
+        label {
           margin-bottom: 5px;
           font-weight: bold;
+          color: black;
         }
 
-        .input-field input {
+        input {
           padding: 5px;
           border: 1px solid #ccc;
           border-radius: 4px;
@@ -97,65 +120,44 @@ class FilterButton extends HTMLElement {
       </style>
 
       <div class="filter-modal">
-        <div class="filter-content">
-          <p>Filtrar registros</p>
-
-          <!-- Formulario de Filtros -->
-          <form id="filter-form">
-            <input type="hidden" name="id">
-
-            <div class="name input-field">
-              <label for="name">Nombre</label>
-              <input type="text" id="name" name="name" placeholder="Nombre">
-            </div>
-
-            <div class="email input-field">
-              <label for="email">Email</label>
-              <input type="email" id="email" name="email" placeholder="example@gmail.com">
-            </div>
-
-            <div class="buttons">
-              <button type="button" class="apply-filter">Aplicar Filtro</button>
-              <button type="button" class="cancel-button">Cancelar</button>
-            </div>
-          </form>
-        </div>
+        <form class="filter-form">
+          <div class="form-group">
+            <label for="filter-name">Nombre:</label>
+            <input type="text"  name="name">
+          </div>
+          <div class="form-group">
+            <label for="filter-email">Email:</label>
+            <input type="email" name="email">
+          </div>
+          <div class="form-actions">
+            <button type="button" class="apply-filter">Aplicar</button>
+            <button type="button" class="reset-filter">Cancelar</button>
+          </div>
+        </form>
       </div>
     `
 
-    const applyFilterButton = this.shadow.querySelector('.apply-filter')
-    const cancelButton = this.shadow.querySelector('.cancel-button')
-    const filterModal = this.shadow.querySelector('.filter-modal')
-
-    applyFilterButton.addEventListener('click', async () => {
-    
-      const form = this.shadow.querySelector('#filter-form')
-      const formData = new FormData(form)
-      
-      const filters = {}
-      formData.forEach((value, key) => {
-        if (value) filters[key] = value.trim() 
-      })
-
-     
-      const response = await fetch(`${this.endpoint}?${new URLSearchParams(filters)}`)
-
-    
-      store.dispatch(refreshTable(this.endpoint))
-
-    
-      if (response.ok) {
-        document.dispatchEvent(new CustomEvent('message', {
-          detail: {
-            message: 'Filtro aplicado correctamente'
-          }
-        }))
-        filterModal.classList.remove('visible')
-      }
+    this.shadow.querySelector('.reset-filter').addEventListener('click', () => {
+      this.shadow.querySelector('.filter-modal').classList.remove('visible')
     })
 
-    cancelButton.addEventListener('click', () => {
-      filterModal.classList.remove('visible')
+    this.shadow.querySelector('.apply-filter').addEventListener('click', (event) => {
+      event.preventDefault()
+      const form = this.shadow.querySelector('form')
+      const formData = new FormData(form)
+      const formDataJson = {}
+
+      for (const [key, value] of formData.entries()) {
+        formDataJson[key] = value !== '' ? value : null
+      }
+
+      const queryString = Object.entries(formDataJson).map(([key, value]) => {
+        return `${key}=${value}`
+      }).join('&')
+
+      store.dispatch(applyFilter(queryString))
+      this.shadow.querySelector('.filter-modal').classList.remove('visible')
+      form.reset()
     })
   }
 }
