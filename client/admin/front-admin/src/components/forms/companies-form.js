@@ -1,6 +1,6 @@
 import isEqual from 'lodash-es/isEqual'
-import { store } from '../redux/store.js'
-import { refreshTable } from '../redux/crud-slice.js'
+import { store } from '../../redux/store.js'
+import { refreshTable } from '../../redux/crud-slice.js'
 
 class Form extends HTMLElement {
   constructor () {
@@ -8,7 +8,7 @@ class Form extends HTMLElement {
     this.unsubscribe = null
     this.formElementData = null
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/users`
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/companies`
   }
 
   connectedCallback () {
@@ -32,48 +32,70 @@ class Form extends HTMLElement {
   render () {
     this.shadow.innerHTML =/* html */ `
       <style>
-        a{
+        a {
           text-decoration: none;
           color: inherit;
         }
-        ul{
+        ul {
           list-style: none;
           margin: 0;
           padding: 0;
-          display:flex;
+          display: flex;
         }
-        .form{
-          display:grid;
-          gap:1rem;
+        .form {
+          display: grid;
+          gap: 1rem;
         }
-        .categori_list   {
-          display:flex;
-          background-color:white;
-          width:100%;
+        .tabs {
+          display: flex;
+        }
+        .tab-content {
+          display: none;
+        }
+        .tab-content.active {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+        }
+        .tabs ul {
+          display: flex;
+        }
+        .tabs ul li {
+          color: hsl(239, 73%, 47%);
+          cursor: pointer;
+          font-weight: bold;
+          display: flex;
+          font-size: 0.8rem;
+          padding: 0.6rem;
+        }
+        .tabs ul li.active {
+          background-color: hsl(272, 40%, 35%);
+          color: white;
         }
         .header_categori {
-          display:flex;
-          justify-content:space-between;
+          display: flex;
+          justify-content: space-between;
+          background-color: white;
         }
         .header_categori li {
           background-color: rgb(90, 14, 90);
           padding: 0 1rem;
           align-content: center;
         }
-        .validation-errors{
+        .validation-errors {
           background-color: hsl(0, 93%, 66%);
           display: none;
           margin-bottom: 1rem;
           padding: 1rem;
         }
-        .validation-errors.active{
+        .validation-errors.active {
           display: block;
         }
-        .validation-errors ul{
+        .validation-errors ul {
           margin: 0;
           padding: 0;
         }
-        .validation-errors li{
+        .validation-errors li {
           color: hsl(0, 0%, 100%);
           font-weight: 600;
         }
@@ -86,41 +108,38 @@ class Form extends HTMLElement {
           background-color: white;
           border: 0;
           padding: 0 0.5rem;
-          display:flex;
+          display: flex;
         }
         .header_categori .categori_button svg {
           fill: hsl(229, 86%, 41%);
         }
         form {
-          width: 100%;
-          display: flex;
-          box-sizing: border-box;
-          gap: 1rem;
         }
-        .name,.email {
+        .name, .email {
           flex: 1;
-          display:grid;
-          gap:0.5rem;
+          display: grid;
+          gap: 0.5rem;
         }
-          .email input,
-          .name input {
+        .email input,
+        .name input {
           background-color: #476bb9;
           color: white;
           border-right: 1px solid #476bb9;
-          padding:0.5rem;
+          padding: 0.5rem;
         }
         .categori_button svg {
           width: 40px;
           height: 40px;
           padding: 0;
         }
+        
       </style>
       <section class="form">
         <div class="header_categori">
-          <div class="categori_list" >
+          <div class="tabs">
             <ul>
-              <li>General</li>
-            
+              <li class="tab active" data-tab="general">General</li>
+              
             </ul>
           </div>
           <div class="categori_button">
@@ -135,20 +154,24 @@ class Form extends HTMLElement {
         <div class="validation-errors">
           <ul></ul>
         </div>
-        <form >
-          <input type="hidden" name="id">
-          <div class="name">
-            <label>Nombre</label>
-            <input type="text" name="name" >
+        <form>
+          <div class="tab-content active" data-tab="general">
+            <input type="hidden" name="id">
+            <div class="name">
+              <label>CommercialName</label>
+              <input type="text" name="name">
+            </div>
+            <div class="email">
+              <label>FiscalName</label>
+              <input type="text" name="email">
+            </div>
           </div>
-          <div class="email">
-            <label >Email</label>
-            <input type="email" name="email">
-          </div>
+         
         </form>
       </section>
       `
     this.setupEventListeners()
+    this.tabsButton()
   }
 
   setupEventListeners () {
@@ -242,6 +265,21 @@ class Form extends HTMLElement {
     this.shadow.querySelector("[name='id']").value = ''
   }
 
+  tabsButton () {
+    this.shadow.querySelector('.form').addEventListener('click', async (event) => {
+      if (event.target.closest('.tab')) {
+        const tab = event.target.closest('.tab')
+
+        if (!tab.classList.contains('active')) {
+          this.shadow.querySelector('.tab.active').classList.remove('active')
+          tab.classList.add('active')
+          this.shadow.querySelector('.tab-content.active').classList.remove('active')
+          this.shadow.querySelector(`.tab-content[data-tab="${tab.dataset.tab}"]`).classList.add('active')
+        }
+      }
+    })
+  }
+
   showElement (element) {
     this.resetForm()
     Object.entries(element).forEach(([key, value]) => {
@@ -253,4 +291,4 @@ class Form extends HTMLElement {
   }
 }
 
-customElements.define('form-component', Form)
+customElements.define('companies-form-component', Form)

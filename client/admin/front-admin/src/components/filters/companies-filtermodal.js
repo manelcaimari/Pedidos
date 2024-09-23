@@ -1,11 +1,11 @@
-import { store } from '../redux/store.js'
-import { applyFilter } from '../redux/crud-slice.js'
+import { store } from '../../redux/store.js'
+import { applyFilter } from '../../redux/crud-slice.js'
 
 class FilterButton extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/users`
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/companies`
   }
 
   connectedCallback () {
@@ -162,4 +162,4 @@ class FilterButton extends HTMLElement {
   }
 }
 
-customElements.define('filterbutton-component', FilterButton)
+customElements.define('companies-filterbutton-component', FilterButton)

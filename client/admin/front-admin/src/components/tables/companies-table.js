@@ -1,6 +1,6 @@
 import isEqual from 'lodash-es/isEqual'
-import { store } from '../redux/store.js'
-import { showFormElement, applyFilter } from '../redux/crud-slice.js'
+import { store } from '../../redux/store.js'
+import { showFormElement, applyFilter } from '../../redux/crud-slice.js'
 
 class Table extends HTMLElement {
   constructor () {
@@ -8,7 +8,7 @@ class Table extends HTMLElement {
     this.shadow = this.attachShadow({ mode: 'open' })
     this.data = []
     this.unsubscribe = null
-    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/users`
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/companies`
     this.queryString = null
     this.page = 1
   }
@@ -233,7 +233,7 @@ class Table extends HTMLElement {
                   </button>
                 </label>
               </div>
-              <div class="table-page-button" data-page="${parseInt(this.data.meta.currentPage) + 1}">
+              <div class="table-page-button" data-page="${parseInt(this.data.meta.currentPage) + 1 < this.data.meta.pages ? parseInt(this.data.meta.currentPage) + 1 : this.data.meta.pages}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-right</title><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
               </div>  
               <div class="table-page-button" data-page="${this.data.meta.pages}">
@@ -382,4 +382,4 @@ class Table extends HTMLElement {
     })
   }
 }
-customElements.define('table-component', Table)
+customElements.define('companies-table-component', Table)
