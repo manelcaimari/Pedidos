@@ -134,6 +134,7 @@ class Table extends HTMLElement {
           justify-content: space-between;
           padding: 0.5rem;
           width: 100%;  
+          align-items: center
         }
 
         .table-info p{
@@ -145,6 +146,7 @@ class Table extends HTMLElement {
           align-items: center;
           display: flex;
           gap: 0.5rem;
+          align-items: baseline
         }
 
         .table-page-button{
@@ -155,7 +157,7 @@ class Table extends HTMLElement {
         }
 
         .current-page{
-          align-items: center;
+          align-items: flex-end;
           display: flex;
           height: 1.5rem;
           width: 4rem;
