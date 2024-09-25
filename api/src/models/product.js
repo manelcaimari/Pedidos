@@ -36,10 +36,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "refencia".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "refencia".'
           }
         }
       },
@@ -48,10 +48,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "unidad".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "unidad".'
           }
         }
       },

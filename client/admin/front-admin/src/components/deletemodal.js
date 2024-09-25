@@ -8,11 +8,11 @@ class DeleteModal extends HTMLElement {
   }
 
   connectedCallback () {
-    document.addEventListener('showDeleteModal', this.handleMessage.bind(this))
+    document.addEventListener('showDeleteModal', this.handleShowDeleteModal.bind(this))
     this.render()
   }
 
-  handleMessage (event) {
+  handleShowDeleteModal (event) {
     this.endpoint = event.detail.endpoint
     this.element = event.detail.element
     this.shadow.querySelector('.register').classList.add('visible')

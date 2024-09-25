@@ -161,4 +161,4 @@ class FilterButton extends HTMLElement {
   }
 }
 
-customElements.define('users-filterbutton-component', FilterButton)
+customElements.define('customers-filterbutton-component', FilterButton)

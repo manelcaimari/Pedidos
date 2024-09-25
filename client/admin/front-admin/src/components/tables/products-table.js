@@ -8,7 +8,7 @@ class Table extends HTMLElement {
     this.shadow = this.attachShadow({ mode: 'open' })
     this.data = []
     this.unsubscribe = null
-    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/companies`
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/products`
     this.queryString = null
     this.page = 1
   }
@@ -36,7 +36,6 @@ class Table extends HTMLElement {
         }
       }
     })
-
     await this.loadData()
     await this.render()
   }
@@ -277,18 +276,45 @@ class Table extends HTMLElement {
 
       const ulData = document.createElement('ul')
 
-      Object.entries(customer).forEach(([key, value]) => {
-        const listElement = document.createElement('li')
-        listElement.textContent = key === 'commercialAddress' ? `Dirección comercial: ${value}` : `${key}: ${value}`
-        ulData.appendChild(listElement)
-      })
+      let elementItemList = document.createElement('li')
+      elementItemList.textContent = `productCategoryId: ${customer.productCategoryId}`
+      ulData.appendChild(elementItemList)
+
+      elementItemList = document.createElement('li')
+      elementItemList.textContent = `nombre: ${customer.name}`
+      ulData.appendChild(elementItemList)
+
+      elementItemList = document.createElement('li')
+      elementItemList.textContent = `Referencia: ${customer.reference}`
+      ulData.appendChild(elementItemList)
+
+      elementItemList = document.createElement('li')
+      elementItemList.textContent = `Unidades: ${customer.units}`
+      ulData.appendChild(elementItemList)
+
+      elementItemList = document.createElement('li')
+      elementItemList.textContent = `Unidad de Medida: ${customer.measurementUnit}`
+      ulData.appendChild(elementItemList)
+
+      elementItemList = document.createElement('li')
+      elementItemList.textContent = `Medida: ${customer.measurement}`
+      ulData.appendChild(elementItemList)
+
+      elementItemList = document.createElement('li')
+      elementItemList.textContent = `Visible: ${customer.visible}`
+      ulData.appendChild(elementItemList)
+
+      elementItemList = document.createElement('li')
+      elementItemList.textContent = `creado : ${customer.createdAt}`
+      ulData.appendChild(elementItemList)
 
       dataDiv.appendChild(ulData)
+
       registerDiv.appendChild(buttonsDiv)
       registerDiv.appendChild(dataDiv)
+
       fragment.appendChild(registerDiv)
     })
-
     tableBody.appendChild(fragment)
 
     this.renderRegisterButtons()
@@ -334,7 +360,7 @@ class Table extends HTMLElement {
     this.shadow.querySelector('.table').addEventListener('click', async (event) => {
       if (event.target.closest('.edit-button')) {
         const id = event.target.closest('.edit-button').dataset.id
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/companies/${id}`)
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/products/${id}`)
         const data = await response.json()
 
         const formElement = {
@@ -376,4 +402,4 @@ class Table extends HTMLElement {
     })
   }
 }
-customElements.define('companies-table-component', Table)
+customElements.define('products-table-component', Table)

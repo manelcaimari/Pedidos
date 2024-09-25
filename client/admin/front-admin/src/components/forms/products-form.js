@@ -8,7 +8,7 @@ class Form extends HTMLElement {
     this.unsubscribe = null
     this.formElementData = null
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/companies`
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/products`
   }
 
   connectedCallback () {
@@ -18,7 +18,11 @@ class Form extends HTMLElement {
       if (currentState.crud.formElement && !isEqual(this.formElementData, currentState.crud.formElement.data)) {
         this.formElementData = currentState.crud.formElement.data
 
-        this.formElementData ? this.showElement(this.formElementData) : this.resetForm()
+        if (this.formElementData) {
+          this.showElement(this.formElementData)
+        } else {
+          this.resetForm()
+        }
       }
     })
 
@@ -28,116 +32,113 @@ class Form extends HTMLElement {
   render () {
     this.shadow.innerHTML =/* html */ `
       <style>
+        a {
+          text-decoration: none;
+          color: inherit;
+        }
+        ul {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+        }
+        .form {
+          display: grid;
+          gap: 1rem;
+        }
+        .tabs {
+          display: flex;
+        }
+        .tab-content {
+          display: none;
+        }
+        .tab-content.active {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1rem;
+        }
+        .tabs ul {
+          display: flex;
+        }
+        .tabs ul li {
+          color: hsl(239, 73%, 47%);
+          cursor: pointer;
+          font-weight: bold;
+          display: flex;
+          font-size: 0.8rem;
+          padding: 0.6rem;
+        }
+        .tabs ul li.active {
+          background-color: hsl(272, 40%, 35%);
+          color: white;
+        }
+        .header_categori {
+          display: flex;
+          justify-content: space-between;
+          background-color: white;
+        }
+        .header_categori li {
+          background-color: rgb(90, 14, 90);
+          padding: 0 1rem;
+          align-content: center;
+        }
+        .validation-errors {
+          background-color: hsl(0, 93%, 66%);
+          display: none;
+          margin-bottom: 1rem;
+          padding: 1rem;
+        }
+        .validation-errors.active {
+          display: block;
+        }
+        .validation-errors ul {
+          margin: 0;
+          padding: 0;
+        }
+        .validation-errors li {
+          color: hsl(0, 0%, 100%);
+          font-weight: 600;
+        }
+        .editer input {
+          width: 96%;
+          padding: 0.5rem;
+          background-color: rgb(90, 14, 90);
+        }
+        .categori_button {
+          background-color: white;
+          border: 0;
+          padding: 0 0.5rem;
+          display: flex;
+        }
+        .header_categori .categori_button svg {
+          fill: hsl(229, 86%, 41%);
+        }
+        form {
+        }
+        .field {
+          flex: 1;
+          display: grid;
+          gap: 0.5rem;
+        }
+         input {
+          background-color: #476bb9;
+          color: white;
+          border-right: 1px solid #476bb9;
+          padding: 0.5rem;
+        }
+        .categori_button svg {
+          width: 40px;
+          height: 40px;
+          padding: 0;
+        }
         
-      a {
-        text-decoration: none;
-        color: inherit;
-      }
-      ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-      }
-      .form {
-        display: grid;
-        gap: 1rem;
-      }
-      .tabs {
-        display: flex;
-      }
-      .tab-content {
-        display: none;
-      }
-      .tab-content.active {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-      }
-      .tabs ul {
-        display: flex;
-      }
-      .tabs ul li {
-        color: hsl(239, 73%, 47%);
-        cursor: pointer;
-        font-weight: bold;
-        display: flex;
-        font-size: 0.8rem;
-        padding: 0.6rem;
-      }
-      .tabs ul li.active {
-        background-color: hsl(272, 40%, 35%);
-        color: white;
-      }
-      .header_categori {
-        display: flex;
-        justify-content: space-between;
-        background-color: white;
-      }
-      .header_categori li {
-        background-color: rgb(90, 14, 90);
-        padding: 0 1rem;
-        align-content: center;
-      }
-      .validation-errors {
-        background-color: hsl(0, 93%, 66%);
-        display: none;
-        margin-bottom: 1rem;
-        padding: 1rem;
-      }
-      .validation-errors.active {
-        display: block;
-      }
-      .validation-errors ul {
-        margin: 0;
-        padding: 0;
-      }
-      .validation-errors li {
-        color: hsl(0, 0%, 100%);
-        font-weight: 600;
-      }
-      .editer input {
-        width: 96%;
-        padding: 0.5rem;
-        background-color: rgb(90, 14, 90);
-      }
-      .categori_button {
-        background-color: white;
-        border: 0;
-        padding: 0 0.5rem;
-        display: flex;
-      }
-      .header_categori .categori_button svg {
-        fill: hsl(229, 86%, 41%);
-      }
-      form {
-      }
-      .form-element {
-        display: grid;
-        gap: 0.5rem;
-      }
-      .form-element label {
-        font-weight: bold;
-      }
-      .form-element input {
-        width: 100%;
-        padding: 0.5rem;
-        background-color: #476bb9;
-        color: white;
-        border-right: 1px solid #476bb9;
-      }
-      .categori_button svg {
-        width: 40px;
-        height: 40px;
-        padding: 0;
-      }
-              
       </style>
       <section class="form">
         <div class="header_categori">
           <div class="tabs">
             <ul>
               <li class="tab active" data-tab="general">General</li>
+              
             </ul>
           </div>
           <div class="categori_button">
@@ -153,42 +154,44 @@ class Form extends HTMLElement {
           <ul></ul>
         </div>
         <form>
+        <input type="hidden"  name="id" >
+
           <div class="tab-content active" data-tab="general">
-            <input type="hidden" name="id">
-            <div class="form-element">
-              <div class="form-element-label">
-                <label for="commercialName">Nombre</label>
-              </div>
-              <div class="form-element-input">
-                <input type="text" name="commercialName" id="commercialName">
-              </div>
-            </div>
-            <div class="form-element">
-              <div class="form-element-label">
-                <label for="vatNumber">NIF</label>
-              </div>
-              <div class="form-element-input">
-                <input type="text" name="vatNumber" id="vatNumber">
-              </div>
-            </div>
-            <div class="form-element">
-              <div class="form-element-label">
-                <label for="commercialAddress">Dirección comercial</label>
-              </div>
-              <div class="form-element-input">
-                <input type="text" name="commercialAddress" id="commercialAddress">
-              </div>
-            </div>
-            <div class="form-element">
-              <div class="form-element-label">
-                <label for="fiscalAddress">Dirección fiscal</label>
-              </div>
-              <div class="form-element-input">
-                <input type="text" name="fiscalAddress" id="fiscalAddress">
-              </div>
-            </div>
+          <div class="field">
+            <label for="productCategoryName">Categoría de Producto</label>
+            <select id="productCategoryName" name="productCategoryName"></select>
           </div>
-         
+            
+            <div class="field">
+              <label for="name">Nombre</label>
+              <input type="text" id="name" name="name" >
+            </div>
+
+            <div class="field">
+              <label for="reference">Referencia</label>
+              <input type="text" id="reference" name="reference" >
+            </div>
+            <div class="field">
+              <label for="units">Unidades</label>
+              <input type="number" id="units" name="units" required min="1">
+            </div>
+            <div class="field">
+              <label for="measurementUnit">Unidad de Medida</label>
+              <input type="text" id="measurementUnit" name="measurementUnit" >
+            </div>
+            <div class="field">
+              <label for="measurement">Medida</label>
+              <input type="number" id="measurement" name="measurement" required min="0">
+            </div>
+            <div class="field">
+              <label for="visible">Visible</label>
+              <select id="visible" name="visible" required>
+                <option value="true">Sí</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+          
+          </div> 
         </form>
       </section>
       `
@@ -313,4 +316,4 @@ class Form extends HTMLElement {
   }
 }
 
-customElements.define('companies-form-component', Form)
+customElements.define('products-form-component', Form)

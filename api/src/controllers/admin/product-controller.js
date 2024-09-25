@@ -34,7 +34,7 @@ exports.findAll = (req, res) => {
 
   Product.findAndCountAll({
     where: condition,
-    attributes: ['id', 'name', 'reference', 'units', 'measurementUnit', 'measurement', 'measurementUnit', 'createdAt', 'updatedAt'],
+    attributes: ['id', 'productCategoryId', 'name', 'reference', 'units', 'measurementUnit', 'measurement', 'visible', 'createdAt', 'updatedAt'],
     limit,
     offset,
     order: [['createdAt', 'DESC']]

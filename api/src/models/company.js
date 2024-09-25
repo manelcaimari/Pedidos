@@ -12,10 +12,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Dirección comercial".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Dirección comercial" con un nombre válido.'
           }
         }
       },
@@ -24,10 +24,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Dirección fiscal".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Dirección fiscal" con un nombre válido.'
           }
         }
       },
@@ -36,22 +36,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Nombre comercial".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
-          }
-        }
-      },
-      fiscalName: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
-          },
-          notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Nombre comercial" con un nombre válido.'
           }
         }
       },
@@ -60,10 +48,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Vat".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Vat" con un número válido.'
           }
         }
       },

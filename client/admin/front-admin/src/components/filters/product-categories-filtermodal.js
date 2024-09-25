@@ -5,6 +5,7 @@ class FilterButton extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/product-categories`
   }
 
   connectedCallback () {
@@ -23,18 +24,18 @@ class FilterButton extends HTMLElement {
   render () {
     this.shadow.innerHTML = /* html */ `
       <style>
-        .filter-modal {
-          position: fixed;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity 0.3s, visibility 0.3s;
-        }
+      .filter-modal {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+      }
 
         .filter-modal.visible {
           opacity: 1;
@@ -100,7 +101,7 @@ class FilterButton extends HTMLElement {
 
         }
 
-        .filter-email, .filter-name {
+        .filter-name {
           display: flex;
           margin-bottom: 10px;
         }
@@ -123,10 +124,6 @@ class FilterButton extends HTMLElement {
           <div class="form-group">
             <label for="filter-name">Nombre:</label>
             <input type="text"  name="name">
-          </div>
-          <div class="form-group">
-            <label for="filter-email">Email:</label>
-            <input type="email" name="email">
           </div>
           <div class="form-actions">
             <button type="button" class="apply-filter">Aplicar</button>
@@ -161,4 +158,4 @@ class FilterButton extends HTMLElement {
   }
 }
 
-customElements.define('users-filterbutton-component', FilterButton)
+customElements.define('product-categories-filterbutton-component', FilterButton)
