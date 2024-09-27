@@ -4,6 +4,7 @@ exports.findAll = (req, res) => {
     '/admin/clientes': 'customers.html',
     '/admin/empresas': 'companies.html',
     '/admin/categorias': 'product-categories.html',
+    '/admin/contacts': 'contacts.html',
     '/admin/productos': 'products.html'
   }
 

@@ -8,7 +8,7 @@ class Form extends HTMLElement {
     this.unsubscribe = null
     this.formElementData = null
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/products`
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/contacts`
   }
 
   connectedCallback () {
@@ -114,24 +114,16 @@ class Form extends HTMLElement {
           fill: hsl(229, 86%, 41%);
         }
         form {
-          display: flex;
-          flex-wrap: wrap; 
-          gap: 1rem; 
         }
-
-        .field {
+        .name, .email, .subject, .message, .fingerprintId {
+          flex: 1;
           display: grid;
-          gap: 0.5rem; 
-          box-sizing: border-box;
-          flex: 1 1 calc(50% - 1rem); 
+          gap: 0.5rem;
         }
-         input {
-          background-color: #476bb9;
-          color: white;
-          border-right: 1px solid #476bb9;
-          padding: 0.5rem;
-        }
-        select{
+        .email input,
+        .name input, .subject input,
+        .fingerprintId input, 
+        .message textarea{
           background-color: #476bb9;
           color: white;
           border-right: 1px solid #476bb9;
@@ -166,61 +158,35 @@ class Form extends HTMLElement {
         </div>
         <form>
           <div class="tab-content active" data-tab="general">
-            <input type="hidden"  name="id" >
-            <div class="field">
-              <label for="categoryId">Categoria</label>                
-              <select name="productCategoryId"></select>
-            </div>   
+            <input type="hidden" name="id">
+            <div class="fingerprintId">
+              <label>fingerprintId</label>
+              <input type="number" name="fingerprintId">
             </div>
-            <div class="field">
-              <label for="name">Nombre</label>
-              <input type="text" id="name" name="name" >
+            <div class="name">
+              <label>Nombre</label>
+              <input type="text" name="name">
             </div>
-            <div class="field">
-              <label for="reference">Referencia</label>
-              <input type="text" id="reference" name="reference" >
+            <div class="email">
+              <label>Email</label>
+              <input type="email" name="email">
             </div>
-            <div class="field">
-              <label for="units">Unidades</label>
-              <input type="number" id="units" name="units" required min="1">
+            <div class="subject">
+              <label>Asunto</label>
+              <input type="text" name="subject">
             </div>
-            <div class="field">
-              <label for="measurementUnit">Unidad de Medida</label>
-              <input type="text" id="measurementUnit" name="measurementUnit" >
+            <div class="message">
+              <label>Mensaje</label>
+              <textarea name="message"></textarea>
             </div>
-            <div class="field">
-              <label for="measurement">Medida</label>
-              <input type="number" id="measurement" name="measurement" required min="0">
-            </div>
-            <div class="field">
-              <label for="visible">Visible</label>
-              <select id="visible" name="visible" required>
-                <option value="true">Sí</option>
-                <option value="false">No</option>
-              </select>
-            </div>
-          </div> 
+
+          </div>
+         
         </form>
       </section>
       `
-
-    this.getProductCategories()
     this.setupEventListeners()
     this.tabsButton()
-  }
-
-  async getProductCategories () {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/product-categories`)
-    this.productCategories = await response.json()
-
-    const select = this.shadow.querySelector('[name="productCategoryId"]')
-
-    this.productCategories.rows.forEach(category => {
-      const option = document.createElement('option')
-      option.value = category.id
-      option.textContent = category.name
-      select.appendChild(option)
-    })
   }
 
   setupEventListeners () {
@@ -340,4 +306,4 @@ class Form extends HTMLElement {
   }
 }
 
-customElements.define('products-form-component', Form)
+customElements.define('contacts-form-component', Form)

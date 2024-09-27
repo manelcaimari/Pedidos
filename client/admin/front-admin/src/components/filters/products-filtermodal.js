@@ -124,10 +124,6 @@ class FilterButton extends HTMLElement {
             <label for="filter-name">Nombre:</label>
             <input type="text"  name="name">
           </div>
-          <div class="form-group">
-            <label for="filter-email">Email:</label>
-            <input type="email" name="email">
-          </div>
           <div class="form-actions">
             <button type="button" class="apply-filter">Aplicar</button>
             <button type="button" class="reset-filter">Cancelar</button>

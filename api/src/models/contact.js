@@ -12,10 +12,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "fingerprintId".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "fingerprintId".'
           }
         }
       },
@@ -36,10 +36,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Email".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Email".'
           }
         }
       },
@@ -48,10 +48,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Asunto".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Asunto".'
           }
         }
       },
@@ -60,10 +60,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Mensaje".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Mensaje".'
           }
         }
       },

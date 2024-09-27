@@ -8,7 +8,7 @@ class Table extends HTMLElement {
     this.shadow = this.attachShadow({ mode: 'open' })
     this.data = []
     this.unsubscribe = null
-    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/products`
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/contacts`
     this.queryString = null
     this.page = 1
   }
@@ -44,7 +44,6 @@ class Table extends HTMLElement {
     const endpoint = this.queryString ? `${this.endpoint}?${this.queryString}&page=${this.page}` : `${this.endpoint}?page=${this.page}`
     const response = await fetch(endpoint)
     this.data = await response.json()
-    await this.getCategoryProduct()
   }
 
   render () {
@@ -278,7 +277,7 @@ class Table extends HTMLElement {
       const ulData = document.createElement('ul')
 
       let elementItemList = document.createElement('li')
-      elementItemList.textContent = `Categoria: ${this.categoryMap[customer.productCategoryId] || 'Desconocida'}`
+      elementItemList.textContent = `fingerprintId: ${customer.fingerprintId}`
       ulData.appendChild(elementItemList)
 
       elementItemList = document.createElement('li')
@@ -286,23 +285,15 @@ class Table extends HTMLElement {
       ulData.appendChild(elementItemList)
 
       elementItemList = document.createElement('li')
-      elementItemList.textContent = `Referencia: ${customer.reference}`
+      elementItemList.textContent = `email: ${customer.email}`
       ulData.appendChild(elementItemList)
 
       elementItemList = document.createElement('li')
-      elementItemList.textContent = `Unidades: ${customer.units}`
+      elementItemList.textContent = `subject: ${customer.subject}`
       ulData.appendChild(elementItemList)
 
       elementItemList = document.createElement('li')
-      elementItemList.textContent = `Unidad de Medida: ${customer.measurementUnit}`
-      ulData.appendChild(elementItemList)
-
-      elementItemList = document.createElement('li')
-      elementItemList.textContent = `Medida: ${customer.measurement}`
-      ulData.appendChild(elementItemList)
-
-      elementItemList = document.createElement('li')
-      elementItemList.textContent = `Visible: ${customer.visible}`
+      elementItemList.textContent = `message: ${customer.message}`
       ulData.appendChild(elementItemList)
 
       elementItemList = document.createElement('li')
@@ -320,16 +311,6 @@ class Table extends HTMLElement {
 
     this.renderRegisterButtons()
     this.renderFilterButton()
-  }
-
-  async getCategoryProduct () {
-    const categoryResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/product-categories`)
-    this.productCategories = await categoryResponse.json()
-
-    this.categoryMap = {}
-    this.productCategories.rows.forEach(category => {
-      this.categoryMap[category.id] = category.name
-    })
   }
 
   async renderFilterButton () {
@@ -371,7 +352,7 @@ class Table extends HTMLElement {
     this.shadow.querySelector('.table').addEventListener('click', async (event) => {
       if (event.target.closest('.edit-button')) {
         const id = event.target.closest('.edit-button').dataset.id
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/products/${id}`)
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/contacts/${id}`)
         const data = await response.json()
 
         const formElement = {
@@ -413,4 +394,4 @@ class Table extends HTMLElement {
     })
   }
 }
-customElements.define('products-table-component', Table)
+customElements.define('contacts-table-component', Table)

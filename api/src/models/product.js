@@ -60,10 +60,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Unidad de Medida".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Unidad de Medida".'
           }
         }
       },
@@ -72,10 +72,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Medida".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Medida".'
           }
         }
       },
@@ -84,10 +84,10 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Visible".'
           },
           notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
+            msg: 'Por favor, rellena el campo "Visible".'
           }
         }
       },

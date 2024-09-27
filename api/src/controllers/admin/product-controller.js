@@ -6,6 +6,7 @@ exports.create = (req, res) => {
   Product.create(req.body).then(async data => {
     res.status(200).send(data)
   }).catch(err => {
+    console.log(err)
     if (err.errors) {
       res.status(422).send({
         message: err.errors
@@ -37,7 +38,14 @@ exports.findAll = (req, res) => {
     attributes: ['id', 'productCategoryId', 'name', 'reference', 'units', 'measurementUnit', 'measurement', 'visible', 'createdAt', 'updatedAt'],
     limit,
     offset,
-    order: [['createdAt', 'DESC']]
+    order: [['createdAt', 'DESC']],
+    include: [
+      {
+        model: sequelizeDb.ProductCategory,
+        as: 'productCategory',
+        attributes: ['id', 'name']
+      }
+    ]
   })
     .then(result => {
       result.meta = {
@@ -49,6 +57,7 @@ exports.findAll = (req, res) => {
 
       res.status(200).send(result)
     }).catch(err => {
+      console.log(err)
       res.status(500).send({
         message: err.errors || 'Algún error ha surgido al recuperar los datos.'
       })
