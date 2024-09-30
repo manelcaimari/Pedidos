@@ -7,7 +7,6 @@ class DetailComponent extends HTMLElement {
   async connectedCallback () {
     await this.loadData()
     await this.render()
-    this.createOrderElements()
   }
 
   async loadData () {
@@ -147,13 +146,14 @@ class DetailComponent extends HTMLElement {
         <div class="order-item"></div>
           <div class="button-order">
             <div class="orders">
-              <a href="#"><button>ver pedido</button></a>
+              <a href="http://dev-pedidos.com/cliente/compra"><button>ver pedido</button></a>
             </div>
         </div>
     `
+    this.createOrderElements()
   }
 
-  createOrderElements () {
+  async createOrderElements () {
     const ordersContainer = this.shadow.querySelector('.order-item')
 
     this.data.forEach(order => {

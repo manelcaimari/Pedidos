@@ -10,6 +10,7 @@ module.exports = function (sequelize, DataTypes) {
       productId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,
         validate: {
           notNull: {
             msg: 'Por favor, rellena el campo "Producto".'
@@ -66,6 +67,7 @@ module.exports = function (sequelize, DataTypes) {
         {
           name: 'prices_productId_fk',
           using: 'BTREE',
+          unique: true,
           fields: [
             { name: 'productId' }
           ]

@@ -45,6 +45,7 @@ class Table extends HTMLElement {
     const response = await fetch(endpoint)
     this.data = await response.json()
     await this.getCategoryProduct()
+    await this.getBasePrices()
   }
 
   render () {
@@ -286,27 +287,7 @@ class Table extends HTMLElement {
       ulData.appendChild(elementItemList)
 
       elementItemList = document.createElement('li')
-      elementItemList.textContent = `Referencia: ${customer.reference}`
-      ulData.appendChild(elementItemList)
-
-      elementItemList = document.createElement('li')
-      elementItemList.textContent = `Unidades: ${customer.units}`
-      ulData.appendChild(elementItemList)
-
-      elementItemList = document.createElement('li')
-      elementItemList.textContent = `Unidad de Medida: ${customer.measurementUnit}`
-      ulData.appendChild(elementItemList)
-
-      elementItemList = document.createElement('li')
-      elementItemList.textContent = `Medida: ${customer.measurement}`
-      ulData.appendChild(elementItemList)
-
-      elementItemList = document.createElement('li')
-      elementItemList.textContent = `Visible: ${customer.visible}`
-      ulData.appendChild(elementItemList)
-
-      elementItemList = document.createElement('li')
-      elementItemList.textContent = `creado : ${customer.createdAt}`
+      elementItemList.textContent = `Precio: ${this.basePricesMap[customer.id] || 'Desconocido'}`
       ulData.appendChild(elementItemList)
 
       dataDiv.appendChild(ulData)
@@ -329,6 +310,16 @@ class Table extends HTMLElement {
     this.categoryMap = {}
     this.productCategories.rows.forEach(category => {
       this.categoryMap[category.id] = category.name
+    })
+  }
+
+  async getBasePrices () {
+    const pricesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/prices`)
+    this.pricesCategories = await pricesResponse.json()
+
+    this.basePricesMap = {}
+    this.pricesCategories.rows.forEach(price => {
+      this.basePricesMap[price.productId] = price.basePrice
     })
   }
 

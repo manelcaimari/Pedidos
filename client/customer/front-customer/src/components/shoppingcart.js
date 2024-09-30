@@ -165,7 +165,7 @@ class Shoppingcart extends HTMLElement {
                     </div>
                 </div>
                 <div class="orders">
-                    <button>finalizar pedido</button>
+                    <a href="http://dev-pedidos.com/cliente/finish"><button> pedido</button></a>
                 </div>
             </div>
          `

@@ -52,7 +52,7 @@ class menu extends HTMLElement {
     const newOrderDiv = document.createElement('div')
     newOrderDiv.classList.add('orders')
     const newOrderLink = document.createElement('a')
-    newOrderLink.href = '#'
+    newOrderLink.href = 'http://dev-pedidos.com/cliente/nuevo-pedido'
     const newOrderButton = document.createElement('button')
     newOrderButton.textContent = 'nuevo pedido'
     newOrderLink.appendChild(newOrderButton)
@@ -62,7 +62,7 @@ class menu extends HTMLElement {
     const previousOrdersDiv = document.createElement('div')
     previousOrdersDiv.classList.add('orders')
     const previousOrdersLink = document.createElement('a')
-    previousOrdersLink.href = '#'
+    previousOrdersLink.href = 'http://dev-pedidos.com/cliente/pedidos-anteriores'
     const previousOrdersButton = document.createElement('button')
     previousOrdersButton.textContent = 'pedidos anteriores'
     previousOrdersLink.appendChild(previousOrdersButton)

@@ -72,12 +72,12 @@ class Form extends HTMLElement {
           background-color: hsl(272, 40%, 35%);
           color: white;
         }
-        .header_categori {
+        .header-categori {
           display: flex;
           justify-content: space-between;
           background-color: white;
         }
-        .header_categori li {
+        .header-categori li {
           background-color: rgb(90, 14, 90);
           padding: 0 1rem;
           align-content: center;
@@ -104,20 +104,20 @@ class Form extends HTMLElement {
           padding: 0.5rem;
           background-color: rgb(90, 14, 90);
         }
-        .categori_button {
+        .categori-button {
           background-color: white;
           border: 0;
           padding: 0 0.5rem;
           display: flex;
         }
-        .header_categori .categori_button svg {
+        .header-categori .categori-button svg {
           fill: hsl(229, 86%, 41%);
         }
-        form {
+         form {
           display: flex;
-          flex-wrap: wrap; 
+          flex-direction: column;
           gap: 1rem; 
-        }
+        } 
 
         .field {
           display: grid;
@@ -137,7 +137,7 @@ class Form extends HTMLElement {
           border-right: 1px solid #476bb9;
           padding: 0.5rem;
         }
-        .categori_button svg {
+        .categori-button svg {
           width: 40px;
           height: 40px;
           padding: 0;
@@ -145,18 +145,18 @@ class Form extends HTMLElement {
         
       </style>
       <section class="form">
-        <div class="header_categori">
+        <div class="header-categori">
           <div class="tabs">
             <ul>
               <li class="tab active" data-tab="general">General</li>
               
             </ul>
           </div>
-          <div class="categori_button">
-            <div class="button_reset">
+          <div class="categori-button">
+            <div class="button-reset">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M19.36,2.72L20.78,4.14L15.06,9.85C16.13,11.39 16.28,13.24 15.38,14.44L9.06,8.12C10.26,7.22 12.11,7.37 13.65,8.44L19.36,2.72M5.93,17.57C3.92,15.56 2.69,13.16 2.35,10.92L7.23,8.83L14.67,16.27L12.58,21.15C10.34,20.81 7.94,19.58 5.93,17.57Z" /></svg>
             </div>
-            <div class="button_save">
+            <div class="button-save">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" /></svg>
             </div>
           </div>
@@ -166,12 +166,11 @@ class Form extends HTMLElement {
         </div>
         <form>
           <div class="tab-content active" data-tab="general">
-            <input type="hidden"  name="id" >
+            <input type="hidden" name="id" value="">
             <div class="field">
               <label for="categoryId">Categoria</label>                
               <select name="productCategoryId"></select>
             </div>   
-            </div>
             <div class="field">
               <label for="name">Nombre</label>
               <input type="text" id="name" name="name" >
@@ -181,12 +180,20 @@ class Form extends HTMLElement {
               <input type="text" id="reference" name="reference" >
             </div>
             <div class="field">
+              <label for="precio">Precio</label>
+              <input type="number" id="precio" name="basePrice">
+            </div>
+            <div class="field">
               <label for="units">Unidades</label>
               <input type="number" id="units" name="units" required min="1">
             </div>
             <div class="field">
               <label for="measurementUnit">Unidad de Medida</label>
-              <input type="text" id="measurementUnit" name="measurementUnit" >
+              <select type="text" id="measurementUnit" name="measurementUnit" >
+                <option value="gr">gr</option>
+                <option value="ml">ml</option>
+                <option value="ud">ud</option>
+              </select>
             </div>
             <div class="field">
               <label for="measurement">Medida</label>
@@ -203,7 +210,7 @@ class Form extends HTMLElement {
         </form>
       </section>
       `
-
+    this.getPrices()
     this.getProductCategories()
     this.setupEventListeners()
     this.tabsButton()
@@ -223,12 +230,26 @@ class Form extends HTMLElement {
     })
   }
 
+  async getPrices () {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/prices`)
+    this.pricesCategories = await response.json()
+
+    const priceInput = this.shadow.querySelector('[name="basePrice"]')
+
+    if (this.pricesCategories.rows.length > 0) {
+      const firstPrice = this.pricesCategories.rows[0]
+
+      priceInput.value = firstPrice.id
+      priceInput.setAttribute('placeholder', `Precio: ${firstPrice.name}`)
+    }
+  }
+
   setupEventListeners () {
-    this.shadow.querySelector('.button_reset').addEventListener('click', () => {
+    this.shadow.querySelector('.button-reset').addEventListener('click', () => {
       this.resetForm()
     })
 
-    this.shadow.querySelector('.button_save').addEventListener('click', async (event) => {
+    this.shadow.querySelector('.button-save').addEventListener('click', async (event) => {
       event.preventDefault()
       const form = this.shadow.querySelector('form')
       const formData = new FormData(form)
@@ -240,7 +261,6 @@ class Form extends HTMLElement {
 
       const method = formDataJson.id ? 'PUT' : 'POST'
       const endpoint = formDataJson.id ? `${this.endpoint}/${formDataJson.id}` : this.endpoint
-
       try {
         const response = await fetch(endpoint, {
           method,
@@ -329,12 +349,33 @@ class Form extends HTMLElement {
     })
   }
 
-  showElement (element) {
+  showElement = async element => {
     this.resetForm()
     Object.entries(element).forEach(([key, value]) => {
-      const input = this.shadow.querySelector(`[name="${key}"]`)
-      if (input) {
-        input.value = value
+      if (this.shadow.querySelector(`[name="${key}"]`)) {
+        const formElement = this.shadow.querySelector(`[name="${key}"]`)
+        if (formElement.tagName.toLowerCase() === 'input') {
+          if (formElement.type === 'radio') {
+            const radioButton = this.shadow.querySelector(`[name="${key}"][value="${value}"]`)
+            if (radioButton) {
+              radioButton.checked = true
+            }
+          } else if (formElement.type === 'checkbox') {
+            formElement.checked = !!value
+          } else {
+            formElement.value = value
+          }
+        }
+        if (formElement.tagName.toLowerCase() === 'select') {
+          formElement.querySelectorAll('option').forEach(option => {
+            if (option.value === value) {
+              option.selected = true
+            }
+          })
+        }
+        if (formElement.tagName.toLowerCase() === 'textarea') {
+          formElement.value = value
+        }
       }
     })
   }

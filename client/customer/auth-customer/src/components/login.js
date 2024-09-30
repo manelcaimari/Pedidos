@@ -5,11 +5,6 @@ class Login extends HTMLElement {
   }
 
   connectedCallback () {
-    this.data = {
-      email: '',
-      password: ''
-    }
-
     this.render()
   }
 
