@@ -3,7 +3,7 @@ const Product = sequelizeDb.Product
 const Price = sequelizeDb.Price
 const Op = sequelizeDb.Sequelize.Op
 
-exports.findAllForCustomer = (req, res) => {
+exports.findAll = (req, res) => {
   const page = req.query.page || 1
   const limit = parseInt(req.query.size) || 10
   const offset = (page - 1) * limit
@@ -17,10 +17,37 @@ exports.findAllForCustomer = (req, res) => {
 
   Product.findAndCountAll({
     where: Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {},
-    attributes: ['id', 'name', 'reference', 'units', 'measurementUnit', 'measurement', 'visible'],
+    attributes: ['id', 'productCategoryId', 'name', 'reference', 'units', 'measurementUnit', 'measurement', 'visible', 'createdAt', 'updatedAt'],
     limit,
     offset,
     order: [['createdAt', 'DESC']],
+    include: [
+      {
+        model: sequelizeDb.ProductCategory,
+        as: 'productCategory',
+        attributes: ['id', 'name']
+      }
+    ]
+  }).then(result => {
+    result.meta = {
+      total: result.count,
+      pages: Math.ceil(result.count / limit),
+      currentPage: page,
+      size: limit
+    }
+    res.status(200).send(result)
+  }).catch(err => {
+    console.log(err)
+    res.status(500).send({
+      message: err.errors || 'Algún error ha surgido al recuperar los datos.'
+    })
+  })
+}
+
+exports.findOne = (req, res) => {
+  const id = req.params.id
+
+  Product.findByPk(id, {
     include: [
       {
         model: Price,
@@ -29,32 +56,20 @@ exports.findAllForCustomer = (req, res) => {
         attributes: ['basePrice']
       }
     ]
-  }).then(result => {
-    const products = result.rows.map(product => {
-      return {
-        id: product.id,
-        name: product.name,
-        reference: product.reference,
-        units: product.units,
-        measurementUnit: product.measurementUnit,
-        measurement: product.measurement,
-        basePrice: product.prices[0].basePrice
-      }
-    })
-
-    res.status(200).send({
-      products,
-      meta: {
-        total: result.count,
-        pages: Math.ceil(result.count / limit),
-        currentPage: page,
-        size: limit
-      }
-    })
+  }).then(data => {
+    if (data) {
+      data.dataValues.basePrice = data.prices[0].dataValues.basePrice
+      res.status(200).send(data)
+    } else {
+      res.status(404).send({
+        message: `No se puede encontrar el elemento con la id=${id}.`
+      })
+    }
   }).catch(err => {
     console.log(err)
     res.status(500).send({
-      message: err.errors || 'Algún error ha surgido al recuperar los datos.'
+      message: 'Algún error ha surgido al recuperar la id=' + id
     })
   })
 }
+

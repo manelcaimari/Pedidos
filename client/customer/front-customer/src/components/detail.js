@@ -1,48 +1,38 @@
-import { store } from '../../redux/store.js'
-import { addItem } from '../../redux/crud-slice.js'
-
 class DetailComponent extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = `${import.meta.env.VITE_API_URL}/api/customer/products`
-    this.page = 1
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/products`
     this.data = []
   }
 
   async connectedCallback () {
-    try {
-      await this.loadData()
-      this.render()
-    } catch (error) {
-      console.error('Error loading data:', error)
-      this.shadow.innerHTML = '<p>Error loading products. Please try again later.</p>'
-    }
+    
+      await this.loadData() 
+      await this.render() 
+    
   }
-
   async loadData () {
-    const endpoint = `${this.endpoint}?page=${this.page}`
+    const endpoint = `${this.endpoint}`
     const response = await fetch(endpoint)
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok')
-    }
-
-    const result = await response.json()
-    this.data = result.products
+    this.data = await response.json()
+    console.log(this.data) 
+    await this.getBasePrices()
   }
-
   render () {
     this.shadow.innerHTML = /* html */`
       <style>
         .order-item {
-          padding: 1.5rem 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          min-height: 70vh;
-          max-height: 70vh;
+      
+          min-height: 80vh;
+          max-height: 90vh;
           font-weight: 600;
+        }
+        .order{
+          display:grid;
+          gap:1rem;
+          padding:1rem 0.5rem;
+     
         }
 
         .item-details {
@@ -74,8 +64,8 @@ class DetailComponent extends HTMLElement {
 
         .quantity-control {
           display: flex;
-          align-items: center;
-          justify-content: center;
+          align-items:stretch;
+          height: 100%;
         }
 
         .quantity-control button {
@@ -84,7 +74,7 @@ class DetailComponent extends HTMLElement {
           cursor: pointer;
           font-size: 18px;
           height: 1.5rem;
-          width: 2rem;
+          width: 1.5rem;
         }
 
         .quantity-control input {
@@ -96,7 +86,7 @@ class DetailComponent extends HTMLElement {
           background-color: hsla(213, 43%, 55%, 0.76);
           border: none;
           height: 100%;
-          padding: 0.1rem;
+          
         }
 
         .button-order {
@@ -137,21 +127,15 @@ class DetailComponent extends HTMLElement {
       <div class="button-order">
         <div class="orders">
             <a href="http://dev-pedidos.com/cliente/compra"><button>Ver pedido</button></a>
-            <button id="add-to-cart">Añadir al carrito</button> 
+  
           </div>
       </div>
     `
 
-    this.createOrderElements()
-    this.setupAddToCartButton()
-  }
-
-  createOrderElements () {
     const ordersContainer = this.shadow.querySelector('.order-item')
+    const fragment = document.createDocumentFragment()
 
-    ordersContainer.innerHTML = ''
-
-    this.data.forEach(product => {
+    this.data.rows.forEach(customer => {
       const orderElement = document.createElement('div')
       orderElement.classList.add('order')
 
@@ -159,17 +143,15 @@ class DetailComponent extends HTMLElement {
       orderDetails.classList.add('item-details')
 
       const titleP = document.createElement('p')
-      titleP.classList.add('detail-title')
-      titleP.textContent = product.name
+      titleP.classList.add('item-name') 
+      titleP.textContent = customer.name
 
       const priceP = document.createElement('p')
-      priceP.classList.add('detail-price')
-      priceP.textContent = `${product.basePrice.toFixed(2)} €`
+      priceP.classList.add('item-price')
+      priceP.textContent = `${this.basePricesMap[customer.id] ? this.basePricesMap[customer.id] + ' €' : 'Desconocido'}`
 
       orderDetails.appendChild(titleP)
       orderDetails.appendChild(priceP)
-
-      ordersContainer.appendChild(orderDetails)
 
       const itemDetail = document.createElement('div')
       itemDetail.classList.add('item-detail')
@@ -179,9 +161,10 @@ class DetailComponent extends HTMLElement {
 
       const unitiesSpan = document.createElement('span')
       unitiesSpan.classList.add('item-united')
-      unitiesSpan.textContent = `${product.units}, ${product.measurement} ${product.measurementUnit}`
+      unitiesSpan.textContent = `${customer.units + 'u'|| 0}, ${customer.measurement || ''} ${customer.measurementUnit || ''}`
 
       detailContents.appendChild(unitiesSpan)
+
 
       const quantityControl = document.createElement('div')
       quantityControl.classList.add('quantity-control')
@@ -214,41 +197,38 @@ class DetailComponent extends HTMLElement {
       itemDetail.appendChild(detailContents)
       itemDetail.appendChild(quantityControl)
 
+
       orderElement.appendChild(orderDetails)
       orderElement.appendChild(itemDetail)
 
-      ordersContainer.appendChild(orderElement)
+      fragment.appendChild(orderElement)
     })
-  }
 
-  setupAddToCartButton () {
-    const addToCartButton = this.shadow.getElementById('add-to-cart')
-    addToCartButton.addEventListener('click', () => {
-      this.handleAddToCart()
-    })
-  }
+    ordersContainer.appendChild(fragment)
+    }
 
-  handleAddToCart () {
-    const quantityInputs = this.shadow.querySelectorAll('input[type="number"]')
-    quantityInputs.forEach((input, index) => {
-      const quantity = parseInt(input.value, 10)
-      if (quantity > 0) {
-        const product = this.data[index]
 
-        const cartItem = {
-          name: product.name,
-          price: product.basePrice,
-          quantity,
-          units: product.units,
-          measurement: product.measurement,
-          measurementUnit: product.measurementUnit
+    async getBasePrices () {
+      try {
+        const pricesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/prices`);
+        if (!pricesResponse.ok) {
+          throw new Error('Error al cargar los precios');
         }
-
-        store.dispatch(addItem(cartItem))
+        this.pricesCategories = await pricesResponse.json();
+        this.basePricesMap = {};
+    
+        this.pricesCategories.rows.forEach(price => {
+          if (price.current) {
+            this.basePricesMap[price.productId] = price.basePrice;
+          }
+        });
+      } catch (error) {
+        console.error('Error al obtener precios base:', error);
       }
-    })
-    alert('Productos añadidos al carrito.')
-  }
+    }
+
+
 }
+
 
 customElements.define('detail-component', DetailComponent)
