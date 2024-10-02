@@ -169,7 +169,7 @@ class Form extends HTMLElement {
             <input type="hidden" name="id" value="">
             <div class="field">
               <label for="categoryId">Categoria</label>                
-              <select name="productCategoryId"></select>
+              <select name="productCategoryId"><option ></option></select>
             </div>   
             <div class="field">
               <label for="name">Nombre</label>
@@ -216,17 +216,25 @@ class Form extends HTMLElement {
     this.tabsButton()
   }
 
-  async getProductCategories () {
+  async getProductCategories (selectedCategoryId = null) {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/product-categories`)
     this.productCategories = await response.json()
 
     const select = this.shadow.querySelector('[name="productCategoryId"]')
 
+    select.innerHTML = ''
+
     this.productCategories.rows.forEach(category => {
-      const option = document.createElement('option')
-      option.value = category.id
-      option.textContent = category.name
-      select.appendChild(option)
+      if (category.name) {
+        const option = document.createElement('option')
+        option.value = category.id
+        option.textContent = category.name
+        if (selectedCategoryId && category.id === selectedCategoryId) {
+          option.selected = true
+        }
+
+        select.appendChild(option)
+      }
     })
   }
 
@@ -351,6 +359,11 @@ class Form extends HTMLElement {
 
   showElement = async element => {
     this.resetForm()
+    if (element.productCategoryId) {
+      await this.getProductCategories(element.productCategoryId)
+    } else {
+      await this.getProductCategories()
+    }
     Object.entries(element).forEach(([key, value]) => {
       if (this.shadow.querySelector(`[name="${key}"]`)) {
         const formElement = this.shadow.querySelector(`[name="${key}"]`)

@@ -72,12 +72,12 @@ class Form extends HTMLElement {
           background-color: hsl(272, 40%, 35%);
           color: white;
         }
-        .header_categori {
+        .header-categori {
           display: flex;
           justify-content: space-between;
           background-color: white;
         }
-        .header_categori li {
+        .header-categori li {
           background-color: rgb(90, 14, 90);
           padding: 0 1rem;
           align-content: center;
@@ -104,13 +104,13 @@ class Form extends HTMLElement {
           padding: 0.5rem;
           background-color: rgb(90, 14, 90);
         }
-        .categori_button {
+        .categori-button {
           background-color: white;
           border: 0;
           padding: 0 0.5rem;
           display: flex;
         }
-        .header_categori .categori_button svg {
+        .header-categori .categori-button svg {
           fill: hsl(229, 86%, 41%);
         }
         form {
@@ -129,7 +129,7 @@ class Form extends HTMLElement {
           border-right: 1px solid #476bb9;
           padding: 0.5rem;
         }
-        .categori_button svg {
+        .categori-button svg {
           width: 40px;
           height: 40px;
           padding: 0;
@@ -137,18 +137,18 @@ class Form extends HTMLElement {
         
       </style>
       <section class="form">
-        <div class="header_categori">
+        <div class="header-categori">
           <div class="tabs">
             <ul>
               <li class="tab active" data-tab="general">General</li>
               
             </ul>
           </div>
-          <div class="categori_button">
-            <div class="button_reset">
+          <div class="categori-button">
+            <div class="button-reset">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M19.36,2.72L20.78,4.14L15.06,9.85C16.13,11.39 16.28,13.24 15.38,14.44L9.06,8.12C10.26,7.22 12.11,7.37 13.65,8.44L19.36,2.72M5.93,17.57C3.92,15.56 2.69,13.16 2.35,10.92L7.23,8.83L14.67,16.27L12.58,21.15C10.34,20.81 7.94,19.58 5.93,17.57Z" /></svg>
             </div>
-            <div class="button_save">
+            <div class="button-save">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title></title><path d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" /></svg>
             </div>
           </div>
@@ -190,11 +190,11 @@ class Form extends HTMLElement {
   }
 
   setupEventListeners () {
-    this.shadow.querySelector('.button_reset').addEventListener('click', () => {
+    this.shadow.querySelector('.button-reset').addEventListener('click', () => {
       this.resetForm()
     })
 
-    this.shadow.querySelector('.button_save').addEventListener('click', async (event) => {
+    this.shadow.querySelector('.button-save').addEventListener('click', async (event) => {
       event.preventDefault()
       const form = this.shadow.querySelector('form')
       const formData = new FormData(form)

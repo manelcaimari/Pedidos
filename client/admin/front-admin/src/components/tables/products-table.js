@@ -318,8 +318,11 @@ class Table extends HTMLElement {
     this.pricesCategories = await pricesResponse.json()
 
     this.basePricesMap = {}
+
     this.pricesCategories.rows.forEach(price => {
-      this.basePricesMap[price.productId] = price.basePrice
+      if (price.current) {
+        this.basePricesMap[price.productId] = price.basePrice
+      }
     })
   }
 

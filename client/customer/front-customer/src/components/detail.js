@@ -1,38 +1,35 @@
+import { store } from '../../redux/store.js'
+import { addItem } from '../../redux/crud-slice.js'
+
 class DetailComponent extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/customer/products`
+    this.page = 1
+    this.data = []
   }
 
   async connectedCallback () {
-    await this.loadData()
-    await this.render()
+    try {
+      await this.loadData()
+      this.render()
+    } catch (error) {
+      console.error('Error loading data:', error)
+      this.shadow.innerHTML = '<p>Error loading products. Please try again later.</p>'
+    }
   }
 
   async loadData () {
-    this.data = [
-      {
-        title: 'Cocacola',
-        price: '90.00€',
-        unities: '16u',
-        quantity: '330',
-        measurementQuantity: 'ml'
-      },
-      {
-        title: 'Pepsi',
-        price: '80.00€',
-        unities: '12u',
-        quantity: '500',
-        measurementQuantity: 'ml'
-      },
-      {
-        title: 'Fanta',
-        price: '70.00€',
-        unities: '20u',
-        quantity: '250',
-        measurementQuantity: 'ml'
-      }
-    ]
+    const endpoint = `${this.endpoint}?page=${this.page}`
+    const response = await fetch(endpoint)
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok')
+    }
+
+    const result = await response.json()
+    this.data = result.products
   }
 
   render () {
@@ -43,8 +40,8 @@ class DetailComponent extends HTMLElement {
           display: flex;
           flex-direction: column;
           gap: 1rem;
-          min-height: 75vh;
-          max-height: 75vh;
+          min-height: 70vh;
+          max-height: 70vh;
           font-weight: 600;
         }
 
@@ -81,32 +78,25 @@ class DetailComponent extends HTMLElement {
           justify-content: center;
         }
 
-        .quantity-control {
+        .quantity-control button {
           align-items: center;
           border: none;
           cursor: pointer;
-          display: flex;
           font-size: 18px;
           height: 1.5rem;
+          width: 2rem;
         }
 
-        .quantity-control span {
+        .quantity-control input {
           box-sizing: border-box;
           width: 40px;
-          color: white;
+          color: black;
           text-align: center;
           margin: 0;
           background-color: hsla(213, 43%, 55%, 0.76);
           border: none;
           height: 100%;
           padding: 0.1rem;
-        }
-
-        .quantity-control button {
-          width: 2rem;
-          height: 100%;
-          border: 0;
-          padding: 0;
         }
 
         .button-order {
@@ -143,20 +133,25 @@ class DetailComponent extends HTMLElement {
           font-weight: 600;
         }
       </style>
-        <div class="order-item"></div>
-          <div class="button-order">
-            <div class="orders">
-              <a href="http://dev-pedidos.com/cliente/compra"><button>ver pedido</button></a>
-            </div>
-        </div>
+      <div class="order-item"></div>
+      <div class="button-order">
+        <div class="orders">
+            <a href="http://dev-pedidos.com/cliente/compra"><button>Ver pedido</button></a>
+            <button id="add-to-cart">Añadir al carrito</button> 
+          </div>
+      </div>
     `
+
     this.createOrderElements()
+    this.setupAddToCartButton()
   }
 
-  async createOrderElements () {
+  createOrderElements () {
     const ordersContainer = this.shadow.querySelector('.order-item')
 
-    this.data.forEach(order => {
+    ordersContainer.innerHTML = ''
+
+    this.data.forEach(product => {
       const orderElement = document.createElement('div')
       orderElement.classList.add('order')
 
@@ -165,14 +160,16 @@ class DetailComponent extends HTMLElement {
 
       const titleP = document.createElement('p')
       titleP.classList.add('detail-title')
-      titleP.textContent = order.title
+      titleP.textContent = product.name
 
       const priceP = document.createElement('p')
       priceP.classList.add('detail-price')
-      priceP.textContent = `${order.price}`
+      priceP.textContent = `${product.basePrice.toFixed(2)} €`
 
       orderDetails.appendChild(titleP)
       orderDetails.appendChild(priceP)
+
+      ordersContainer.appendChild(orderDetails)
 
       const itemDetail = document.createElement('div')
       itemDetail.classList.add('item-detail')
@@ -182,7 +179,7 @@ class DetailComponent extends HTMLElement {
 
       const unitiesSpan = document.createElement('span')
       unitiesSpan.classList.add('item-united')
-      unitiesSpan.textContent = `${order.unities}, ${order.quantity} ${order.measurementQuantity}`
+      unitiesSpan.textContent = `${product.units}, ${product.measurement} ${product.measurementUnit}`
 
       detailContents.appendChild(unitiesSpan)
 
@@ -191,13 +188,27 @@ class DetailComponent extends HTMLElement {
 
       const minusButton = document.createElement('button')
       minusButton.textContent = '-'
-      const quantitySpan = document.createElement('span')
-      quantitySpan.textContent = '1'
+      const quantityInput = document.createElement('input')
+      quantityInput.type = 'number'
+      quantityInput.value = '0'
+      quantityInput.min = '0'
       const plusButton = document.createElement('button')
       plusButton.textContent = '+'
 
+      minusButton.addEventListener('click', () => {
+        const quantity = parseInt(quantityInput.value)
+        if (quantity > 0) {
+          quantityInput.value = quantity - 1
+        }
+      })
+
+      plusButton.addEventListener('click', () => {
+        const quantity = parseInt(quantityInput.value)
+        quantityInput.value = quantity + 1
+      })
+
       quantityControl.appendChild(minusButton)
-      quantityControl.appendChild(quantitySpan)
+      quantityControl.appendChild(quantityInput)
       quantityControl.appendChild(plusButton)
 
       itemDetail.appendChild(detailContents)
@@ -208,6 +219,35 @@ class DetailComponent extends HTMLElement {
 
       ordersContainer.appendChild(orderElement)
     })
+  }
+
+  setupAddToCartButton () {
+    const addToCartButton = this.shadow.getElementById('add-to-cart')
+    addToCartButton.addEventListener('click', () => {
+      this.handleAddToCart()
+    })
+  }
+
+  handleAddToCart () {
+    const quantityInputs = this.shadow.querySelectorAll('input[type="number"]')
+    quantityInputs.forEach((input, index) => {
+      const quantity = parseInt(input.value, 10)
+      if (quantity > 0) {
+        const product = this.data[index]
+
+        const cartItem = {
+          name: product.name,
+          price: product.basePrice,
+          quantity,
+          units: product.units,
+          measurement: product.measurement,
+          measurementUnit: product.measurementUnit
+        }
+
+        store.dispatch(addItem(cartItem))
+      }
+    })
+    alert('Productos añadidos al carrito.')
   }
 }
 

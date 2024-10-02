@@ -4,7 +4,7 @@ exports.findAll = (req, res) => {
     '/cliente/nuevo-pedido': 'new-orders.html',
     '/cliente/pedidos-anteriores': 'previous-orders.html',
     '/cliente/compra': 'summary-orders.html',
-    '/cliente/finish': 'reference.html'
+    '/cliente/reference': 'reference.html'
   }
 
   res.status(200).send(routes)
