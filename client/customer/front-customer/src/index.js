@@ -1,6 +1,6 @@
 import './components/header.js'
 import './components/menu.js'
-
+import './components/shoppingcart.js'
 import './components/detail.js'
 import './components/orders.js'
 import './components/conference.js'

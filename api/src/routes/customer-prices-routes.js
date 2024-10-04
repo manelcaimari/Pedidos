@@ -5,6 +5,5 @@ module.exports = (app) => {
   router.get('/', controller.findAll)
   router.get('/:id', controller.findOne)
 
-
   app.use('/api/client/prices', router)
 }

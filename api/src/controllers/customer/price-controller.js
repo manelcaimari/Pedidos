@@ -2,7 +2,6 @@ const sequelizeDb = require('../../models')
 const Price = sequelizeDb.Price
 const Op = sequelizeDb.Sequelize.Op
 
-
 exports.findAll = (req, res) => {
   const page = req.query.page || 1
   const limit = parseInt(req.query.size) || 10
@@ -57,4 +56,3 @@ exports.findOne = (req, res) => {
     })
   })
 }
-

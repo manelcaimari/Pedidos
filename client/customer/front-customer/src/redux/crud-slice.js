@@ -1,29 +1,39 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const crudSlice = createSlice({
-  name: 'cart',
+  name: 'crud',
   initialState: {
-    items: [],
-    total: 0
+    cart: [],
+    isCartOpen: false
   },
   reducers: {
-    addItem: (state, action) => {
-      state.items.push(action.payload)
-      state.total += action.payload.price * action.payload.quantity
+
+    toggleCart (state) {
+      state.isCartOpen = !state.isCartOpen
+      console.log('isCartOpen:', state.isCartOpen)
     },
-    removeItem: (state, action) => {
-      const item = state.items[action.payload]
-      state.total -= item.price * item.quantity
-      state.items.splice(action.payload, 1)
-    },
-    updateItemQuantity: (state, action) => {
-      const { index, quantity } = action.payload
-      const item = state.items[index]
-      state.total += item.price * (quantity - item.quantity)
-      item.quantity = quantity
+
+    setCart (state, action) {
+      const newItem = action.payload
+      const existingItem = state.cart.find(item => item.id === newItem.id)
+
+      if (existingItem) {
+        existingItem.quantity += newItem.quantity
+
+        if (existingItem.quantity <= 0) {
+          state.cart = state.cart.filter(item => item.id !== newItem.id)
+        }
+      } else if (newItem.quantity > 0) {
+        state.cart.push({
+          ...newItem,
+          quantity: newItem.quantity || 1
+        })
+      }
+
+      console.log('Cart updated:', state.cart)
     }
   }
 })
 
-export const { addItem, removeItem, updateItemQuantity } = crudSlice.actions
+export const { toggleCart, setCart } = crudSlice.actions
 export default crudSlice.reducer
