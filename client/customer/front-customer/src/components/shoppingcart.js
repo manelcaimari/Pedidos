@@ -34,155 +34,169 @@ class Shoppingcart extends HTMLElement {
     this.shadow.innerHTML =
       /* html */`
       <style>
-      .filter-modal {
-        position: fixed; 
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: #1D055B;
-        visibility: hidden; 
-        display: flex;
-        flex-direction: column;
-        justify-content: center; 
-        align-items: center; 
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-      .filter-modal.visible {
-        opacity: 1;
-        visibility: visible;
-      }
-      .order-item {
-        padding: 1rem;
-        display: flex;
+        *{
+          box-sizing: border-box;
 
-        min-height: 55vh;
-        max-height: 80vh;
-        font-size: 16px;
-        
-      
-      }
-      .item{
-        padding: 10px 0;
-        border-bottom: 1px solid white;  
-      }
-      .item-details {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight:bold;
-      }
-      .item-name {
-        font-size: 17px;
-        margin: 0;
-      }
-      .item-price {
-        font-size: 18px;
-        margin: 0;
-      }
-      .item-quantity {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .item-quantity span{
-        font-weight:700;
-        font-size: 14px;
-      }
-      .quantity-control {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .quantity-control  {
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
-      }
-      .quantity-control input {
-        width: 40px;
-        color: white;
-        text-align: center;
-        margin: 0 ;
-        background-color: hsla(214, 87%, 56%, 0.966);
-      }
-      .bottom{
-        border: none;
-        gap: 20px; 
-        width: 100%;
-      }
-      .total {
-        padding: 0.5rem 1rem;
-      }
-      .item-total {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .total-title::first-letter{
-        text-transform: capitalize;
-      }
-      .total-title {
-        font-size: 20px;
-        margin: 0;
-        font-weight: 600;
-      }
-      .total-price {
-        font-size: 18px;
-        margin: 0;
-        font-weight: 600;
-      }
-      .total-quantity  ::first-letter{
-        text-transform: capitalize;
-      }
-      .total-quantity {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 500;
-      }
-      .orders{
-        margin-top: 5px;
-        text-align: center;
-      }
-      .orders button::first-letter{
-        text-transform: capitalize;
-      }
-      .orders button{
-        background-color: white;
-        color:  hsl(0, 0%, 0%);
-        border: none;
-        border-radius: 13px;
-        padding: 8px 0;
-        text-align: center;
-        text-decoration: none;
-        font-size: 16px;
-        width: 70%; 
-        cursor: pointer;
-        font-weight: 600;
-      }
-    </style>
-    <div class="filter-modal">
-      <div class="order-item"></div>
-      <div class="bottom">
-        <div class="total">
-          <div class="item-total">
-            <p class="total-title">Total</p>
-            <p class="total-price">€${this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)}</p>
+        }
+
+        .filter-modal {
+          position: fixed;
+          top: 60px;
+          left: 0;
+          width: 100%;
+          height: calc(100% - 60px);
+          background-color: #0b0b4e; 
+          visibility: hidden;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          z-index: 1;
+          padding: 20px; 
+        }
+
+        .filter-modal.visible {
+          opacity: 1;
+          visibility: visible;
+        }
+
+        .order-item {
+          width: 100%;
+          min-height: 55vh;
+          max-height: 80vh;
+          display: grid;
+          gap: 10px; 
+        }
+
+        .order {
+          
+          justify-content: space-between;
+          align-items: center;
+  
+          padding: 10px 0;
+        }
+
+        .item-details {
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+        }
+
+        .item-name {
+          font-size: 18px;
+          margin: 0;
+          color: white; 
+        }
+
+        .item-price {
+          font-size: 18px;
+          margin: 0;
+          color: white;
+        }
+
+        .item-detail {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: white;
+        }
+
+        .item-detail span {
+          font-weight: 700;
+          color: white;
+        }
+
+        .quantity-control input {
+          width: 40px;
+          color: white;
+          text-align: center;
+          margin: 0;
+          background-color: hsla(214, 87%, 56%, 0.966);
+        }
+
+        .bottom {
+          border: none;
+          width: 100%;
+          padding-top: 20px;
+          
+        }
+
+        .total {
+         
+          justify-content: space-between;
+          padding: 1rem 0;
+          color: white;
+        }
+
+        .item-total {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .total-title {
+          font-size: 20px;
+          margin: 0;
+          font-weight: 600;
+          color: white;
+        }
+
+        .total-price {
+          font-size: 20px;
+          margin: 0;
+          font-weight: 600;
+          color: white;
+        }
+
+        .total-quantity {
+          font-weight: 500;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: white;
+        }
+
+        .orders {
+          text-align: center;
+        }
+
+        .orders button {
+          background-color: white;
+          color: hsl(0, 0%, 0%);
+          border: none;
+          border-radius: 13px;
+          padding: 8px 0;
+          width: 100%; 
+          max-width: 400px; 
+          cursor: pointer;
+          font-weight: 600;
+        }
+      </style>
+      <div class="filter-modal">
+        <div class="order-item"></div>
+        <div class="bottom">
+          <div class="total">
+            <div class="item-total">
+              <p class="total-title">Total</p>
+              <p class="total-price">€${this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)}</p>
+            </div>
+            <div class="total-quantity">
+              <p>Impuesto no incluidos</p>
+            </div>
           </div>
-          <div class="total-quantity">
-            <p>Impuesto no incluidos</p>
+          <div class="orders">
+            <button>Finalizar pedido</button>
           </div>
         </div>
-        <div class="orders">
-          <button>Finalizar pedido</button>
-        </div>
-      </div>
       </div>
     `
 
     const orderItem = this.shadow.querySelector('.order-item')
+
+
+    const fragment = document.createDocumentFragment()
+
 
     this.cartItems.forEach(item => {
       const itemContainer = document.createElement('div')
@@ -201,19 +215,21 @@ class Shoppingcart extends HTMLElement {
 
       const additionalDetails = document.createElement('p')
       additionalDetails.classList.add('item-details')
-      additionalDetails.textContent = `${item.quantity}u, ${item.size || '---'}ml`
+      additionalDetails.textContent = `${item.units || 0}u, ${item.measurement || ''} ${item.measurementUnit || ''}`
 
       itemDetails.appendChild(title)
       itemDetails.appendChild(price)
       itemContainer.appendChild(itemDetails)
       itemContainer.appendChild(additionalDetails)
-      orderItem.appendChild(itemContainer)
+      fragment.appendChild(itemContainer)
     })
+
+    orderItem.appendChild(fragment)
+
     const finishOrderBtn = this.shadow.querySelector('.orders button')
     finishOrderBtn.addEventListener('click', () => {
       console.log('Pedido finalizado')
     })
   }
 }
-
 customElements.define('shop-component', Shoppingcart)
