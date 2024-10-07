@@ -18,14 +18,9 @@ class DetailComponent extends HTMLElement {
   }
 
   async loadData () {
-    try {
-      const response = await fetch(this.endpoint)
-      if (!response.ok) throw new Error('Error en la carga de productos')
-      this.data = await response.json()
-      await this.getBasePrices()
-    } catch (error) {
-      console.error('Error al cargar datos:', error)
-    }
+    const response = await fetch(this.endpoint)
+    this.data = await response.json()
+    await this.getBasePrices()
   }
 
   render () {
@@ -38,7 +33,7 @@ class DetailComponent extends HTMLElement {
         }
         .order{
           display:grid;
-          gap:1rem;
+          gap: 0.5rem;
           padding:1rem 0.5rem;
      
         }
@@ -51,6 +46,7 @@ class DetailComponent extends HTMLElement {
         }
 
         .item-name {
+          text-transform: capitalize;
           font-size: 18px;
           margin: 0;
         }
@@ -134,7 +130,7 @@ class DetailComponent extends HTMLElement {
       <div class="order-item"></div>
       <div class="button-order">
         <div class="orders">
-            <button class="filter-button">Ver pedido</button>
+            <button class="view-order-button">Ver pedido</button>
           </div>
       </div>
     `
@@ -213,47 +209,55 @@ class DetailComponent extends HTMLElement {
     })
 
     ordersContainer.appendChild(fragment)
-    this.renderFilterButton()
+    this.renderOrderButton()
   }
 
   addToCart (productId, quantity) {
     const product = this.data.rows.find(item => item.id === productId)
 
     if (!product) return
+    const price = this.basePricesMap[productId]
 
     const cartItem = {
-      id: productId,
+      productId,
+      priceId: price.id,
       name: product.name,
       price: this.basePricesMap[productId],
-      quantity
+      quantity,
+      units: product.units || 0,
+      measurement: product.measurement || '',
+      measurementUnit: product.measurementUnit || ''
     }
     store.dispatch(setCart(cartItem))
   }
 
-  async renderFilterButton () {
-    const filterButton = this.shadow.querySelector('.filter-button')
+  async renderOrderButton () {
+    const orderButton = this.shadow.querySelector('.view-order-button')
 
-    filterButton.addEventListener('click', () => {
+    orderButton.addEventListener('click', () => {
       store.dispatch(toggleCart())
       document.dispatchEvent(new CustomEvent('showFilterModal'))
+      document.dispatchEvent(new CustomEvent('changeHeader', {
+        detail: {
+          title: 'Resumen de tu pedido',
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>arrow-left</title><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>',
+          linkHref: 'http://dev-pedidos.com/cliente/nuevo-pedido'
+        }
+      }))
     })
   }
 
   async getBasePrices () {
-    try {
-      const pricesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/prices`)
-      if (!pricesResponse.ok) throw new Error('Error al cargar precios')
-      const pricesCategories = await pricesResponse.json()
-      this.basePricesMap = {}
+    const pricesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/prices`)
+    this.pricesCategories = await pricesResponse.json()
 
-      pricesCategories.rows.forEach(price => {
-        if (price.current) {
-          this.basePricesMap[price.productId] = price.basePrice
-        }
-      })
-    } catch (error) {
-      console.error('Error al obtener precios base:', error)
-    }
+    this.basePricesMap = {}
+
+    this.pricesCategories.rows.forEach(price => {
+      if (price.current) {
+        this.basePricesMap[price.productId] = price.basePrice
+      }
+    })
   }
 }
 

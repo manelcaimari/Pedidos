@@ -62,7 +62,7 @@ class orders extends HTMLElement {
             <p>en breve recibirá un correo con los detalles. La rederencia de su pedido es ${this.data.reference}</p>
           </div>
           <div class="go-home">
-            <a href="#"><button>volver a inicio</button></a>
+            <a href="/cliente"><button>volver a inicio</button></a>
           </div>
       `
   }

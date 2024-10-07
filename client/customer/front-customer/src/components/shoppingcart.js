@@ -5,12 +5,12 @@ class Shoppingcart extends HTMLElement {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.cartItems = []
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/sales`
   }
 
   connectedCallback () {
     document.addEventListener('showFilterModal', this.handleMessage.bind(this))
     this.unsubscribe = store.subscribe(() => {
-      console.log('Estado actualizado:', store.getState().crud.cart)
       this.cartItems = store.getState().crud.cart
       this.render()
     })
@@ -34,202 +34,295 @@ class Shoppingcart extends HTMLElement {
     this.shadow.innerHTML =
       /* html */`
       <style>
-        *{
+        * {
           box-sizing: border-box;
-
+          padding: 0;
+          margin: 0;
         }
-
         .filter-modal {
           position: fixed;
-          top: 60px;
+          top: 50px;
           left: 0;
           width: 100%;
           height: calc(100% - 60px);
-          background-color: #0b0b4e; 
-          visibility: hidden;
+          background-color: #1D055B;
           display: flex;
           flex-direction: column;
           align-items: center;
+          padding: 10px;
+          visibility: hidden;
           opacity: 0;
-          transition: opacity 0.3s ease;
-          z-index: 1;
-          padding: 20px; 
+          transition: opacity 0.3s ease-in-out, visibility 0.3s;
+          z-index: 10;
         }
-
         .filter-modal.visible {
           opacity: 1;
           visibility: visible;
         }
-
+        main{
+          display:grid;
+          align-items: start;
+          align-content: space-between;
+          width: 100%;
+          height: 90%;
+        }
         .order-item {
           width: 100%;
-          min-height: 55vh;
-          max-height: 80vh;
           display: grid;
-          gap: 10px; 
+          grid-gap: 15px;
         }
-
         .order {
-          
-          justify-content: space-between;
-          align-items: center;
-  
-          padding: 10px 0;
+          padding: 10px;
         }
-
         .item-details {
           display: flex;
           justify-content: space-between;
           width: 100%;
+          font-weight: 600;
         }
-
-        .item-name {
+        .item-name{
+          text-transform: capitalize;
           font-size: 18px;
           margin: 0;
-          color: white; 
-        }
-
-        .item-price {
+        }        
+        .item-name, .item-price {
           font-size: 18px;
           margin: 0;
-          color: white;
+          color: #fff;
         }
-
         .item-detail {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          color: white;
-        }
-
-        .item-detail span {
-          font-weight: 700;
-          color: white;
-        }
-
-        .quantity-control input {
-          width: 40px;
-          color: white;
-          text-align: center;
-          margin: 0;
-          background-color: hsla(214, 87%, 56%, 0.966);
-        }
-
-        .bottom {
-          border: none;
           width: 100%;
-          padding-top: 20px;
-          
+          color: #bbb;
         }
-
+        .item-detail span {
+          font-size: 14px;
+          color: #ffffff;
+          font-weight: 600;
+        }
+        .bottom {
+          width: 100%;
+          padding: 10px;
+        }
         .total {
-         
-          justify-content: space-between;
           padding: 1rem 0;
           color: white;
         }
-
-        .item-total {
+        .item-total{
           display: flex;
           justify-content: space-between;
-          align-items: center;
         }
 
-        .total-title {
+        .total-title, .total-price {
           font-size: 20px;
-          margin: 0;
           font-weight: 600;
-          color: white;
         }
-
-        .total-price {
-          font-size: 20px;
-          margin: 0;
-          font-weight: 600;
-          color: white;
-        }
-
         .total-quantity {
-          font-weight: 500;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          color: white;
+          color: #bbb;
+          font-size: 14px;
         }
-
         .orders {
           text-align: center;
         }
-
         .orders button {
           background-color: white;
           color: hsl(0, 0%, 0%);
           border: none;
-          border-radius: 13px;
-          padding: 8px 0;
-          width: 100%; 
-          max-width: 400px; 
-          cursor: pointer;
+          border-radius: 25px;
+          padding: 12px 20px;
+          font-size: 16px;
           font-weight: 600;
+          cursor: pointer;
+          width: 100%;
+          max-width: 400px;
+          transition: background-color 0.3s ease;
+        }
+        .orders button:hover {
+          background-color: #e0e0e0;
         }
       </style>
       <div class="filter-modal">
+        <main>
         <div class="order-item"></div>
-        <div class="bottom">
-          <div class="total">
-            <div class="item-total">
-              <p class="total-title">Total</p>
-              <p class="total-price">€${this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)}</p>
+          <div class="bottom">
+            <div class="total">
+              <div class="item-total">
+                <p class="total-title">Total</p>
+                <p class="total-price"></p>
+              </div>
+              <div class="total-quantity">
+                <p>Impuesto no incluidos</p>
+              </div>
             </div>
-            <div class="total-quantity">
-              <p>Impuesto no incluidos</p>
+            <div class="orders">
+              <button>Finalizar pedido</button>
             </div>
           </div>
-          <div class="orders">
-            <button>Finalizar pedido</button>
-          </div>
-        </div>
+        </main>
       </div>
     `
 
     const orderItem = this.shadow.querySelector('.order-item')
 
-
     const fragment = document.createDocumentFragment()
 
-
     this.cartItems.forEach(item => {
-      const itemContainer = document.createElement('div')
-      itemContainer.classList.add('item')
+      const orderElement = document.createElement('div')
+      orderElement.classList.add('order')
 
-      const itemDetails = document.createElement('div')
-      itemDetails.classList.add('item-details')
+      const orderDetails = document.createElement('div')
+      orderDetails.classList.add('item-details')
 
       const title = document.createElement('p')
       title.classList.add('item-name')
       title.textContent = item.name || 'Producto'
 
-      const price = document.createElement('p')
-      price.classList.add('item-price')
-      price.textContent = `${(parseFloat(item.price) * parseFloat(item.quantity)).toFixed(2)} €`
+      const priceP = document.createElement('p')
+      priceP.classList.add('item-price')
+      priceP.textContent = `${(parseFloat(item.price) * parseFloat(item.quantity)).toFixed(2)} €`
 
-      const additionalDetails = document.createElement('p')
-      additionalDetails.classList.add('item-details')
-      additionalDetails.textContent = `${item.units || 0}u, ${item.measurement || ''} ${item.measurementUnit || ''}`
+      orderDetails.appendChild(title)
+      orderDetails.appendChild(priceP)
 
-      itemDetails.appendChild(title)
-      itemDetails.appendChild(price)
-      itemContainer.appendChild(itemDetails)
-      itemContainer.appendChild(additionalDetails)
-      fragment.appendChild(itemContainer)
+      const itemDetail = document.createElement('div')
+      itemDetail.classList.add('item-detail')
+
+      const detailContents = document.createElement('div')
+      detailContents.classList.add('detail')
+
+      const unitiesSpan = document.createElement('span')
+      unitiesSpan.classList.add('item-united')
+      unitiesSpan.textContent = `${item.units || 0}u, ${item.measurement || ''} ${item.measurementUnit || ''}`
+
+      detailContents.appendChild(unitiesSpan)
+
+      const quantityControl = document.createElement('div')
+      quantityControl.classList.add('quantity-control')
+
+      const unities = document.createElement('span')
+      unities.classList.add('item-united')
+      unities.textContent = `${item.quantity || ''}x${item.price}`
+      quantityControl.appendChild(unities)
+      itemDetail.appendChild(detailContents)
+      itemDetail.appendChild(quantityControl)
+
+      orderElement.appendChild(orderDetails)
+      orderElement.appendChild(itemDetail)
+
+      fragment.appendChild(orderElement)
     })
 
     orderItem.appendChild(fragment)
 
+    this.buttonfinality()
+    this.totalprice()
+  }
+
+  async totalprice () {
+    const total = this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)
+    const totalPriceElement = this.shadow.querySelector('.total-price')
+    totalPriceElement.textContent = `${total} €`
+  }
+
+  async buttonfinality () {
     const finishOrderBtn = this.shadow.querySelector('.orders button')
-    finishOrderBtn.addEventListener('click', () => {
-      console.log('Pedido finalizado')
+
+    finishOrderBtn.addEventListener('click', async () => {
+      if (this.cartItems.length === 0) {
+        document.dispatchEvent(new CustomEvent('message', {
+          detail: {
+            type: 'error',
+            message: 'Tu carrito está vacío. Añade productos antes de finalizar el pedido.'
+          }
+        }))
+        return
+      }
+
+      const saleData = {
+        customerId: 1,
+        items: this.cartItems
+      }
+
+      try {
+        const response = await fetch(this.endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(saleData)
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          console.log('Venta creada:', data)
+
+          const saleId = data.id
+
+          await this.sendSaleDetails(saleId, this.cartItems)
+
+          document.dispatchEvent(new CustomEvent('message', {
+            detail: {
+              type: 'success',
+              message: 'Venta creada con éxito.'
+            }
+          }))
+          window.location.href = '/cliente/reference'
+        } else {
+          const errorData = await response.json()
+          console.error('Error al crear la venta:', errorData)
+
+          document.dispatchEvent(new CustomEvent('message', {
+            detail: {
+              type: 'error',
+              message: 'No se pudo finalizar el pedido. Inténtalo de nuevo.'
+            }
+          }))
+        }
+      } catch (error) {
+        console.error('Error en la solicitud:', error)
+
+        document.dispatchEvent(new CustomEvent('message', {
+          detail: {
+            type: 'error',
+            message: 'Ocurrió un error al finalizar el pedido. Verifica tu conexión a internet.'
+          }
+        }))
+      }
     })
+  }
+
+  async sendSaleDetails (saleId, items) {
+    const saleDetails = items.map(item => ({
+      saleId,
+      productId: item.productId,
+      priceId: item.priceId,
+      productName: item.name,
+      basePrice: item.price,
+      quantity: item.quantity
+    }))
+
+    console.log('Sale Details:', saleDetails)
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(saleDetails)
+      })
+
+      if (response.ok) {
+        console.log('Detalles de la venta enviados correctamente')
+      } else {
+        const errorData = await response.json()
+        console.error('Error al enviar los detalles de la venta:', errorData)
+      }
+    } catch (error) {
+      console.error('Error en la solicitud de detalles de la venta:', error)
+    }
   }
 }
 customElements.define('shop-component', Shoppingcart)

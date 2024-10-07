@@ -7,10 +7,8 @@ const crudSlice = createSlice({
     isCartOpen: false
   },
   reducers: {
-
     toggleCart (state) {
       state.isCartOpen = !state.isCartOpen
-      console.log('isCartOpen:', state.isCartOpen)
     },
 
     setCart (state, action) {
@@ -25,12 +23,11 @@ const crudSlice = createSlice({
         }
       } else if (newItem.quantity > 0) {
         state.cart.push({
+          id: newItem.id,
           ...newItem,
           quantity: newItem.quantity || 1
         })
       }
-
-      console.log('Cart updated:', state.cart)
     }
   }
 })
