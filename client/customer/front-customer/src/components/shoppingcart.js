@@ -302,16 +302,13 @@ class Shoppingcart extends HTMLElement {
       basePrice: item.price,
       quantity: item.quantity
     }))
-
-    console.log('Sale Details:', saleDetails)
-
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(saleDetails)
+        body: JSON.stringify(saleDetails) 
       })
 
       if (response.ok) {
@@ -320,7 +317,7 @@ class Shoppingcart extends HTMLElement {
         const errorData = await response.json()
         console.error('Error al enviar los detalles de la venta:', errorData)
       }
-    } catch (error) {
+    }catch (error) {
       console.error('Error en la solicitud de detalles de la venta:', error)
     }
   }

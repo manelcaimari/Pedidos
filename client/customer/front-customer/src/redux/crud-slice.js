@@ -8,29 +8,25 @@ const crudSlice = createSlice({
   },
   reducers: {
     toggleCart (state) {
-      state.isCartOpen = !state.isCartOpen
+      state.isCartOpen = !state.isCartOpen;
     },
-
     setCart (state, action) {
-      const newItem = action.payload
-      const existingItem = state.cart.find(item => item.id === newItem.id)
+      const newItem = action.payload;
+      const existingItem = state.cart.find(item => item.productId === newItem.productId);
 
       if (existingItem) {
-        existingItem.quantity += newItem.quantity
+        existingItem.quantity += newItem.quantity;
 
+      
         if (existingItem.quantity <= 0) {
-          state.cart = state.cart.filter(item => item.id !== newItem.id)
+          state.cart = state.cart.filter(item => item.productId !== newItem.productId);
         }
       } else if (newItem.quantity > 0) {
-        state.cart.push({
-          id: newItem.id,
-          ...newItem,
-          quantity: newItem.quantity || 1
-        })
+        state.cart.push(newItem);
       }
     }
   }
-})
+});
 
-export const { toggleCart, setCart } = crudSlice.actions
-export default crudSlice.reducer
+export const { toggleCart, setCart } = crudSlice.actions;
+export default crudSlice.reducer;

@@ -2,39 +2,43 @@ const sequelizeDb = require('../../models')
 const SaleDetail = sequelizeDb.SaleDetail
 
 exports.create = async (req, res) => {
-  console.log('Datos recibidos:', req.body)
   try {
-    const { saleId, productId, priceId, productName, basePrice, quantity } = req.body
-
-    if (!saleId || !productId || !priceId || !quantity) {
+    if (!Array.isArray(req.body) || req.body.length === 0) {
       return res.status(400).send({
-        message: 'Faltan campos requeridos para crear un detalle de venta.'
+        message: 'Se requieren detalles de venta.'
       })
     }
+    const saleDetails = [];
+    for (const detail of req.body) {
+      const { saleId, productId, priceId, productName, basePrice, quantity } = detail;
 
-    const saleDetailData = {
-      saleId,
-      productId,
-      priceId,
-      productName,
-      basePrice: parseFloat(basePrice),
-      quantity
+      if (!saleId || !productId || !priceId || !quantity) {
+        return res.status(400).send({
+          message: 'Faltan campos requeridos para crear un detalle de venta.'
+        })
+      }
+      const saleDetailData = {
+        saleId,
+        productId,
+        priceId,
+        productName,
+        basePrice: parseFloat(basePrice),
+        quantity
+      }
+      const saleDetail = await SaleDetail.create(saleDetailData)
+      saleDetails.push(saleDetail);
     }
-
-    const saleDetail = await SaleDetail.create(saleDetailData)
-    console.log('Detalle de venta creado:', saleDetail)
-
-    res.status(201).send(saleDetail)
+    console.log('Detalles de venta creados:', saleDetails);
+    res.status(201).send(saleDetails);
   } catch (err) {
     console.error('Error al crear el detalle de la venta:', err)
-
     if (err.errors) {
       res.status(422).send({
         message: err.errors
-      })
+      });
     } else {
       res.status(500).send({
-        message: 'Algún error ha surgido al insertar el dato del detalle de venta.'
+        message: 'Algún error ha surgido al insertar los datos del detalle de venta.'
       })
     }
   }

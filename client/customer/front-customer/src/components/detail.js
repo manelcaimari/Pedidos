@@ -15,6 +15,7 @@ class DetailComponent extends HTMLElement {
   async connectedCallback () {
     await this.loadData()
     await this.render()
+    await this.getBasePrices();
   }
 
   async loadData () {
@@ -213,21 +214,44 @@ class DetailComponent extends HTMLElement {
   }
 
   addToCart (productId, quantity) {
-    const product = this.data.rows.find(item => item.id === productId)
-
-    if (!product) return
-    const price = this.basePricesMap[productId]
-
+    const product = this.data.rows.find(item => item.id === productId);
+  
+    if (!product) return;
+  
+    const price = this.basePricesMap[productId];
+    const priceData = this.pricesCategories.rows.find(p => p.productId === productId && p.current);
+  
     const cartItem = {
-      productId,
-      priceId: price.id,
+      productId, 
+      priceId: priceData ? priceData.id : null,
       name: product.name,
-      price: this.basePricesMap[productId],
-      quantity,
+      price: price,
+      quantity: quantity, 
       units: product.units || 0,
       measurement: product.measurement || '',
       measurementUnit: product.measurementUnit || ''
     }
+  
+  
+    const currentCart = [...store.getState().crud.cart]; 
+  
+   
+    const existingItemIndex = currentCart.findIndex(item => item.productId === productId);
+  
+    if (existingItemIndex > -1) {
+     
+      currentCart[existingItemIndex].quantity += quantity;
+     
+      if (currentCart[existingItemIndex].quantity <= 0) {
+        currentCart.splice(existingItemIndex, 1)
+      }
+    } else {
+
+      if (quantity > 0) {
+        currentCart.push(cartItem);
+      }
+    }
+
     store.dispatch(setCart(cartItem))
   }
 
@@ -250,7 +274,6 @@ class DetailComponent extends HTMLElement {
   async getBasePrices () {
     const pricesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/prices`)
     this.pricesCategories = await pricesResponse.json()
-
     this.basePricesMap = {}
 
     this.pricesCategories.rows.forEach(price => {
