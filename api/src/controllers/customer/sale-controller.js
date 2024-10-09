@@ -1,12 +1,13 @@
 const sequelizeDb = require('../../models')
 const Sale = sequelizeDb.Sale
+const SaleDetail = sequelizeDb.SaleDetail
 const Op = sequelizeDb.Sequelize.Op
 
 exports.create = async (req, res) => {
   try {
     const items = req.body.items || []
 
-    const totalBasePrice = items.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)
+    const totalBasePrice = items.reduce((acc, item) => acc + item.basePrice * item.quantity, 0).toFixed(2)
 
     const now = new Date()
     const formattedDate = now.toISOString().split('T')[0].replace(/-/g, '')
@@ -14,8 +15,8 @@ exports.create = async (req, res) => {
 
     const newReference = `${formattedDate}${formattedTime}`
 
-    const saleDate = new Date().toISOString().split('T')[0]
-    const saleTime = new Date().toISOString().split('T')[1].split('.')[0]
+    const saleDate = now.toISOString().split('T')[0]
+    const saleTime = now.toISOString().split('T')[1].split('.')[0]
 
     const newSaleData = {
       ...req.body,
@@ -26,6 +27,18 @@ exports.create = async (req, res) => {
     }
 
     const sale = await Sale.create(newSaleData)
+
+    const saleDetails = items.map(item => ({
+      saleId: sale.id,
+      productId: item.productId,
+      priceId: item.priceId,
+      quantity: item.quantity,
+      basePrice: item.basePrice,
+      productName: item.productName
+    }))
+
+    await SaleDetail.bulkCreate(saleDetails)
+
     res.status(200).send(sale)
   } catch (err) {
     if (err.errors) {

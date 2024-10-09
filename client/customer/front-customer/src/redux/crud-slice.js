@@ -4,7 +4,8 @@ const crudSlice = createSlice({
   name: 'crud',
   initialState: {
     cart: [],
-    isCartOpen: false
+    isCartOpen: false,
+    queryString: null
   },
   reducers: {
     toggleCart (state) {
@@ -23,9 +24,12 @@ const crudSlice = createSlice({
       } else if (newItem.quantity > 0) {
         state.cart.push(newItem)
       }
+    },
+    applyFilter: (state, action) => {
+      state.queryString = action.payload
     }
   }
 })
 
-export const { toggleCart, setCart } = crudSlice.actions
+export const { toggleCart, setCart, applyFilter } = crudSlice.actions
 export default crudSlice.reducer

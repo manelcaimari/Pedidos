@@ -1,38 +1,35 @@
-class conference extends HTMLElement {
+import { store } from '../redux/store.js'
+
+class Conference extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/sales`
+    this.data = []
+    this.queryString = null
   }
 
   async connectedCallback () {
+    this.unsubscribe = store.subscribe(async () => {
+      const currentState = store.getState()
+      const newQueryString = currentState.crud.queryString
+
+      if (this.queryString !== newQueryString) {
+        this.queryString = newQueryString
+        await this.loadData()
+        this.render()
+      }
+    })
+
     await this.loadData()
-    await this.render()
+    this.render()
   }
 
   async loadData () {
-    this.data = [
-      {
-        reference: '00000000002',
-        total: '180',
-        date: '20-05-2024',
-        hour: '11:13',
-        measurementtotal: '€'
-      },
-      {
-        reference: '00000000003',
-        total: '270',
-        date: '13-05-2024',
-        hour: '17:09',
-        measurementtotal: '€'
-      },
-      {
-        reference: '00000000002',
-        total: '270',
-        date: '13-05-2024',
-        hour: '17:09',
-        measurementtotal: '€'
-      }
-    ]
+    const endpoint = this.queryString ? `${this.endpoint}?${this.queryString}` : this.endpoint
+    const response = await fetch(endpoint)
+
+    this.data = await response.json()
   }
 
   render () {
@@ -101,7 +98,7 @@ class conference extends HTMLElement {
         </div>
     `
     const ordersContainer = this.shadow.querySelector('.orders')
-    this.data.forEach(order => {
+    this.data.rows.forEach(order => {
       const orderContainer = document.createElement('div')
       orderContainer.classList.add('order')
 
@@ -115,7 +112,7 @@ class conference extends HTMLElement {
 
       const total = document.createElement('p')
       total.classList.add('detail-price')
-      total.textContent = `${order.total} ${order.measurementtotal}`
+      total.textContent = `${order.totalBasePrice} €`
       orderDetails.appendChild(total)
 
       orderContainer.appendChild(orderDetails)
@@ -128,12 +125,12 @@ class conference extends HTMLElement {
 
       const date = document.createElement('span')
       date.classList.add('detail-date')
-      date.textContent = order.date
+      date.textContent = order.saleDate
       dateTimeContainer.appendChild(date)
 
       const hour = document.createElement('span')
       hour.classList.add('detail-hour')
-      hour.textContent = order.hour
+      hour.textContent = order.saleTime
       dateTimeContainer.appendChild(hour)
 
       orderQuantity.appendChild(dateTimeContainer)
@@ -150,6 +147,10 @@ class conference extends HTMLElement {
       ordersContainer.appendChild(orderContainer)
     })
   }
+
+  disconnectedCallback () {
+    this.unsubscribe()
+  }
 }
 
-customElements.define('conference-component', conference)
+customElements.define('conference-component', Conference)

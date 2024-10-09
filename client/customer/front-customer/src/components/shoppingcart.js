@@ -242,7 +242,13 @@ class Shoppingcart extends HTMLElement {
 
       const saleData = {
         customerId: 1,
-        items: this.cartItems
+        items: this.cartItems.map(item => ({
+          productId: item.productId,
+          priceId: item.priceId,
+          productName: item.name,
+          basePrice: item.price,
+          quantity: item.quantity
+        }))
       }
 
       try {
@@ -257,10 +263,6 @@ class Shoppingcart extends HTMLElement {
         if (response.ok) {
           const data = await response.json()
           console.log('Venta creada:', data)
-
-          const saleId = data.id
-
-          await this.sendSaleDetails(saleId, this.cartItems)
 
           document.dispatchEvent(new CustomEvent('message', {
             detail: {
@@ -291,35 +293,6 @@ class Shoppingcart extends HTMLElement {
         }))
       }
     })
-  }
-
-  async sendSaleDetails (saleId, items) {
-    const saleDetails = items.map(item => ({
-      saleId,
-      productId: item.productId,
-      priceId: item.priceId,
-      productName: item.name,
-      basePrice: item.price,
-      quantity: item.quantity
-    }))
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(saleDetails)
-      })
-
-      if (response.ok) {
-        console.log('Detalles de la venta enviados correctamente')
-      } else {
-        const errorData = await response.json()
-        console.error('Error al enviar los detalles de la venta:', errorData)
-      }
-    } catch (error) {
-      console.error('Error en la solicitud de detalles de la venta:', error)
-    }
   }
 }
 customElements.define('shop-component', Shoppingcart)

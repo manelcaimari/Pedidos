@@ -1,45 +1,63 @@
 const sequelizeDb = require('../../models')
 const SaleDetail = sequelizeDb.SaleDetail
+const Op = sequelizeDb.Sequelize.Op
 
 exports.create = async (req, res) => {
-  try {
-    if (!Array.isArray(req.body) || req.body.length === 0) {
-      return res.status(400).send({
-        message: 'Se requieren detalles de venta.'
-      })
-    }
-    const saleDetails = []
-    for (const detail of req.body) {
-      const { saleId, productId, priceId, productName, basePrice, quantity } = detail
+  return res.status(405).send({
+    message: 'Este endpoint ya no está disponible. Utiliza el endpoint de ventas para crear detalles de venta.'
+  })
+}
+exports.findAll = (req, res) => {
+  const page = req.query.page || 1
+  const limit = parseInt(req.query.size) || 10
+  const offset = (page - 1) * limit
+  const whereStatement = {}
 
-      if (!saleId || !productId || !priceId || !quantity) {
-        return res.status(400).send({
-          message: 'Faltan campos requeridos para crear un detalle de venta.'
-        })
-      }
-      const saleDetailData = {
-        saleId,
-        productId,
-        priceId,
-        productName,
-        basePrice: parseFloat(basePrice),
-        quantity
-      }
-      const saleDetail = await SaleDetail.create(saleDetailData)
-      saleDetails.push(saleDetail)
-    }
-    console.log('Detalles de venta creados:', saleDetails)
-    res.status(201).send(saleDetails)
-  } catch (err) {
-    console.error('Error al crear el detalle de la venta:', err)
-    if (err.errors) {
-      res.status(422).send({
-        message: err.errors
-      })
-    } else {
-      res.status(500).send({
-        message: 'Algún error ha surgido al insertar los datos del detalle de venta.'
-      })
+  for (const key in req.query) {
+    if (req.query[key] !== '' && req.query[key] !== 'null' && key !== 'page' && key !== 'size') {
+      whereStatement[key] = { [Op.substring]: req.query[key] }
     }
   }
+
+  const condition = Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {}
+
+  SaleDetail.findAndCountAll({
+    where: condition,
+    attributes: ['id', 'saleId', 'productId', 'priceId', 'productName', 'basePrice', 'quantity', 'createdAt', 'updatedAt'],
+    limit,
+    offset,
+    order: [['createdAt', 'DESC']]
+  })
+    .then(result => {
+      result.meta = {
+        total: result.count,
+        pages: Math.ceil(result.count / limit),
+        currentPage: page,
+        size: limit
+      }
+
+      res.status(200).send(result)
+    }).catch(err => {
+      res.status(500).send({
+        message: err.errors || 'Algún error ha surgido al recuperar los datos.'
+      })
+    })
+}
+
+exports.findOne = (req, res) => {
+  const id = req.params.id
+
+  SaleDetail.findByPk(id).then(data => {
+    if (data) {
+      res.status(200).send(data)
+    } else {
+      res.status(404).send({
+        message: `No se puede encontrar el elemento con la id=${id}.`
+      })
+    }
+  }).catch(_ => {
+    res.status(500).send({
+      message: 'Algún error ha surgido al recuperar la id=' + id
+    })
+  })
 }
