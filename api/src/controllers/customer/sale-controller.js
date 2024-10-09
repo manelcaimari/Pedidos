@@ -8,12 +8,11 @@ exports.create = async (req, res) => {
 
     const totalBasePrice = items.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)
 
-    const lastSale = await Sale.findOne({
-      order: [['reference', 'DESC']],
-      attributes: ['reference']
-    })
+    const now = new Date()
+    const formattedDate = now.toISOString().split('T')[0].replace(/-/g, '')
+    const formattedTime = now.toTimeString().split(' ')[0].replace(/:/g, '')
 
-    const newReference = lastSale ? parseInt(lastSale.reference, 10) + 1 : 1
+    const newReference = `${formattedDate}${formattedTime}`
 
     const saleDate = new Date().toISOString().split('T')[0]
     const saleTime = new Date().toISOString().split('T')[1].split('.')[0]

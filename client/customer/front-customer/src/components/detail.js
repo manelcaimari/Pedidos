@@ -15,7 +15,7 @@ class DetailComponent extends HTMLElement {
   async connectedCallback () {
     await this.loadData()
     await this.render()
-    await this.getBasePrices();
+    await this.getBasePrices()
   }
 
   async loadData () {
@@ -214,42 +214,22 @@ class DetailComponent extends HTMLElement {
   }
 
   addToCart (productId, quantity) {
-    const product = this.data.rows.find(item => item.id === productId);
-  
-    if (!product) return;
-  
-    const price = this.basePricesMap[productId];
-    const priceData = this.pricesCategories.rows.find(p => p.productId === productId && p.current);
-  
+    const product = this.data.rows.find(item => item.id === productId)
+
+    if (!product) return
+
+    const price = this.basePricesMap[productId]
+    const priceData = this.pricesCategories.rows.find(p => p.productId === productId && p.current)
+
     const cartItem = {
-      productId, 
+      productId,
       priceId: priceData ? priceData.id : null,
       name: product.name,
-      price: price,
-      quantity: quantity, 
+      price,
+      quantity,
       units: product.units || 0,
       measurement: product.measurement || '',
       measurementUnit: product.measurementUnit || ''
-    }
-  
-  
-    const currentCart = [...store.getState().crud.cart]; 
-  
-   
-    const existingItemIndex = currentCart.findIndex(item => item.productId === productId);
-  
-    if (existingItemIndex > -1) {
-     
-      currentCart[existingItemIndex].quantity += quantity;
-     
-      if (currentCart[existingItemIndex].quantity <= 0) {
-        currentCart.splice(existingItemIndex, 1)
-      }
-    } else {
-
-      if (quantity > 0) {
-        currentCart.push(cartItem);
-      }
     }
 
     store.dispatch(setCart(cartItem))

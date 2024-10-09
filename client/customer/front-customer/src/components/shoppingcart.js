@@ -308,7 +308,7 @@ class Shoppingcart extends HTMLElement {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(saleDetails) 
+        body: JSON.stringify(saleDetails)
       })
 
       if (response.ok) {
@@ -317,7 +317,7 @@ class Shoppingcart extends HTMLElement {
         const errorData = await response.json()
         console.error('Error al enviar los detalles de la venta:', errorData)
       }
-    }catch (error) {
+    } catch (error) {
       console.error('Error en la solicitud de detalles de la venta:', error)
     }
   }
