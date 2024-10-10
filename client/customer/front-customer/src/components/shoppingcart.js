@@ -1,5 +1,6 @@
 import { store } from '../redux/store.js'
 
+
 class Shoppingcart extends HTMLElement {
   constructor () {
     super()
@@ -59,7 +60,7 @@ class Shoppingcart extends HTMLElement {
           opacity: 1;
           visibility: visible;
         }
-        main{
+        .main{
           display:grid;
           align-items: start;
           align-content: space-between;
@@ -144,8 +145,8 @@ class Shoppingcart extends HTMLElement {
         }
       </style>
       <div class="filter-modal">
-        <main>
-        <div class="order-item"></div>
+        <div class="main">
+          <div class="order-item"></div>
           <div class="bottom">
             <div class="total">
               <div class="item-total">
@@ -160,7 +161,7 @@ class Shoppingcart extends HTMLElement {
               <button>Finalizar pedido</button>
             </div>
           </div>
-        </main>
+        </div>
       </div>
     `
 
@@ -262,7 +263,7 @@ class Shoppingcart extends HTMLElement {
 
         if (response.ok) {
           const data = await response.json()
-          console.log('Venta creada:', data)
+  
 
           document.dispatchEvent(new CustomEvent('message', {
             detail: {
@@ -270,7 +271,10 @@ class Shoppingcart extends HTMLElement {
               message: 'Venta creada con éxito.'
             }
           }))
-          window.location.href = '/cliente/reference'
+          this.shadow.querySelector('.filter-modal').classList.remove('visible');
+          document.dispatchEvent(new CustomEvent('showrenferentModal', {
+            detail: { reference: data.reference }
+          }))
         } else {
           const errorData = await response.json()
           console.error('Error al crear la venta:', errorData)
