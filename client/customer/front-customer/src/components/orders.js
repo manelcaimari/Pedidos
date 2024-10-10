@@ -45,7 +45,7 @@ class orders extends HTMLElement {
           opacity: 1;
           visibility: visible;
         }
-        main{
+        .main{
           display:grid;
           align-content: center;
           height: 80vh;
