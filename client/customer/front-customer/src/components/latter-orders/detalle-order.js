@@ -128,6 +128,7 @@ class Devolution extends HTMLElement {
           text-align: center;
         }
         .orders button {
+          text-transform: capitalize;
           background-color: white;
           color: hsl(0, 0%, 0%);
           border: none;
@@ -161,7 +162,7 @@ class Devolution extends HTMLElement {
         </div>
       </div>
     `
-
+    this.renderOrderButton()
     this.populateOrderItems()
     this.totalPrice()
   }
@@ -218,5 +219,24 @@ class Devolution extends HTMLElement {
     const totalPriceElement = this.shadow.querySelector('.total-price')
     totalPriceElement.textContent = `${total} €`
   }
+
+  async renderOrderButton() {
+    const orderButtons = this.shadow.querySelectorAll('.returns-orders')
+
+    orderButtons.forEach(orderButton => {
+      orderButton.addEventListener('click', () => {
+        const event = new CustomEvent('latterorder', {})
+        document.dispatchEvent(event)
+        document.dispatchEvent(new CustomEvent('showFilterModal'))
+
+        document.body.style.overflow = 'hidden'
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        })
+      })
+    })
+  }
 }
-customElements.define('devolution-component', Devolution)
+
+customElements.define('devolutionorder-component', Devolution)

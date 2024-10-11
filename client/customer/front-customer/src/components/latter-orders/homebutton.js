@@ -1,29 +1,54 @@
-class DetailComponent extends HTMLElement {
+class DevolutionComponent extends HTMLElement {
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/products`
     this.data = []
-    this.cartItems = []
-    this.basePricesMap = {}
-    this.selectionCounts = {}
   }
 
   async connectedCallback() {
     await this.loadData()
     await this.render()
-    await this.getBasePrices()
+    document.addEventListener('latterorder', this.handleMessage.bind(this))
+    this.render()
   }
 
-  async loadData() {
-    const response = await fetch(this.endpoint)
-    this.data = await response.json()
-    await this.getBasePrices()
+  disconnectedCallback() {
+    document.removeEventListener('latterorder', this.handleMessage.bind(this))
+  }
+
+  async handleMessage(event) {
+    this.render()
+    this.shadow.querySelector('.filter-modal').classList.add('visible')
   }
 
   render() {
     this.shadow.innerHTML = /* html */`
       <style>
+      * {
+          box-sizing: border-box;
+          padding: 0;
+          margin: 0;
+        }
+        .filter-modal {
+          position: fixed;
+          top: 50px;
+          left: 0;
+          width: 100%;
+          background-color: #1D055B;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+
+          visibility: hidden;
+          opacity: 0;
+          transition: opacity 0.3s ease-in-out, visibility 0.3s;
+          z-index: 10;
+        }
+        .filter-modal.visible {
+          opacity: 1;
+          visibility: visible;
+        }
         .order-item {
           min-height: 75vh;
           max-height: 90vh;
@@ -125,12 +150,14 @@ class DetailComponent extends HTMLElement {
           font-weight: 600;
         }
         </style>
-      <div class="order-item"></div>
-      <div class="button-order">
-        <div class="orders">
-            <button class="view-order-button">Ver pedido</button>
+        <div class="filter-modal">
+          <div class="order-item"></div>
+          <div class="button-order">
+            <div class="orders">
+                <button class="view-order-button">Ver pedido</button>
+              </div>
           </div>
-      </div>
+        </div>
     `
 
     const ordersContainer = this.shadow.querySelector('.order-item')
@@ -211,4 +238,4 @@ class DetailComponent extends HTMLElement {
   }
 }
 
-customElements.define('cosita-component', DetailComponent)
+customElements.define('devolution-component', DevolutionComponent)
