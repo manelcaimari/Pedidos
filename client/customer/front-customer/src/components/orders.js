@@ -14,11 +14,11 @@ class orders extends HTMLElement {
     document.removeEventListener('showrenferentModal', this.handleMessage.bind(this))
   }
 
-  handleMessage(event) {
+  handleMessage (event) {
     this.data = event.detail
     this.render()
     this.shadow.querySelector('.reference').classList.add('visible')
-}
+  }
 
   render () {
     this.shadow.innerHTML =
@@ -94,7 +94,7 @@ class orders extends HTMLElement {
               <h2>pedido realizado con èxito.</h2>
             </div>
             <div class="order-text">
-              <p>en breve recibirá un correo con los detalles. La rederencia de su pedido es ${this.data?.reference || ''} </p>
+              <p>en breve recibirá un correo con los detalles. La rederencia de su pedido es ${this.data?.reference} </p>
             </div>
             <div class="go-home">
               <a href="/cliente"><button>volver a inicio</button></a>

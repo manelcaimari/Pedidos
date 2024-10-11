@@ -248,6 +248,11 @@ class DetailComponent extends HTMLElement {
           linkHref: 'http://dev-pedidos.com/cliente/nuevo-pedido'
         }
       }))
+      document.body.style.overflow = 'hidden'
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
     })
   }
 

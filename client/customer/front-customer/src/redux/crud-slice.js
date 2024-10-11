@@ -5,7 +5,8 @@ const crudSlice = createSlice({
   initialState: {
     cart: [],
     isCartOpen: false,
-    queryString: null
+    queryString: null,
+    saleId: []
   },
   reducers: {
     toggleCart (state) {
@@ -27,9 +28,12 @@ const crudSlice = createSlice({
     },
     applyFilter: (state, action) => {
       state.queryString = action.payload
+    },
+    setSaleId: (state, action) => {
+      state.saleId = action.payload
     }
   }
 })
 
-export const { toggleCart, setCart, applyFilter } = crudSlice.actions
+export const { toggleCart, setCart, applyFilter, setSaleId } = crudSlice.actions
 export default crudSlice.reducer

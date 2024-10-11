@@ -1,11 +1,12 @@
 import { store } from '../redux/store.js'
+import { setSaleId } from '../redux/crud-slice.js'
 
 class Conference extends HTMLElement {
   constructor () {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/sales`
-    this.data = []
+    this.data = { rows: [] }
     this.queryString = null
   }
 
@@ -23,6 +24,10 @@ class Conference extends HTMLElement {
 
     await this.loadData()
     this.render()
+  }
+
+  disconnectedCallback () {
+    this.unsubscribe()
   }
 
   async loadData () {
@@ -98,6 +103,7 @@ class Conference extends HTMLElement {
         </div>
     `
     const ordersContainer = this.shadow.querySelector('.orders')
+    ordersContainer.innerHTML = ''
     this.data.rows.forEach(order => {
       const orderContainer = document.createElement('div')
       orderContainer.classList.add('order')
@@ -139,17 +145,46 @@ class Conference extends HTMLElement {
       quantityControlContainer.classList.add('quantity-control')
 
       const button = document.createElement('button')
+      button.classList.add('check-order-details')
       button.textContent = 'ver pedido'
+
       quantityControlContainer.appendChild(button)
 
       orderQuantity.appendChild(quantityControlContainer)
       orderContainer.appendChild(orderQuantity)
       ordersContainer.appendChild(orderContainer)
     })
+    this.renderOrderButton()
   }
 
-  disconnectedCallback () {
-    this.unsubscribe()
+  async renderOrderButton () {
+    const orderButtons = this.shadow.querySelectorAll('.check-order-details')
+
+    orderButtons.forEach((button, index) => {
+      button.addEventListener('click', () => {
+        const saleId = this.data.rows[index].id
+        const reference = this.data.rows[index].reference
+
+        store.dispatch(setSaleId(saleId))
+
+        const event = new CustomEvent('showorderModal', {
+          detail: { saleId }
+        })
+        document.dispatchEvent(event)
+        document.dispatchEvent(new CustomEvent('changeHeader', {
+          detail: {
+            title: `Resumen de tu pedido: ${reference}`,
+            svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>',
+            linkHref: 'http://dev-pedidos.com/cliente/pedidos-anteriores'
+          }
+        }))
+        document.body.style.overflow = 'hidden'
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        })
+      })
+    })
   }
 }
 
