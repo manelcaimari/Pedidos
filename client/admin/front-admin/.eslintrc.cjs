@@ -8,6 +8,7 @@ module.exports = {
 
   },
   rules: {
+    'space-before-function-paren': 'off'
     // Aquí puedes añadir o sobrescribir reglas específicas
   }
 }

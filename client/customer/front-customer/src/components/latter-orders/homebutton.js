@@ -1,8 +1,5 @@
-import { store } from '../redux/store.js'
-import { toggleCart, setCart } from '../redux/crud-slice.js'
-
 class DetailComponent extends HTMLElement {
-  constructor () {
+  constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/products`
@@ -12,19 +9,19 @@ class DetailComponent extends HTMLElement {
     this.selectionCounts = {}
   }
 
-  async connectedCallback () {
+  async connectedCallback() {
     await this.loadData()
     await this.render()
     await this.getBasePrices()
   }
 
-  async loadData () {
+  async loadData() {
     const response = await fetch(this.endpoint)
     this.data = await response.json()
     await this.getBasePrices()
   }
 
-  render () {
+  render() {
     this.shadow.innerHTML = /* html */`
       <style>
         .order-item {
@@ -212,61 +209,6 @@ class DetailComponent extends HTMLElement {
     ordersContainer.appendChild(fragment)
     this.renderOrderButton()
   }
-
-  addToCart (productId, quantity) {
-    const product = this.data.rows.find(item => item.id === productId)
-
-    if (!product) return
-
-    const price = this.basePricesMap[productId]
-    const priceData = this.pricesCategories.rows.find(p => p.productId === productId && p.current)
-
-    const cartItem = {
-      productId,
-      priceId: priceData ? priceData.id : null,
-      name: product.name,
-      price,
-      quantity,
-      units: product.units || 0,
-      measurement: product.measurement || '',
-      measurementUnit: product.measurementUnit || ''
-    }
-
-    store.dispatch(setCart(cartItem))
-  }
-
-  async renderOrderButton () {
-    const orderButton = this.shadow.querySelector('.view-order-button')
-
-    orderButton.addEventListener('click', () => {
-      store.dispatch(toggleCart())
-      document.dispatchEvent(new CustomEvent('showFilterModal'))
-      document.dispatchEvent(new CustomEvent('changeHeader', {
-        detail: {
-          title: 'Resumen de tu pedido',
-          svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>arrow-left</title><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>',
-          linkHref: 'http://dev-pedidos.com/cliente/nuevo-pedido'
-        }
-      }))
-      document.body.style.overflow = 'hidden'
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      })
-    })
-  }
-
-  async getBasePrices () {
-    const pricesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/prices`)
-    this.pricesCategories = await pricesResponse.json()
-    this.basePricesMap = {}
-
-    this.pricesCategories.rows.forEach(price => {
-      if (price.current) {
-        this.basePricesMap[price.productId] = price.basePrice
-      }
-    })
-  }
 }
 
-customElements.define('detail-component', DetailComponent)
+customElements.define('cosita-component', DetailComponent)

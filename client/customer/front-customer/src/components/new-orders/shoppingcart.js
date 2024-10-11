@@ -1,37 +1,36 @@
-class Devolution extends HTMLElement {
-  constructor () {
+import { store } from '../../redux/store.js'
+
+class Shoppingcart extends HTMLElement {
+  constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
+    this.cartItems = []
     this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/sales`
-    this.data = { rows: [] }
   }
 
-  connectedCallback () {
-    document.addEventListener('showorderModal', this.handleMessage.bind(this))
+  connectedCallback() {
+    document.addEventListener('showFilterModal', this.handleMessage.bind(this))
+    this.unsubscribe = store.subscribe(() => {
+      this.cartItems = store.getState().crud.cart
+      this.render()
+    })
+
     this.render()
   }
 
-  disconnectedCallback () {
-    document.removeEventListener('showorderModal', this.handleMessage.bind(this))
-  }
+  disconnectedCallback() {
+    document.removeEventListener('showFilterModal', this.handleMessage.bind(this))
 
-  async handleMessage (event) {
-    const saleId = event.detail.saleId
-    console.log('Sale ID:', saleId)
-
-    await this.getSaleDetails(saleId)
-    if (this.data && this.data.rows && Array.isArray(this.data.rows)) {
-      this.render()
-      this.shadow.querySelector('.filter-modal').classList.add('visible')
+    if (this.unsubscribe) {
+      this.unsubscribe()
     }
   }
 
-  async getSaleDetails (saleId) {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`)
-    this.data = await response.json()
+  handleMessage(event) {
+    this.shadow.querySelector('.filter-modal').classList.add('visible')
   }
 
-  render () {
+  render() {
     this.shadow.innerHTML =
       /* html */`
       <style>
@@ -153,24 +152,23 @@ class Devolution extends HTMLElement {
                 <p class="total-title">Total</p>
                 <p class="total-price"></p>
               </div>
+              <div class="total-quantity">
+                <p>Impuesto no incluidos</p>
+              </div>
             </div>
             <div class="orders">
-              <button class="returns-orders">devolver pedido</button>
+              <button>Finalizar pedido</button>
             </div>
           </div>
         </div>
       </div>
     `
 
-    this.populateOrderItems()
-    this.totalPrice()
-  }
-
-  populateOrderItems () {
     const orderItem = this.shadow.querySelector('.order-item')
+
     const fragment = document.createDocumentFragment()
 
-    this.data.rows.forEach(item => {
+    this.cartItems.forEach(item => {
       const orderElement = document.createElement('div')
       orderElement.classList.add('order')
 
@@ -179,11 +177,11 @@ class Devolution extends HTMLElement {
 
       const title = document.createElement('p')
       title.classList.add('item-name')
-      title.textContent = item.productName
+      title.textContent = item.name || 'Producto'
 
       const priceP = document.createElement('p')
       priceP.classList.add('item-price')
-      priceP.textContent = `${(parseFloat(item.basePrice) * parseFloat(item.quantity)).toFixed(2)} €`
+      priceP.textContent = `${(parseFloat(item.price) * parseFloat(item.quantity)).toFixed(2)} €`
 
       orderDetails.appendChild(title)
       orderDetails.appendChild(priceP)
@@ -191,32 +189,106 @@ class Devolution extends HTMLElement {
       const itemDetail = document.createElement('div')
       itemDetail.classList.add('item-detail')
 
+      const detailContents = document.createElement('div')
+      detailContents.classList.add('detail')
+
+      const unitiesSpan = document.createElement('span')
+      unitiesSpan.classList.add('item-united')
+      unitiesSpan.textContent = `${item.units || 0}u, ${item.measurement || ''} ${item.measurementUnit || ''}`
+
+      detailContents.appendChild(unitiesSpan)
+
       const quantityControl = document.createElement('div')
       quantityControl.classList.add('quantity-control')
 
       const unities = document.createElement('span')
       unities.classList.add('item-united')
-      unities.textContent = `${item.quantity}`
+      unities.textContent = `${item.quantity || ''}x${item.price}`
       quantityControl.appendChild(unities)
+      itemDetail.appendChild(detailContents)
       itemDetail.appendChild(quantityControl)
 
       orderElement.appendChild(orderDetails)
       orderElement.appendChild(itemDetail)
+
       fragment.appendChild(orderElement)
     })
 
     orderItem.appendChild(fragment)
+
+    this.buttonfinality()
+    this.totalprice()
   }
 
-  async totalPrice () {
-    const total = this.data.rows.reduce((acc, item) => {
-      const quantity = parseFloat(item.quantity) || 0
-      const basePrice = parseFloat(item.basePrice) || 0
-      return acc + (basePrice * quantity)
-    }, 0).toFixed(2)
-
+  async totalprice() {
+    const total = this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)
     const totalPriceElement = this.shadow.querySelector('.total-price')
     totalPriceElement.textContent = `${total} €`
   }
+
+  async buttonfinality() {
+    const finishOrderBtn = this.shadow.querySelector('.orders button')
+
+    finishOrderBtn.addEventListener('click', async () => {
+      if (this.cartItems.length === 0) {
+        document.dispatchEvent(new CustomEvent('message', {
+          detail: {
+            type: 'error',
+            message: 'Tu carrito está vacío. Añade productos antes de finalizar el pedido.'
+          }
+        }))
+        return
+      }
+
+      const saleData = {
+        customerId: 1,
+        items: this.cartItems.map(item => ({
+          productId: item.productId,
+          priceId: item.priceId,
+          productName: item.name,
+          basePrice: item.price,
+          quantity: item.quantity
+        }))
+      }
+
+      try {
+        const response = await fetch(this.endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(saleData)
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+
+          this.shadow.querySelector('.filter-modal').classList.remove('visible')
+          document.dispatchEvent(new CustomEvent('showrenferentModal', {
+            detail: { reference: data.reference }
+          }))
+        } else {
+          const errorData = await response.json()
+          console.error('Error al crear la venta:', errorData)
+
+          document.dispatchEvent(new CustomEvent('message', {
+            detail: {
+              type: 'error',
+              message: 'No se pudo finalizar el pedido. Inténtalo de nuevo.'
+            }
+          }))
+        }
+      } catch (error) {
+        console.error('Error en la solicitud:', error)
+
+        document.dispatchEvent(new CustomEvent('message', {
+          detail: {
+            type: 'error',
+            message: 'Ocurrió un error al finalizar el pedido. Verifica tu conexión a internet.'
+          }
+        }))
+      }
+    })
+  }
 }
-customElements.define('devolution-component', Devolution)
+customElements.define('shop-component', Shoppingcart)

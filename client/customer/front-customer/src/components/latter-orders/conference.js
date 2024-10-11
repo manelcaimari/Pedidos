@@ -1,8 +1,8 @@
-import { store } from '../redux/store.js'
-import { setSaleId } from '../redux/crud-slice.js'
+import { store } from '../../redux/store.js'
+import { setSaleId } from '../../redux/crud-slice.js'
 
 class Conference extends HTMLElement {
-  constructor () {
+  constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/sales`
@@ -10,7 +10,7 @@ class Conference extends HTMLElement {
     this.queryString = null
   }
 
-  async connectedCallback () {
+  async connectedCallback() {
     this.unsubscribe = store.subscribe(async () => {
       const currentState = store.getState()
       const newQueryString = currentState.crud.queryString
@@ -26,18 +26,18 @@ class Conference extends HTMLElement {
     this.render()
   }
 
-  disconnectedCallback () {
+  disconnectedCallback() {
     this.unsubscribe()
   }
 
-  async loadData () {
+  async loadData() {
     const endpoint = this.queryString ? `${this.endpoint}?${this.queryString}` : this.endpoint
     const response = await fetch(endpoint)
 
     this.data = await response.json()
   }
 
-  render () {
+  render() {
     this.shadow.innerHTML =
     /* html */`
       <style>
@@ -157,7 +157,7 @@ class Conference extends HTMLElement {
     this.renderOrderButton()
   }
 
-  async renderOrderButton () {
+  async renderOrderButton() {
     const orderButtons = this.shadow.querySelectorAll('.check-order-details')
 
     orderButtons.forEach((button, index) => {

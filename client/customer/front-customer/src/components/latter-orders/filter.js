@@ -1,16 +1,16 @@
-import { store } from '../redux/store.js'
-import { applyFilter } from '../redux/crud-slice.js'
+import { store } from '../../redux/store.js'
+import { applyFilter } from '../../redux/crud-slice.js'
 class Filter extends HTMLElement {
-  constructor () {
+  constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
   }
 
-  connectedCallback () {
+  connectedCallback() {
     this.render()
   }
 
-  render () {
+  render() {
     this.shadow.innerHTML =
     /* html */`
       <style>
