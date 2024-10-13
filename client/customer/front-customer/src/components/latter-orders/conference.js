@@ -1,5 +1,5 @@
 import { store } from '../../redux/store.js'
-import { setSaleId } from '../../redux/crud-slice.js'
+import { setSaleId, setReference } from '../../redux/crud-slice.js'
 
 class Conference extends HTMLElement {
   constructor() {
@@ -166,9 +166,11 @@ class Conference extends HTMLElement {
         const reference = this.data.rows[index].reference
 
         store.dispatch(setSaleId(saleId))
+        store.dispatch(setReference(reference))
+
 
         const event = new CustomEvent('showorderModal', {
-          detail: { saleId }
+          detail: { saleId, reference }
         })
         document.dispatchEvent(event)
         document.dispatchEvent(new CustomEvent('changeHeader', {

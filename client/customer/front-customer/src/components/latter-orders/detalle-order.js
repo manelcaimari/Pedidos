@@ -1,9 +1,12 @@
+import { store } from '../../redux/store.js'
+import { setOrderDetails } from '../../redux/crud-slice.js'
+
 class Devolution extends HTMLElement {
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/sales`
-    this.data = { rows: [] }
+    this.data = { rows: [], saleId: null }
   }
 
   connectedCallback() {
@@ -16,19 +19,36 @@ class Devolution extends HTMLElement {
   }
 
   async handleMessage(event) {
-    const saleId = event.detail.saleId
+
+    const state = store.getState()
+    const saleId = state.crud.saleId
     console.log('Sale ID:', saleId)
 
-    await this.getSaleDetails(saleId)
+
+    if (!saleId) {
+      console.error('Sale ID no definido, no se puede procesar la devolución.')
+      return;
+    }
+
+    await this.getSaleDetails(saleId);
+
     if (this.data && this.data.rows && Array.isArray(this.data.rows)) {
-      this.render()
+      this.render();
       this.shadow.querySelector('.filter-modal').classList.add('visible')
     }
+
   }
 
   async getSaleDetails(saleId) {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`)
-    this.data = await response.json()
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      this.data = await response.json();
+    } catch (error) {
+      console.error('Error fetching sale details:', error);
+    }
   }
 
   render() {
@@ -46,19 +66,19 @@ class Devolution extends HTMLElement {
           left: 0;
           width: 100%;
           height: calc(100% - 60px);
-          background-color: #1D055B;
+          background-color: #1D055B; 
           display: flex;
           flex-direction: column;
           align-items: center;
           padding: 10px;
-          visibility: hidden;
-          opacity: 0;
+          visibility: hidden; 
+          opacity: 0; 
           transition: opacity 0.3s ease-in-out, visibility 0.3s;
           z-index: 10;
         }
         .filter-modal.visible {
           opacity: 1;
-          visibility: visible;
+          visibility: visible; 
         }
         .main{
           display:grid;
@@ -156,7 +176,7 @@ class Devolution extends HTMLElement {
               </div>
             </div>
             <div class="orders">
-              <button class="returns-orders">devolver pedido</button>
+              <button class="view-order-button">devolver pedido</button>
             </div>
           </div>
         </div>
@@ -166,6 +186,9 @@ class Devolution extends HTMLElement {
     this.populateOrderItems()
     this.totalPrice()
   }
+
+
+
 
   populateOrderItems() {
     const orderItem = this.shadow.querySelector('.order-item')
@@ -220,22 +243,44 @@ class Devolution extends HTMLElement {
     totalPriceElement.textContent = `${total} €`
   }
 
-  async renderOrderButton() {
-    const orderButtons = this.shadow.querySelectorAll('.returns-orders')
 
-    orderButtons.forEach(orderButton => {
-      orderButton.addEventListener('click', () => {
-        const event = new CustomEvent('latterorder', {})
-        document.dispatchEvent(event)
-        document.dispatchEvent(new CustomEvent('showFilterModal'))
+  renderOrderButton() {
+    const button = this.shadow.querySelector('.view-order-button')
 
-        document.body.style.overflow = 'hidden'
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        })
-      })
-    })
+    button.addEventListener('click', () => {
+      this.handleOrderButtonClick()
+    });
+  }
+
+  handleOrderButtonClick() {
+
+    const orderDetails = this.data.rows.map(item => ({
+      productName: item.productName,
+      quantity: item.quantity,
+      basePrice: item.basePrice,
+      totalPrice: (parseFloat(item.basePrice) * parseFloat(item.quantity)).toFixed(2) + ' €',
+    }));
+
+    console.log('Detalles del pedido a enviar:', orderDetails)
+
+    store.dispatch(setOrderDetails(orderDetails))
+
+    console.log('Estado del store después de despachar:', store.getState())
+
+    this.shadow.querySelector('.filter-modal').classList.remove('visible')
+
+    document.dispatchEvent(new CustomEvent('showFilterModal'))
+
+    document.dispatchEvent(new CustomEvent('changeHeader', {
+      detail: {
+        title: 'Resumen de tu pedido',
+        svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>arrow-left</title><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>',
+        linkHref: 'http://dev-pedidos.com/cliente/pedidos-anteriores'
+      }
+    }))
+
+    document.body.style.overflow = 'hidden'
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 
