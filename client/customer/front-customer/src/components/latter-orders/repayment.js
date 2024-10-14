@@ -1,8 +1,8 @@
 import { store } from '../../redux/store.js'
-
+import { setCart } from '../../redux/crud-slice.js'
 class Repayment extends HTMLElement {
   constructor() {
-    super();
+    super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/sales`
     this.data = []
@@ -16,7 +16,7 @@ class Repayment extends HTMLElement {
     this.data = store.getState().crud.orderDetails
 
     console.log('Datos del pedido:', this.data)
-    this.render();
+    this.render()
   }
 
   disconnectedCallback() {
@@ -33,24 +33,32 @@ class Repayment extends HTMLElement {
 
     if (!orderId) {
       console.error('Sale ID no definido, no se puede procesar la devolución.')
-      return;
+      return
     }
 
-    this.getSaleDetails(orderId);
+    this.getSaleDetails(orderId)
   }
 
   async getSaleDetails(saleId) {
     try {
       const response = await fetch(`${this.endpoint}?id=${saleId}`)
-      const saleDetails = await response.json();
+      const saleDetails = await response.json()
       this.orderData = saleDetails
       this.render()
 
-
-      this.shadow.querySelector('.detalls').classList.add('visible');
+      this.shadow.querySelector('.detalls').classList.add('visible')
     } catch (error) {
-      console.error('Error al obtener los detalles de la venta:', error);
+      console.error('Error al obtener los detalles de la venta:', error)
     }
+  }
+
+  addToCart(productId, quantityChange) {
+    const currentState = store.getState()
+    const existingCartItem = currentState.crud.cart.find(item => item.productId === productId)
+    const newQuantity = existingCartItem ? existingCartItem.quantity + quantityChange : quantityChange
+
+    console.log('Añadiendo al carrito:', { productId, newQuantity })
+    store.dispatch(setCart({ productId, quantity: newQuantity }))
   }
 
   render() {
@@ -192,6 +200,7 @@ class Repayment extends HTMLElement {
     this.populateOrderItems()
     this.renderOrderButton()
   }
+
   populateOrderItems() {
     const ordersContainer = this.shadow.querySelector('.order-item')
     const fragment = document.createDocumentFragment()
@@ -202,10 +211,8 @@ class Repayment extends HTMLElement {
         const orderElement = document.createElement('div')
         orderElement.classList.add('order')
 
-
         const orderDetails = document.createElement('div')
         orderDetails.classList.add('item-details')
-
 
         const titleP = document.createElement('p')
         titleP.classList.add('item-name')
@@ -222,16 +229,18 @@ class Repayment extends HTMLElement {
         quantityControl.classList.add('quantity-control')
 
         const minusButton = document.createElement('button')
-        minusButton.textContent = '-';
+        minusButton.textContent = '-'
+
         const quantityInput = document.createElement('input')
         quantityInput.type = 'number'
-        quantityInput.value = product.quantity
+        quantityInput.value = '0'
         quantityInput.min = '0'
+        quantityInput.max = product.quantity
+
         const plusButton = document.createElement('button')
         plusButton.textContent = '+'
 
         const productId = product.productId
-
 
         minusButton.addEventListener('click', () => {
           const quantity = parseInt(quantityInput.value)
@@ -239,39 +248,38 @@ class Repayment extends HTMLElement {
             quantityInput.value = quantity - 1
             this.addToCart(productId, -1)
           }
-        });
-
-        plusButton.addEventListener('click', () => {
-          const quantity = parseInt(quantityInput.value)
-          quantityInput.value = quantity + 1
-          this.addToCart(productId, 1)
         })
 
+        plusButton.addEventListener('click', (event) => {
+          event.preventDefault() // Evita que el botón recargue la página
+          const quantity = parseInt(quantityInput.value)
+          const maxQuantity = parseInt(quantityInput.max)
 
+          if (quantity < maxQuantity) {
+            quantityInput.value = quantity + 1
+            this.addToCart(productId, 1)
+          }
+        })
         quantityControl.appendChild(minusButton)
         quantityControl.appendChild(quantityInput)
         quantityControl.appendChild(plusButton)
 
-
         const itemDetail = document.createElement('div')
         itemDetail.classList.add('item-detail')
-
 
         itemDetail.appendChild(orderDetails)
         itemDetail.appendChild(quantityControl)
 
-
         orderElement.appendChild(itemDetail)
         fragment.appendChild(orderElement)
       })
-
 
       ordersContainer.appendChild(fragment)
     }
   }
 
   renderOrderButton() {
-    const button = this.shadow.querySelector('.view-order-button');
+    const button = this.shadow.querySelector('.view-order-button')
     button.addEventListener('click', async () => {
       const orderDetails = store.getState().crud.orderDetails
       const state = store.getState()
@@ -279,8 +287,7 @@ class Repayment extends HTMLElement {
       const reference = state.crud.reference
 
       if (orderDetails && Array.isArray(orderDetails)) {
-        const totalBasePrice = orderDetails.reduce((acc, product) => acc + parseFloat(product.basePrice) * product.quantity, 0);
-
+        const totalBasePrice = orderDetails.reduce((acc, product) => acc + parseFloat(product.basePrice) * product.quantity, 0)
 
         const returnData = {
           saleId,
@@ -290,8 +297,8 @@ class Repayment extends HTMLElement {
           returnDate: new Date().toISOString().split('T')[0],
           returnTime: new Date().toLocaleTimeString(),
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
+          updatedAt: new Date().toISOString()
+        }
 
         console.log('Datos de devolución:', returnData)
 
@@ -299,8 +306,8 @@ class Repayment extends HTMLElement {
           const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/returns`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(returnData),
-          });
+            body: JSON.stringify(returnData)
+          })
 
           if (response.ok) {
             const result = await response.json()
@@ -311,21 +318,21 @@ class Repayment extends HTMLElement {
             this.data = []
             this.render()
           } else {
-            const error = await response.json();
-            console.error('Error al procesar la devolución:', error);
+            const error = await response.json()
+            console.error('Error al procesar la devolución:', error)
 
             if (Array.isArray(error.message)) {
-              alert('Error al procesar la devolución:\n' + error.message.join('\n'));
+              alert('Error al procesar la devolución:\n' + error.message.join('\n'))
             } else {
-              alert('Error al procesar la devolución: ' + error.message);
+              alert('Error al procesar la devolución: ' + error.message)
             }
           }
         } catch (error) {
-          console.error('Error en la solicitud de devolución:', error);
-          alert('Error en la solicitud de devolución: ' + error.message);
+          console.error('Error en la solicitud de devolución:', error)
+          alert('Error en la solicitud de devolución: ' + error.message)
         }
       } else {
-        alert('No hay detalles del pedido para procesar la devolución.');
+        alert('No hay detalles del pedido para procesar la devolución.')
       }
     })
   }

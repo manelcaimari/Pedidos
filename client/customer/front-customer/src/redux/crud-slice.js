@@ -8,7 +8,7 @@ const crudSlice = createSlice({
     queryString: null,
     saleId: null,
     orderDetails: [],
-    reference: null,
+    reference: null
   },
   reducers: {
     toggleCart(state) {
@@ -38,10 +38,10 @@ const crudSlice = createSlice({
       state.orderDetails = action.payload
     },
     setReference(state, action) {
-      state.reference = action.payload;
+      state.reference = action.payload
     },
     updateProductQuantity(state, action) {
-      const { productId, change } = action.payload;
+      const { productId, change } = action.payload
 
       if (!productId || typeof change !== 'number') {
         console.error('Payload no válido en updateProductQuantity:', action.payload)
@@ -50,7 +50,6 @@ const crudSlice = createSlice({
       const existingProduct = state.orderDetails.find(item => item.productId === productId)
 
       if (existingProduct) {
-
         existingProduct.quantity += change
         if (existingProduct.quantity <= 0) {
           state.orderDetails = state.orderDetails.filter(item => item.productId !== productId)

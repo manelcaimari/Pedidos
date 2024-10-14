@@ -19,35 +19,32 @@ class Devolution extends HTMLElement {
   }
 
   async handleMessage(event) {
-
     const state = store.getState()
     const saleId = state.crud.saleId
     console.log('Sale ID:', saleId)
 
-
     if (!saleId) {
       console.error('Sale ID no definido, no se puede procesar la devolución.')
-      return;
+      return
     }
 
-    await this.getSaleDetails(saleId);
+    await this.getSaleDetails(saleId)
 
     if (this.data && this.data.rows && Array.isArray(this.data.rows)) {
-      this.render();
+      this.render()
       this.shadow.querySelector('.filter-modal').classList.add('visible')
     }
-
   }
 
   async getSaleDetails(saleId) {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`)
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`HTTP error! Status: ${response.status}`)
       }
-      this.data = await response.json();
+      this.data = await response.json()
     } catch (error) {
-      console.error('Error fetching sale details:', error);
+      console.error('Error fetching sale details:', error)
     }
   }
 
@@ -187,9 +184,6 @@ class Devolution extends HTMLElement {
     this.totalPrice()
   }
 
-
-
-
   populateOrderItems() {
     const orderItem = this.shadow.querySelector('.order-item')
     const fragment = document.createDocumentFragment()
@@ -243,23 +237,21 @@ class Devolution extends HTMLElement {
     totalPriceElement.textContent = `${total} €`
   }
 
-
   renderOrderButton() {
     const button = this.shadow.querySelector('.view-order-button')
 
     button.addEventListener('click', () => {
       this.handleOrderButtonClick()
-    });
+    })
   }
 
   handleOrderButtonClick() {
-
     const orderDetails = this.data.rows.map(item => ({
       productName: item.productName,
       quantity: item.quantity,
       basePrice: item.basePrice,
-      totalPrice: (parseFloat(item.basePrice) * parseFloat(item.quantity)).toFixed(2) + ' €',
-    }));
+      totalPrice: (parseFloat(item.basePrice) * parseFloat(item.quantity)).toFixed(2) + ' €'
+    }))
 
     console.log('Detalles del pedido a enviar:', orderDetails)
 

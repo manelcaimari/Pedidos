@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('return_orders', {
+    await queryInterface.createTable('return_details', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -24,28 +24,42 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      basePrice: {
-        type: Sequelize.DECIMAL(10, 2),
-        allowNull: false
+      productId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'products',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      priceId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'prices',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       quantity: {
         type: Sequelize.INTEGER,
         allowNull: false,
         validate: {
-          min: 0,
+          min: 0
         }
       },
-      reference: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      returnDate: {
-        type: Sequelize.DATEONLY,
-        allowNull: false
-      },
-      returnTime: {
-        type: Sequelize.TIME,
-        allowNull: true
+      saledetailId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'saledetails',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -61,12 +75,12 @@ module.exports = {
       }
     })
 
-    await queryInterface.addIndex('return_orders', ['returnId'], {
-      name: 'return_orders_returnId_index'
+    await queryInterface.addIndex('return_details', ['returnId'], {
+      name: 'return_details_returnId_index'
     })
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('return_orders')
+    await queryInterface.dropTable('return_details')
   }
 }

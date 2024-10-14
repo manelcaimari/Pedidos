@@ -168,7 +168,6 @@ class Conference extends HTMLElement {
         store.dispatch(setSaleId(saleId))
         store.dispatch(setReference(reference))
 
-
         const event = new CustomEvent('showorderModal', {
           detail: { saleId, reference }
         })

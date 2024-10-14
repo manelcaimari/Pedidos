@@ -1,5 +1,5 @@
 const sequelizeDb = require('../../models')
-const ReturnOrder = sequelizeDb.ReturnOrder
+const ReturnDetail = sequelizeDb.ReturnDetail
 const Op = sequelizeDb.Sequelize.Op
 
 exports.findAll = (req, res) => {
@@ -16,9 +16,9 @@ exports.findAll = (req, res) => {
 
   const condition = Object.keys(whereStatement).length > 0 ? { [Op.and]: [whereStatement] } : {}
 
-  ReturnOrder.findAndCountAll({
+  ReturnDetail.findAndCountAll({
     where: condition,
-    attributes: ['id', 'returnId', 'productName', 'basePrice', 'quantity', 'reference', 'returnDate', 'returnTime', 'createdAt', 'updatedAt'],
+    attributes: ['id', 'returnId', 'productName', 'productId', 'priceId', 'quantity', 'saledetailId', 'createdAt', 'updatedAt'],
     limit,
     offset,
     order: [['createdAt', 'DESC']]
@@ -43,7 +43,7 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
   const id = req.params.id
 
-  ReturnOrder.findByPk(id)
+  ReturnDetail.findByPk(id)
     .then(data => {
       if (data) {
         res.status(200).send(data)
@@ -61,7 +61,7 @@ exports.findOne = (req, res) => {
 }
 
 exports.create = (req, res) => {
-  ReturnOrder.create(req.body)
+  ReturnDetail.create(req.body)
     .then(data => {
       res.status(201).send(data)
     })

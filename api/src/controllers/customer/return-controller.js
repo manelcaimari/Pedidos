@@ -62,17 +62,15 @@ exports.findOne = (req, res) => {
 }
 
 exports.create = async (req, res) => {
-  const t = await sequelizeDb.sequelize.transaction(); // Iniciar transacción
+  const t = await sequelizeDb.sequelize.transaction()
 
   try {
-    const { saleId, customerId, reference, totalBasePrice, orderDetails } = req.body;
+    const { saleId, customerId, reference, totalBasePrice, orderDetails } = req.body
 
-    // Verificar que orderDetails existe y es un array
     if (!orderDetails || !Array.isArray(orderDetails)) {
-      throw new Error('Los detalles del pedido (orderDetails) no están presentes o no son válidos.');
+      throw new Error('Los detalles del pedido (orderDetails) no están presentes o no son válidos.')
     }
 
-    // Crear el registro en la tabla `Return`
     const newReturn = await Return.create({
       saleId,
       customerId,
@@ -81,9 +79,8 @@ exports.create = async (req, res) => {
       returnDate: new Date().toISOString().split('T')[0],
       returnTime: new Date().toLocaleTimeString(),
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }, { transaction: t });
-
+      updatedAt: new Date().toISOString()
+    }, { transaction: t })
 
     const returnOrders = orderDetails.map((order) => {
       return {
@@ -95,26 +92,21 @@ exports.create = async (req, res) => {
         returnDate: newReturn.returnDate,
         returnTime: newReturn.returnTime,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-    });
+        updatedAt: new Date().toISOString()
+      }
+    })
 
+    await ReturnOrder.bulkCreate(returnOrders, { transaction: t })
 
-    await ReturnOrder.bulkCreate(returnOrders, { transaction: t });
-
-
-    await t.commit();
-
+    await t.commit()
 
     res.status(201).json({
       message: 'Devolución y órdenes de devolución creadas correctamente.',
       data: { return: newReturn, returnOrders }
-    });
-
+    })
   } catch (error) {
-
-    await t.rollback();
-    console.error('Error en el controlador de devolución:', error);
-    res.status(500).json({ message: 'Error procesando la devolución.', details: error.message });
+    await t.rollback()
+    console.error('Error en el controlador de devolución:', error)
+    res.status(500).json({ message: 'Error procesando la devolución.', details: error.message })
   }
-};
+}
