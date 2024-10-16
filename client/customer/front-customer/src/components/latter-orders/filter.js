@@ -1,5 +1,5 @@
 import { store } from '../../redux/store.js'
-import { applyFilter } from '../../redux/crud-slice.js'
+import { setQueryString } from '../../redux/crud-slice.js'
 class Filter extends HTMLElement {
   constructor() {
     super()
@@ -69,7 +69,7 @@ class Filter extends HTMLElement {
       event.preventDefault()
       const formData = new FormData(event.target)
       const reference = formData.get('reference')
-      store.dispatch(applyFilter(`reference=${reference}`))
+      store.dispatch(setQueryString(`reference=${reference}`))
       event.target.reset()
     })
 
@@ -80,7 +80,7 @@ class Filter extends HTMLElement {
 
       const formattedDate = new Date(orderDate).toISOString().split('T')[0]
 
-      store.dispatch(applyFilter(`saleDate=${formattedDate}`))
+      store.dispatch(setQueryString(`saleDate=${formattedDate}`))
       event.target.reset()
     })
   }

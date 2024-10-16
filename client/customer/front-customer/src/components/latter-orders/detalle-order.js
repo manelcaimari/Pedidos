@@ -1,5 +1,5 @@
 import { store } from '../../redux/store.js'
-import { setOrderDetails } from '../../redux/crud-slice.js'
+import { setOrderDetails, setReference } from '../../redux/crud-slice.js'
 
 class Devolution extends HTMLElement {
   constructor() {
@@ -21,10 +21,8 @@ class Devolution extends HTMLElement {
   async handleMessage(event) {
     const state = store.getState()
     const saleId = state.crud.saleId
-    console.log('Sale ID:', saleId)
 
     if (!saleId) {
-      console.error('Sale ID no definido, no se puede procesar la devolución.')
       return
     }
 
@@ -44,7 +42,6 @@ class Devolution extends HTMLElement {
       }
       this.data = await response.json()
     } catch (error) {
-      console.error('Error fetching sale details:', error)
     }
   }
 
@@ -245,7 +242,15 @@ class Devolution extends HTMLElement {
     })
   }
 
-  handleOrderButtonClick() {
+  async handleOrderButtonClick() {
+    const state = store.getState()
+    const saleId = state.crud.saleId
+    const reference = state.crud.reference
+
+    if (!saleId) {
+      return
+    }
+
     const orderDetails = this.data.rows.map(item => ({
       productName: item.productName,
       quantity: item.quantity,
@@ -253,27 +258,28 @@ class Devolution extends HTMLElement {
       totalPrice: (parseFloat(item.basePrice) * parseFloat(item.quantity)).toFixed(2) + ' €'
     }))
 
-    console.log('Detalles del pedido a enviar:', orderDetails)
-
     store.dispatch(setOrderDetails(orderDetails))
-
-    console.log('Estado del store después de despachar:', store.getState())
+    store.dispatch(setReference(reference))
 
     this.shadow.querySelector('.filter-modal').classList.remove('visible')
 
-    document.dispatchEvent(new CustomEvent('showFilterModal'))
-
+    document.dispatchEvent(new CustomEvent('showFilterModal', {
+      detail: { saleId: saleId, reference }
+    }))
     document.dispatchEvent(new CustomEvent('changeHeader', {
       detail: {
-        title: 'Resumen de tu pedido',
-        svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>arrow-left</title><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>',
+        title: `Tu Pedido: ${reference}`,
+        svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>',
         linkHref: 'http://dev-pedidos.com/cliente/pedidos-anteriores'
       }
     }))
-
     document.body.style.overflow = 'hidden'
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
   }
+
 }
 
 customElements.define('devolutionorder-component', Devolution)

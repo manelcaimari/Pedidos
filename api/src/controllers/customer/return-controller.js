@@ -1,7 +1,59 @@
 const sequelizeDb = require('../../models')
 const Return = sequelizeDb.Return
-const ReturnOrder = sequelizeDb.ReturnOrder
+const ReturnDetail = sequelizeDb.ReturnDetail
 const Op = sequelizeDb.Sequelize.Op
+
+exports.create = async (req, res) => {
+  const t = await sequelizeDb.sequelize.transaction()
+
+  try {
+    const { saleId, customerId, reference, totalBasePrice, returnDetails } = req.body
+
+    if (!saleId || !customerId || !reference || totalBasePrice === undefined || !Array.isArray(returnDetails) || returnDetails.length === 0) {
+      return res.status(400).json({ message: 'Faltan datos requeridos para procesar la devolución.' })
+    }
+
+    const newReturn = await Return.create({
+      saleId,
+      customerId,
+      reference,
+      totalBasePrice,
+      returnDate: new Date().toISOString().split('T')[0],
+      returnTime: new Date().toLocaleTimeString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }, { transaction: t })
+
+    const returnDetailsToCreate = returnDetails.map(detail => {
+      if (!detail.saleDetailId) {
+        throw new Error(`El campo saleDetailId es obligatorio para el producto ${detail.productName}`)
+      }
+
+      return {
+        returnId: newReturn.id,
+        productName: detail.productName,
+        productId: detail.productId,
+        priceId: detail.priceId,
+        quantity: detail.quantity,
+        saledetailId: detail.saleDetailId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+    })
+
+    await ReturnDetail.bulkCreate(returnDetailsToCreate, { transaction: t })
+
+    await t.commit()
+
+    res.status(201).json({
+      message: 'Devolución creada correctamente.',
+      data: newReturn,
+    })
+  } catch (error) {
+    await t.rollback()
+    res.status(500).json({ message: 'Error procesando la devolución.', details: error.message })
+  }
+}
 
 exports.findAll = (req, res) => {
   const page = req.query.page || 1
@@ -59,54 +111,4 @@ exports.findOne = (req, res) => {
         message: 'Algún error ha surgido al recuperar la id=' + id
       })
     })
-}
-
-exports.create = async (req, res) => {
-  const t = await sequelizeDb.sequelize.transaction()
-
-  try {
-    const { saleId, customerId, reference, totalBasePrice, orderDetails } = req.body
-
-    if (!orderDetails || !Array.isArray(orderDetails)) {
-      throw new Error('Los detalles del pedido (orderDetails) no están presentes o no son válidos.')
-    }
-
-    const newReturn = await Return.create({
-      saleId,
-      customerId,
-      reference,
-      totalBasePrice,
-      returnDate: new Date().toISOString().split('T')[0],
-      returnTime: new Date().toLocaleTimeString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }, { transaction: t })
-
-    const returnOrders = orderDetails.map((order) => {
-      return {
-        returnId: newReturn.id,
-        productName: order.productName,
-        basePrice: order.basePrice,
-        quantity: order.quantity,
-        reference,
-        returnDate: newReturn.returnDate,
-        returnTime: newReturn.returnTime,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    })
-
-    await ReturnOrder.bulkCreate(returnOrders, { transaction: t })
-
-    await t.commit()
-
-    res.status(201).json({
-      message: 'Devolución y órdenes de devolución creadas correctamente.',
-      data: { return: newReturn, returnOrders }
-    })
-  } catch (error) {
-    await t.rollback()
-    console.error('Error en el controlador de devolución:', error)
-    res.status(500).json({ message: 'Error procesando la devolución.', details: error.message })
-  }
 }

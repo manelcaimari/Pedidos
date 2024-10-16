@@ -1,5 +1,5 @@
 import { store } from '../../redux/store.js'
-import { setSaleId, setReference } from '../../redux/crud-slice.js'
+import { setSaleId, setReference, setQueryString } from '../../redux/crud-slice.js'
 
 class Conference extends HTMLElement {
   constructor() {
@@ -20,10 +20,13 @@ class Conference extends HTMLElement {
         await this.loadData()
         this.render()
       }
-    })
+    });
 
-    await this.loadData()
-    this.render()
+
+    store.dispatch(setQueryString(this.queryString))
+
+    await this.loadData();
+    this.render();
   }
 
   disconnectedCallback() {

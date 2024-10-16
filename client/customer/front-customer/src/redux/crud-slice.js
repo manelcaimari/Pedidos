@@ -28,7 +28,7 @@ const crudSlice = createSlice({
         state.cart.push(newItem)
       }
     },
-    applyFilter: (state, action) => {
+    setQueryString: (state, action) => {
       state.queryString = action.payload
     },
     setSaleId: (state, action) => {
@@ -40,25 +40,10 @@ const crudSlice = createSlice({
     setReference(state, action) {
       state.reference = action.payload
     },
-    updateProductQuantity(state, action) {
-      const { productId, change } = action.payload
 
-      if (!productId || typeof change !== 'number') {
-        console.error('Payload no válido en updateProductQuantity:', action.payload)
-        return
-      }
-      const existingProduct = state.orderDetails.find(item => item.productId === productId)
-
-      if (existingProduct) {
-        existingProduct.quantity += change
-        if (existingProduct.quantity <= 0) {
-          state.orderDetails = state.orderDetails.filter(item => item.productId !== productId)
-        }
-      }
-    }
 
   }
 })
 
-export const { toggleCart, setCart, applyFilter, setSaleId, setOrderDetails, setReference, updateProductQuantity } = crudSlice.actions
+export const { toggleCart, setCart, setQueryString, setSaleId, setOrderDetails, setReference, } = crudSlice.actions
 export default crudSlice.reducer
