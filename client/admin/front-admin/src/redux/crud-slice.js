@@ -7,7 +7,12 @@ export const crudSlice = createSlice({
       data: null
     },
     tableEndpoint: null,
-    queryString: null
+    queryString: null,
+    visualSaleElement: {
+      data: null
+    },
+    saleDetails: null,
+    saleId: null,
   },
   reducers: {
     showFormElement: (state, action) => {
@@ -18,14 +23,26 @@ export const crudSlice = createSlice({
     },
     applyFilter: (state, action) => {
       state.queryString = action.payload
-    }
+    },
+    showVisualSaleElement: (state, action) => {
+      state.visualSaleElement = action.payload
+    },
+    setSaleDetails: (state, action) => {
+      state.saleDetails = action.payload
+    },
+    setSaleId: (state, action) => {
+      state.saleId = action.payload;
+    },
   }
 })
 
 export const {
   showFormElement,
   refreshTable,
-  applyFilter
+  applyFilter,
+  showVisualSaleElement,
+  setSaleDetails,
+  setSaleId
 } = crudSlice.actions
 
 export default crudSlice.reducer
