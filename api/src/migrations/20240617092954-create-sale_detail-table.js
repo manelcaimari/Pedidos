@@ -65,13 +65,15 @@ module.exports = {
       }
     })
     await queryInterface.addIndex('sale_details', ['saleId'], {
-      name: 'sale_details_saleId_index'
+      name: 'unique_sale_details_saleId_index'
     })
+
     await queryInterface.addIndex('sale_details', ['productId'], {
-      name: 'sale_details_productId_index'
+      name: 'unique_sale_details_productId_index'
     })
+
     await queryInterface.addIndex('sale_details', ['priceId'], {
-      name: 'sale_details_priceId_index'
+      name: 'unique_sale_details_priceId_index'
     })
   },
 

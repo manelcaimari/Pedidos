@@ -3,7 +3,7 @@ import { store } from '../../redux/store.js'
 import { refreshTable } from '../../redux/crud-slice.js'
 
 class Form extends HTMLElement {
-  constructor () {
+  constructor() {
     super()
     this.unsubscribe = null
     this.formElementData = null
@@ -11,7 +11,7 @@ class Form extends HTMLElement {
     this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/products`
   }
 
-  connectedCallback () {
+  connectedCallback() {
     this.unsubscribe = store.subscribe(() => {
       const currentState = store.getState()
 
@@ -29,7 +29,7 @@ class Form extends HTMLElement {
     this.render()
   }
 
-  render () {
+  render() {
     this.shadow.innerHTML =/* html */ `
       <style>
         a {
@@ -216,7 +216,7 @@ class Form extends HTMLElement {
     this.tabsButton()
   }
 
-  async getProductCategories (selectedCategoryId = null) {
+  async getProductCategories(selectedCategoryId = null) {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/product-categories`)
     this.productCategories = await response.json()
 
@@ -238,7 +238,7 @@ class Form extends HTMLElement {
     })
   }
 
-  async getPrices () {
+  async getPrices() {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/prices`)
     this.pricesCategories = await response.json()
 
@@ -252,7 +252,7 @@ class Form extends HTMLElement {
     }
   }
 
-  setupEventListeners () {
+  setupEventListeners() {
     this.shadow.querySelector('.button-reset').addEventListener('click', () => {
       this.resetForm()
     })
@@ -265,6 +265,10 @@ class Form extends HTMLElement {
 
       for (const [key, value] of formData.entries()) {
         formDataJson[key] = value !== '' ? value : null
+      }
+      if (!formDataJson.productCategoryId) {
+        alert('Por favor, selecciona una categoría de producto válida.');
+        return;
       }
 
       const method = formDataJson.id ? 'PUT' : 'POST'
@@ -342,7 +346,7 @@ class Form extends HTMLElement {
     this.shadow.querySelector("[name='id']").value = ''
   }
 
-  tabsButton () {
+  tabsButton() {
     this.shadow.querySelector('.form').addEventListener('click', async (event) => {
       if (event.target.closest('.tab')) {
         const tab = event.target.closest('.tab')

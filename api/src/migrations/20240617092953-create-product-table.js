@@ -14,11 +14,11 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'products',
+          model: 'product_categories',
           key: 'id'
         },
         onUpdate: 'CASCADE',
-        onDelete: 'NO ACTION'
+        onDelete: 'CASCADE'
       },
       name: {
         type: Sequelize.STRING,

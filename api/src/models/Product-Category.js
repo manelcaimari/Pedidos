@@ -26,26 +26,24 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.DATE
       }
     }, {
-      sequelize,
-      tableName: 'product_categories',
-      timestamps: true,
-      paranoid: true,
-      indexes: [
-        {
-          name: 'PRIMARY',
-          unique: true,
-          using: 'BTREE',
-          fields: [
-            { name: 'id' }
-          ]
-        }
-      ]
-    }
+    sequelize,
+    tableName: 'product_categories',
+    timestamps: true,
+    paranoid: true,
+    indexes: [
+      {
+        name: 'PRIMARY',
+        unique: true,
+        using: 'BTREE',
+        fields: [{ name: 'id' }]
+      }
+    ]
+  }
   )
 
   ProductCategory.associate = function (models) {
-    ProductCategory.hasMany(models.SentEmail, { as: 'products', foreignKey: 'ProductCategoryId' })
-  }
+    ProductCategory.hasMany(models.Product, { as: 'products', foreignKey: 'productCategoryId' });
+  };
 
   return ProductCategory
 }
