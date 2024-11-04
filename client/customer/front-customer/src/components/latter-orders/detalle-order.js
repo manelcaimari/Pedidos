@@ -264,7 +264,7 @@ class Devolution extends HTMLElement {
     this.shadow.querySelector('.filter-modal').classList.remove('visible')
 
     document.dispatchEvent(new CustomEvent('showFilterModal', {
-      detail: { saleId: saleId, reference }
+      detail: { saleId, reference }
     }))
     document.dispatchEvent(new CustomEvent('changeHeader', {
       detail: {
@@ -279,7 +279,6 @@ class Devolution extends HTMLElement {
       behavior: 'smooth'
     })
   }
-
 }
 
 customElements.define('devolutionorder-component', Devolution)

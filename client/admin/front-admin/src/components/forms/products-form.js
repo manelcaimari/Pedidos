@@ -267,8 +267,8 @@ class Form extends HTMLElement {
         formDataJson[key] = value !== '' ? value : null
       }
       if (!formDataJson.productCategoryId) {
-        alert('Por favor, selecciona una categoría de producto válida.');
-        return;
+        alert('Por favor, selecciona una categoría de producto válida.')
+        return
       }
 
       const method = formDataJson.id ? 'PUT' : 'POST'

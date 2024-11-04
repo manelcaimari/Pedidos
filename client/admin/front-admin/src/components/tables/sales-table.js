@@ -4,44 +4,39 @@ import { showVisualSaleElement, applyFilter } from '../../redux/crud-slice.js'
 
 class Table extends HTMLElement {
   constructor() {
-    super();
-    this.shadow = this.attachShadow({ mode: 'open' });
-    this.data = [];
-    this.unsubscribe = null;
-    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/sales`;
-    this.queryString = null;
-    this.page = 1;
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+    this.data = []
+    this.unsubscribe = null
+    this.endpoint = `${import.meta.env.VITE_API_URL}/api/admin/sales`
+    this.queryString = null
+    this.page = 1
   }
 
   async connectedCallback() {
     this.unsubscribe = store.subscribe(async () => {
-      const currentState = store.getState();
+      const currentState = store.getState()
 
       if (currentState.crud.tableEndpoint && isEqual(this.endpoint, currentState.crud.tableEndpoint)) {
-        await this.loadData();
-        await this.render();
+        await this.loadData()
+        await this.render()
       }
 
       if (!isEqual(this.queryString, currentState.crud.queryString)) {
-        this.queryString = currentState.crud.queryString;
-        await this.loadData();
-        await this.render();
+        this.queryString = currentState.crud.queryString
+        await this.loadData()
+        await this.render()
       }
-
 
       if (currentState.crud.visualSaleElement || currentState.crud.saleDetails) {
-        this.renderSale(currentState.crud.visualSaleElement || currentState.crud.saleDetails);
+        this.renderSale(currentState.crud.visualSaleElement || currentState.crud.saleDetails)
       }
-    });
+    })
 
-    await this.loadData();
-    await this.render();
+    await this.loadData()
+    await this.render()
   }
 
-
-  renderSale(saleData) {
-    console.log('Renderizando datos de la venta:', saleData);
-  }
   async loadData() {
     const endpoint = this.queryString ? `${this.endpoint}?${this.queryString}&page=${this.page}` : `${this.endpoint}?page=${this.page}`
     const response = await fetch(endpoint)
@@ -264,8 +259,6 @@ class Table extends HTMLElement {
       editLi.dataset.id = customer.id
       editLi.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C21.27,16.39 17,19.5 12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C15.76,17.5 19.17,15.36 20.82,12C19.17,8.64 15.76,6.5 12,6.5C8.24,6.5 4.83,8.64 3.18,12Z" /></svg>'
 
-
-
       ulButtons.appendChild(editLi)
       buttonsDiv.appendChild(ulButtons)
 
@@ -281,8 +274,6 @@ class Table extends HTMLElement {
       elementItemList = document.createElement('li')
       elementItemList.textContent = `id del cliente: ${customer.customerId}`
       ulData.appendChild(elementItemList)
-
-
 
       elementItemList = document.createElement('li')
       elementItemList.textContent = `referencia: ${customer.reference}`
@@ -301,6 +292,7 @@ class Table extends HTMLElement {
     })
     tableBody.appendChild(fragment)
 
+    this.rendervisualButton()
     this.renderRegisterButtons()
     this.renderFilterButton()
   }
@@ -318,6 +310,16 @@ class Table extends HTMLElement {
       filterButton.classList.add('active')
       filterCancelButton.classList.remove('active')
     })
+  }
+
+  async rendervisualButton() {
+    const visualButton = this.shadow.querySelector('.visual-button')
+
+    visualButton.addEventListener('click', (e) => {
+      document.dispatchEvent(new CustomEvent('showtablemodal'))
+    })
+
+    visualButton.classList.add('active')
   }
 
   async renderRegisterButtons() {

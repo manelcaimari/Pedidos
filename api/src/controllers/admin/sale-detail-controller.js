@@ -72,7 +72,6 @@ exports.findOne = (req, res) => {
   })
 }
 
-
 exports.update = (req, res) => {
   const id = req.params.id
 
@@ -117,10 +116,10 @@ exports.delete = (req, res) => {
   })
 }
 exports.findBySaleId = (req, res) => {
-  const saleId = req.query.saleId;
+  const saleId = req.query.saleId
 
   SaleDetail.findAll({
-    where: { saleId: saleId },
+    where: { saleId },
     attributes: ['id', 'saleId', 'productId', 'priceId', 'productName', 'basePrice', 'quantity']
   })
     .then(data => {
@@ -129,12 +128,12 @@ exports.findBySaleId = (req, res) => {
       } else {
         res.status(404).json({
           message: `No se encontraron detalles para la venta con id=${saleId}.`
-        });
+        })
       }
     })
     .catch(err => {
       res.status(500).json({
         message: 'Error al recuperar los detalles de la venta: ' + err.message
-      });
-    });
-};
+      })
+    })
+}

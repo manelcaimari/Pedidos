@@ -20,13 +20,12 @@ class Conference extends HTMLElement {
         await this.loadData()
         this.render()
       }
-    });
-
+    })
 
     store.dispatch(setQueryString(this.queryString))
 
-    await this.loadData();
-    this.render();
+    await this.loadData()
+    this.render()
   }
 
   disconnectedCallback() {

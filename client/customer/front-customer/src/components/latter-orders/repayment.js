@@ -67,7 +67,7 @@ class Repayment extends HTMLElement {
           return {
             ...product,
             currentPrice: priceInfo ? priceInfo.basePrice : product.basePrice,
-            priceId: priceInfo ? priceInfo.id : product.priceId,
+            priceId: priceInfo ? priceInfo.id : product.priceId
           }
         })
 
@@ -83,6 +83,7 @@ class Repayment extends HTMLElement {
       return null
     }
   }
+
   render() {
     this.shadow.innerHTML = /* html */`
       <style>
@@ -252,7 +253,7 @@ class Repayment extends HTMLElement {
       }
 
       minusButton.addEventListener('click', () => {
-        let quantity = parseInt(quantityInput.value)
+        const quantity = parseInt(quantityInput.value)
         if (quantity > 0) {
           quantityInput.value = quantity - 1
           this.returnQuantities[product.productName] = quantity - 1
@@ -260,7 +261,7 @@ class Repayment extends HTMLElement {
       })
 
       plusButton.addEventListener('click', () => {
-        let quantity = parseInt(quantityInput.value)
+        const quantity = parseInt(quantityInput.value)
         const maxQuantity = parseInt(quantityInput.max)
         if (quantity < maxQuantity) {
           quantityInput.value = quantity + 1
@@ -292,21 +293,21 @@ class Repayment extends HTMLElement {
 
       if (!saleId) {
         alert('El ID de venta no es válido.')
-        return;
+        return
       }
 
       const orderDetails = await this.getSaleDetails(saleId)
 
       if (orderDetails === null || !Array.isArray(orderDetails) || orderDetails.length === 0) {
         alert('No se pudieron obtener los detalles de la venta. Verifica la consola para más detalles.')
-        return;
+        return
       }
 
       const totalBasePrice = orderDetails.reduce((acc, product) => {
         const quantityInput = this.shadow.querySelector(`input[data-product-name="${product.productName}"]`)
-        const quantity = quantityInput ? parseInt(quantityInput.value) : 0;
-        return acc + parseFloat(product.basePrice) * quantity;
-      }, 0);
+        const quantity = quantityInput ? parseInt(quantityInput.value) : 0
+        return acc + parseFloat(product.basePrice) * quantity
+      }, 0)
 
       const returnData = {
         saleId,
@@ -319,13 +320,13 @@ class Repayment extends HTMLElement {
         updatedAt: new Date().toISOString(),
         returnDetails: orderDetails.map(product => {
           const quantityInput = this.shadow.querySelector(`input[data-product-name="${product.productName}"]`)
-          const quantity = quantityInput ? parseInt(quantityInput.value) : 0;
+          const quantity = quantityInput ? parseInt(quantityInput.value) : 0
           return {
             saleDetailId: product.saleDetailId || 'No saleDetailId',
             productId: product.productId || 'No productId',
             productName: product.productName || 'No productName',
             quantity,
-            priceId: product.priceId || product.basePrice,
+            priceId: product.priceId || product.basePrice
           }
         })
       }
@@ -333,8 +334,8 @@ class Repayment extends HTMLElement {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/returns`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(returnData),
-        });
+          body: JSON.stringify(returnData)
+        })
 
         if (response.ok) {
           this.resetOrderItems()
@@ -351,11 +352,11 @@ class Repayment extends HTMLElement {
       }
     })
   }
+
   resetOrderItems() {
     this.returnQuantities = {}
     this.orderData = []
     this.shadow.querySelector('.detalls').classList.remove('visible')
   }
-
 }
 customElements.define('repayment-component', Repayment)
