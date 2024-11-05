@@ -16,18 +16,15 @@ class Table extends HTMLElement {
   async connectedCallback() {
     this.unsubscribe = store.subscribe(async () => {
       const currentState = store.getState()
-
       if (currentState.crud.tableEndpoint && isEqual(this.endpoint, currentState.crud.tableEndpoint)) {
         await this.loadData()
         await this.render()
       }
-
       if (!isEqual(this.queryString, currentState.crud.queryString)) {
         this.queryString = currentState.crud.queryString
         await this.loadData()
         await this.render()
       }
-
       if (currentState.crud.visualSaleElement || currentState.crud.saleDetails) {
         this.renderSale(currentState.crud.visualSaleElement || currentState.crud.saleDetails)
       }
@@ -347,7 +344,6 @@ class Table extends HTMLElement {
         const id = event.target.closest('.visual-button').dataset.id
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/sales/${id}`)
         const data = await response.json()
-        console.log('Datos obtenidos del servidor:', data)
 
         const visualSaleElement = { data }
         store.dispatch(showVisualSaleElement(visualSaleElement))
