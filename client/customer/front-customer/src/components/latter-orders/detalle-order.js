@@ -7,41 +7,44 @@ class Devolution extends HTMLElement {
     this.shadow = this.attachShadow({ mode: 'open' })
     this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/sales`
     this.data = { rows: [], saleId: null }
+    this.saleId = null
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     document.addEventListener('showorderModal', this.handleMessage.bind(this))
+    this.unsubscribe = store.subscribe(() => {
+      const state = store.getState()
+      const newSaleId = state.crud.saleId
+
+      if (newSaleId !== this.saleId) {
+        this.saleId = newSaleId
+        if (this.saleId) {
+          this.getSaleDetails(this.saleId).then(() => {
+            this.render()
+          })
+          this.getReturns(this.saleId)
+        } else {
+          console.error('No valid saleId to fetch details')
+        }
+      }
+    })
     this.render()
   }
 
   disconnectedCallback() {
     document.removeEventListener('showorderModal', this.handleMessage.bind(this))
-  }
 
-  async handleMessage(event) {
-    const state = store.getState()
-    const saleId = state.crud.saleId
-
-    if (!saleId) {
-      return
-    }
-
-    await this.getSaleDetails(saleId)
-
-    if (this.data && this.data.rows && Array.isArray(this.data.rows)) {
-      this.render()
-      this.shadow.querySelector('.filter-modal').classList.add('visible')
+    if (this.unsubscribe) {
+      this.unsubscribe()
     }
   }
 
-  async getSaleDetails(saleId) {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      }
-      this.data = await response.json()
-    } catch (error) {
+  handleMessage(event) {
+    const filterModal = this.shadow.querySelector('.filter-modal')
+    if (filterModal) {
+      filterModal.classList.add('visible')
+    } else {
+      console.warn('El elemento .filter-modal no está disponible en el DOM')
     }
   }
 
@@ -177,15 +180,91 @@ class Devolution extends HTMLElement {
       </div>
     `
     this.renderOrderButton()
-    this.populateOrderItems()
+    this.populateOrderItems(this.data.rows)
     this.totalPrice()
   }
 
-  populateOrderItems() {
+  async getSaleDetails(saleId, returnId) {
+    try {
+      if (returnId) {
+        await this.getReturnDetails(returnId)
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`)
+      }
+      this.data = await response.json()
+
+      this.populateOrderItems(this.data.rows)
+    } catch (error) {
+      console.error('Error fetching sale details:', error)
+    }
+  }
+
+  async getReturns(saleId) {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/returns?saleId=${saleId}`)
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+
+      const data = await response.json()
+
+      if (data.rows && data.rows.length > 0) {
+        const returnId = data.rows[0].id
+        await this.getReturnDetails(returnId)
+        return { returnId }
+      } else {
+        return { returnId: null }
+      }
+    } catch (error) {
+      console.error('Error fetching returns:', error)
+      return { returnId: null }
+    }
+  }
+
+  async getReturnDetails(returnId) {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/return-details?returnId=${returnId}`)
+
+      if (!response.ok) {
+        throw new Error('Error al obtener los detalles de la devolución: ' + response.statusText)
+      }
+
+      const data = await response.json()
+
+      if (data.rows && data.rows.length > 0) {
+        data.rows.forEach(returnedItem => {
+          const itemInSale = this.data.rows.find(item => item.productId === returnedItem.productId)
+          if (itemInSale) {
+            itemInSale.returnedQuantity = returnedItem.quantity
+          } else {
+            console.warn(`No se encontró el producto en la venta para productId: ${returnedItem.productId}`)
+          }
+        })
+      } else {
+        console.warn('No hay filas en los detalles de la devolución.')
+      }
+
+      this.populateOrderItems(this.data.rows)
+    } catch (error) {
+      console.error('Error fetching return details:', error)
+    }
+  }
+
+  populateOrderItems(items) {
     const orderItem = this.shadow.querySelector('.order-item')
+    if (!orderItem) {
+      console.warn('El elemento .order-item no está disponible en el DOM')
+      return
+    }
+
+    orderItem.innerHTML = ''
     const fragment = document.createDocumentFragment()
 
-    this.data.rows.forEach(item => {
+    items.forEach(item => {
       const orderElement = document.createElement('div')
       orderElement.classList.add('order')
 
@@ -212,6 +291,14 @@ class Devolution extends HTMLElement {
       const unities = document.createElement('span')
       unities.classList.add('item-united')
       unities.textContent = `${item.quantity}`
+
+      if (item.returnedQuantity && item.returnedQuantity > 0) {
+        const returnedInfo = document.createElement('span')
+        returnedInfo.classList.add('item-returned')
+        returnedInfo.textContent = ` (Devuelto: ${item.returnedQuantity})`
+        unities.appendChild(returnedInfo)
+      }
+
       quantityControl.appendChild(unities)
       itemDetail.appendChild(quantityControl)
 
@@ -248,15 +335,22 @@ class Devolution extends HTMLElement {
     const reference = state.crud.reference
 
     if (!saleId) {
+      console.error('No sale ID provided, aborting order process.')
       return
     }
 
-    const orderDetails = this.data.rows.map(item => ({
-      productName: item.productName,
-      quantity: item.quantity,
-      basePrice: item.basePrice,
-      totalPrice: (parseFloat(item.basePrice) * parseFloat(item.quantity)).toFixed(2) + ' €'
-    }))
+    const orderDetails = this.data.rows.map(item => {
+      const remainingQuantity = item.quantity - (item.returnedQuantity || 0)
+
+      return {
+        productName: item.productName,
+        quantity: item.returnedQuantity ? remainingQuantity : item.quantity,
+        basePrice: item.basePrice,
+        totalPrice: (parseFloat(item.basePrice) * (item.returnedQuantity ? remainingQuantity : item.quantity)).toFixed(2) + ' €'
+      }
+    })
+
+    console.log(orderDetails)
 
     store.dispatch(setOrderDetails(orderDetails))
     store.dispatch(setReference(reference))
@@ -273,6 +367,7 @@ class Devolution extends HTMLElement {
         linkHref: 'http://dev-pedidos.com/cliente/pedidos-anteriores'
       }
     }))
+
     document.body.style.overflow = 'hidden'
     window.scrollTo({
       top: 0,

@@ -167,13 +167,13 @@ class Conference extends HTMLElement {
         const saleId = this.data.rows[index].id
         const reference = this.data.rows[index].reference
 
+        document.dispatchEvent(new CustomEvent('showorderModal', {
+          detail: { saleId, reference }
+        }))
+
         store.dispatch(setSaleId(saleId))
         store.dispatch(setReference(reference))
 
-        const event = new CustomEvent('showorderModal', {
-          detail: { saleId, reference }
-        })
-        document.dispatchEvent(event)
         document.dispatchEvent(new CustomEvent('changeHeader', {
           detail: {
             title: `Resumen de tu pedido: ${reference}`,
@@ -181,11 +181,9 @@ class Conference extends HTMLElement {
             linkHref: 'http://dev-pedidos.com/cliente/pedidos-anteriores'
           }
         }))
+
         document.body.style.overflow = 'hidden'
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        })
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       })
     })
   }

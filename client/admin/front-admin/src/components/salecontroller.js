@@ -260,7 +260,6 @@ class SaleController extends HTMLElement {
         throw new Error('Network response was not ok')
       }
       const data = await response.json()
-      console.log('Datos de devoluciones recibidos:', data)
 
       if (data.rows && data.rows.length > 0) {
         const totalBasePrice = parseFloat(data.rows[0].totalBasePrice)

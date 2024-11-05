@@ -39,11 +39,10 @@ const crudSlice = createSlice({
     },
     setReference(state, action) {
       state.reference = action.payload
-    },
-
+    }
 
   }
 })
 
-export const { toggleCart, setCart, setQueryString, setSaleId, setOrderDetails, setReference, } = crudSlice.actions
+export const { toggleCart, setCart, setQueryString, setSaleId, setOrderDetails, setReference } = crudSlice.actions
 export default crudSlice.reducer

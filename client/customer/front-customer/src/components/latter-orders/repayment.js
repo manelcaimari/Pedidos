@@ -4,83 +4,42 @@ class Repayment extends HTMLElement {
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/sales`
-    this.productEndpoint = `${import.meta.env.VITE_API_URL}/api/client/products`
     this.orderData = []
     this.returnQuantities = {}
+    this.saleId = null
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     document.addEventListener('showFilterModal', this.handleMessage.bind(this))
-    this.orderData = []
-    this.render()
+
+    this.unsubscribe = store.subscribe(() => {
+      const state = store.getState()
+      const newSaleId = state.crud.saleId
+      const newOrderDetails = state.crud.orderDetails
+
+      if (newSaleId !== this._saleId) {
+        this._saleId = newSaleId
+        this.getSaleDetails(this._saleId)
+      }
+
+      if (JSON.stringify(newOrderDetails) !== JSON.stringify(this.orderData)) {
+        this.orderData = newOrderDetails
+        this.cosita()
+      }
+    })
+
+    await this.render()
   }
 
   disconnectedCallback() {
+    this.unsubscribe()
     document.removeEventListener('showFilterModal', this.handleMessage.bind(this))
   }
 
   handleMessage(event) {
-    const saleId = event.detail.saleId
-    if (!saleId) {
-      alert('Sale ID no definido, no se puede procesar la devolución.')
-      return
-    }
-    this.getSaleDetails(saleId)
-  }
-
-  async getSaleDetails(saleId) {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`)
-      if (!response.ok) {
-        alert('Error al obtener los detalles de la venta.')
-        return null
-      }
-
-      const saleDetails = await response.json()
-      if (saleDetails && saleDetails.count > 0 && Array.isArray(saleDetails.rows) && saleDetails.rows.length > 0) {
-        this.orderData = saleDetails.rows.map(item => ({
-          saleDetailId: item.id || 'No saleDetailId',
-          saleId: item.saleId || 'No saleId',
-          productId: item.productId || 'No productId',
-          productName: item.productName || 'No productName',
-          basePrice: item.basePrice || 'No basePrice',
-          priceId: item.priceId || 'No priceId',
-          quantity: item.quantity || 0,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt
-        }))
-
-        const productIds = this.orderData.map(item => item.productId).join(',')
-        const priceResponse = await fetch(`${this.productEndpoint}?id=${productIds}`)
-
-        if (!priceResponse.ok) {
-          alert('Error al obtener los precios de los productos.')
-          return null
-        }
-
-        const priceData = await priceResponse.json()
-        const priceArray = Array.isArray(priceData) ? priceData : priceData.rows || priceData.data || []
-
-        this.orderData = this.orderData.map(product => {
-          const priceInfo = priceArray.find(price => price.productId === product.productId)
-          return {
-            ...product,
-            currentPrice: priceInfo ? priceInfo.basePrice : product.basePrice,
-            priceId: priceInfo ? priceInfo.id : product.priceId
-          }
-        })
-
-        this.render()
-        this.shadow.querySelector('.detalls').classList.add('visible')
-        return this.orderData
-      } else {
-        alert('No se encontraron detalles para la venta.')
-        return null
-      }
-    } catch (error) {
-      alert('Error inesperado: ' + error.message)
-      return null
+    const detailsElement = this.shadow.querySelector('.detalls')
+    if (detailsElement) {
+      detailsElement.classList.add('visible')
     }
   }
 
@@ -204,17 +163,39 @@ class Repayment extends HTMLElement {
         </div>
       </div>
     `
-    this.populateOrderItems()
+
     this.renderOrderButton()
   }
 
-  populateOrderItems() {
-    const ordersContainer = this.shadow.querySelector('.order-item')
-    ordersContainer.innerHTML = ''
+  async getSaleDetails(saleId) {
+    console.log('Obteniendo detalles para el saleId:', saleId)
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?Id=${saleId}`)
+      console.log('Respuesta de la API:', response)
+      if (!response.ok) {
+        console.error('Error en la respuesta de getSaleDetails:', response.statusText)
+        return null
+      }
+      const data = await response.json()
+      console.log('Detalles de la venta:', data)
+      return data
+    } catch (error) {
+      console.error('Error en getSaleDetails:', error)
+      return null
+    }
+  }
 
+  cosita() {
+    const ordersContainer = this.shadow.querySelector('.order-item')
+    if (!ordersContainer) {
+      console.warn('populateOrderItems: No se encontró el contenedor .order-item en el DOM')
+      return
+    }
+
+    ordersContainer.innerHTML = ''
     const fragment = document.createDocumentFragment()
 
-    this.orderData.forEach(product => {
+    this.orderData.forEach((product, index) => {
       const orderElement = document.createElement('div')
       orderElement.classList.add('order')
 
@@ -291,12 +272,17 @@ class Repayment extends HTMLElement {
       const saleId = state.crud.saleId
       const reference = state.crud.reference
 
+      console.log('Estado del store:', state)
+      console.log('ID de venta:', saleId)
+      console.log('Referencia:', reference)
+
       if (!saleId) {
         alert('El ID de venta no es válido.')
         return
       }
 
       const orderDetails = await this.getSaleDetails(saleId)
+      console.log('Detalles de la venta:', orderDetails)
 
       if (orderDetails === null || !Array.isArray(orderDetails) || orderDetails.length === 0) {
         alert('No se pudieron obtener los detalles de la venta. Verifica la consola para más detalles.')
@@ -308,6 +294,8 @@ class Repayment extends HTMLElement {
         const quantity = quantityInput ? parseInt(quantityInput.value) : 0
         return acc + parseFloat(product.basePrice) * quantity
       }, 0)
+
+      console.log('Precio total base:', totalBasePrice)
 
       const returnData = {
         saleId,
