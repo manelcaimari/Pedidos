@@ -90,6 +90,9 @@ module.exports = function (sequelize, DataTypes) {
 
   ReturnDetail.associate = function (models) {
     ReturnDetail.belongsTo(models.Return, { as: 'return', foreignKey: 'returnId' })
+    ReturnDetail.belongsTo(models.Product, { as: 'product', foreignKey: 'productId' })
+    ReturnDetail.belongsTo(models.Price, { as: 'price', foreignKey: 'priceId' })
+    ReturnDetail.belongsTo(models.SaleDetail, { as: 'saleDetail', foreignKey: 'saledetailId' })
   }
 
   return ReturnDetail

@@ -189,14 +189,13 @@ class Devolution extends HTMLElement {
       if (returnId) {
         await this.getReturnDetails(returnId)
       }
-
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`)
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`)
       }
       this.data = await response.json()
-
       this.populateOrderItems(this.data.rows)
+      this.totalPrice()
     } catch (error) {
       console.error('Error fetching sale details:', error)
     }
@@ -204,6 +203,8 @@ class Devolution extends HTMLElement {
 
   async getReturns(saleId) {
     try {
+      console.log(`Fetching returns for saleId: ${saleId}`) // Log para verificar el saleId
+
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/returns?saleId=${saleId}`)
 
       if (!response.ok) {
@@ -212,16 +213,22 @@ class Devolution extends HTMLElement {
 
       const data = await response.json()
 
+      console.log('Data received from API:', data)
+
       if (data.rows && data.rows.length > 0) {
-        const returnId = data.rows[0].id
-        await this.getReturnDetails(returnId)
-        return { returnId }
+        const returnIds = data.rows.map(row => row.id)
+
+        console.log('Return IDs found:', returnIds)
+        const returnDetailsPromises = returnIds.map(returnId => this.getReturnDetails(returnId))
+        await Promise.all(returnDetailsPromises)
+        return { returnIds }
       } else {
-        return { returnId: null }
+        console.log('No returns found for this saleId')
+        return { returnIds: null }
       }
     } catch (error) {
       console.error('Error fetching returns:', error)
-      return { returnId: null }
+      return { returnIds: null }
     }
   }
 
@@ -234,8 +241,9 @@ class Devolution extends HTMLElement {
       }
 
       const data = await response.json()
-
       if (data.rows && data.rows.length > 0) {
+        console.log(`Details received for returnId ${returnId}:`, data.rows)
+
         data.rows.forEach(returnedItem => {
           const itemInSale = this.data.rows.find(item => item.productId === returnedItem.productId)
           if (itemInSale) {
@@ -247,7 +255,6 @@ class Devolution extends HTMLElement {
       } else {
         console.warn('No hay filas en los detalles de la devolución.')
       }
-
       this.populateOrderItems(this.data.rows)
     } catch (error) {
       console.error('Error fetching return details:', error)
@@ -260,70 +267,61 @@ class Devolution extends HTMLElement {
       console.warn('El elemento .order-item no está disponible en el DOM')
       return
     }
-
     orderItem.innerHTML = ''
     const fragment = document.createDocumentFragment()
-
     items.forEach(item => {
       const orderElement = document.createElement('div')
       orderElement.classList.add('order')
-
       const orderDetails = document.createElement('div')
       orderDetails.classList.add('item-details')
-
       const title = document.createElement('p')
       title.classList.add('item-name')
       title.textContent = item.productName
-
       const priceP = document.createElement('p')
       priceP.classList.add('item-price')
-      priceP.textContent = `${(parseFloat(item.basePrice) * parseFloat(item.quantity)).toFixed(2)} €`
-
+      if (parseFloat(item.returnedQuantity) > 0) {
+        const adjustedQuantity = parseFloat(item.quantity) - parseFloat(item.returnedQuantity)
+        priceP.textContent = `${(parseFloat(item.basePrice) * adjustedQuantity).toFixed(2)} € (Precio: ${(parseFloat(item.basePrice) * parseFloat(item.quantity))}-${(parseFloat(item.basePrice) * parseFloat(item.returnedQuantity))} )`
+      } else {
+        priceP.textContent = `${(parseFloat(item.basePrice) * parseFloat(item.quantity)).toFixed(2)} €`
+      }
       orderDetails.appendChild(title)
       orderDetails.appendChild(priceP)
-
       const itemDetail = document.createElement('div')
       itemDetail.classList.add('item-detail')
-
       const quantityControl = document.createElement('div')
       quantityControl.classList.add('quantity-control')
-
       const unities = document.createElement('span')
       unities.classList.add('item-united')
       unities.textContent = `${item.quantity}`
-
       if (item.returnedQuantity && item.returnedQuantity > 0) {
         const returnedInfo = document.createElement('span')
         returnedInfo.classList.add('item-returned')
         returnedInfo.textContent = ` (Devuelto: ${item.returnedQuantity})`
         unities.appendChild(returnedInfo)
       }
-
       quantityControl.appendChild(unities)
       itemDetail.appendChild(quantityControl)
-
       orderElement.appendChild(orderDetails)
       orderElement.appendChild(itemDetail)
       fragment.appendChild(orderElement)
     })
-
     orderItem.appendChild(fragment)
+    this.totalPrice()
   }
 
   async totalPrice() {
-    const total = this.data.rows.reduce((acc, item) => {
-      const quantity = parseFloat(item.quantity) || 0
-      const basePrice = parseFloat(item.basePrice) || 0
-      return acc + (basePrice * quantity)
-    }, 0).toFixed(2)
-
     const totalPriceElement = this.shadow.querySelector('.total-price')
-    totalPriceElement.textContent = `${total} €`
+    const total = this.data.rows.reduce((sum, item) => {
+      const adjustedQuantity = item.returnedQuantity ? item.quantity - item.returnedQuantity : item.quantity
+      return sum + (parseFloat(item.basePrice) * adjustedQuantity)
+    }, 0)
+
+    totalPriceElement.textContent = `${total.toFixed(2)} €`
   }
 
   renderOrderButton() {
     const button = this.shadow.querySelector('.view-order-button')
-
     button.addEventListener('click', () => {
       this.handleOrderButtonClick()
     })
@@ -343,13 +341,15 @@ class Devolution extends HTMLElement {
       const remainingQuantity = item.quantity - (item.returnedQuantity || 0)
 
       return {
+        productId: item.productId,
+        saledetailId: item.id,
+        priceId: item.priceId,
         productName: item.productName,
         quantity: item.returnedQuantity ? remainingQuantity : item.quantity,
         basePrice: item.basePrice,
         totalPrice: (parseFloat(item.basePrice) * (item.returnedQuantity ? remainingQuantity : item.quantity)).toFixed(2) + ' €'
       }
     })
-
     console.log(orderDetails)
 
     store.dispatch(setOrderDetails(orderDetails))

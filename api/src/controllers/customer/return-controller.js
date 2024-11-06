@@ -7,6 +7,8 @@ exports.create = async (req, res) => {
   const t = await sequelizeDb.sequelize.transaction()
 
   try {
+    console.log('Datos recibidos:', req.body)
+
     const { saleId, customerId, reference, totalBasePrice, returnDetails } = req.body
 
     if (!saleId || !customerId || !reference || totalBasePrice === undefined || !Array.isArray(returnDetails) || returnDetails.length === 0) {
@@ -21,13 +23,27 @@ exports.create = async (req, res) => {
       returnDate: new Date().toISOString().split('T')[0],
       returnTime: new Date().toLocaleTimeString(),
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }, { transaction: t })
 
+    console.log('Detalles de la devolución recibidos:', returnDetails)
     const returnDetailsToCreate = returnDetails.map(detail => {
-      if (!detail.saleDetailId) {
-        throw new Error(`El campo saleDetailId es obligatorio para el producto ${detail.productName}`)
+      console.log('Detalle completo recibido:', detail)
+
+      if (!detail.productId || !detail.priceId || !detail.quantity) {
+        throw new Error(`Faltan campos necesarios en el producto ${detail.productName}`)
       }
+
+      console.log('Detalle procesado para inserción:', {
+        returnId: newReturn.id,
+        productName: detail.productName,
+        productId: detail.productId,
+        priceId: detail.priceId,
+        quantity: detail.quantity,
+        saledetailId: detail.saledetailId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      })
 
       return {
         returnId: newReturn.id,
@@ -35,9 +51,9 @@ exports.create = async (req, res) => {
         productId: detail.productId,
         priceId: detail.priceId,
         quantity: detail.quantity,
-        saledetailId: detail.saleDetailId,
+        saledetailId: detail.saledetailId,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
     })
 
@@ -47,10 +63,11 @@ exports.create = async (req, res) => {
 
     res.status(201).json({
       message: 'Devolución creada correctamente.',
-      data: newReturn,
+      data: newReturn
     })
   } catch (error) {
     await t.rollback()
+    console.error('Error durante la transacción:', error)
     res.status(500).json({ message: 'Error procesando la devolución.', details: error.message })
   }
 }

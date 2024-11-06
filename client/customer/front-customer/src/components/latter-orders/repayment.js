@@ -17,14 +17,14 @@ class Repayment extends HTMLElement {
       const newSaleId = state.crud.saleId
       const newOrderDetails = state.crud.orderDetails
 
-      if (newSaleId !== this._saleId) {
-        this._saleId = newSaleId
-        this.getSaleDetails(this._saleId)
+      if (newSaleId !== this.saleId) {
+        this.saleId = newSaleId
+        this.getSaleDetails(this.saleId)
       }
 
       if (JSON.stringify(newOrderDetails) !== JSON.stringify(this.orderData)) {
         this.orderData = newOrderDetails
-        this.cosita()
+        this.renderOrderItems()
       }
     })
 
@@ -40,6 +40,10 @@ class Repayment extends HTMLElement {
     const detailsElement = this.shadow.querySelector('.detalls')
     if (detailsElement) {
       detailsElement.classList.add('visible')
+      this.handleBoundMessage = this.handleMessage.bind(this)
+      document.addEventListener('showFilterModal', this.handleBoundMessage)
+      // y en disconnectedCallback
+      document.removeEventListener('showFilterModal', this.handleBoundMessage)
     }
   }
 
@@ -168,29 +172,30 @@ class Repayment extends HTMLElement {
   }
 
   async getSaleDetails(saleId) {
-    console.log('Obteniendo detalles para el saleId:', saleId)
+    if (!saleId) return
+
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?Id=${saleId}`)
-      console.log('Respuesta de la API:', response)
-      if (!response.ok) {
-        console.error('Error en la respuesta de getSaleDetails:', response.statusText)
-        return null
-      }
+
+      if (!response.ok) return null
+
       const data = await response.json()
-      console.log('Detalles de la venta:', data)
-      return data
+
+      if (!data || !Array.isArray(data.rows)) return null
+
+      this.orderData = data.rows
+      this.renderOrderItems()
+
+      return this.orderData
     } catch (error) {
-      console.error('Error en getSaleDetails:', error)
       return null
     }
   }
 
-  cosita() {
+  renderOrderItems() {
     const ordersContainer = this.shadow.querySelector('.order-item')
-    if (!ordersContainer) {
-      console.warn('populateOrderItems: No se encontró el contenedor .order-item en el DOM')
-      return
-    }
+
+    if (!ordersContainer) return
 
     ordersContainer.innerHTML = ''
     const fragment = document.createDocumentFragment()
@@ -208,7 +213,8 @@ class Repayment extends HTMLElement {
 
       const priceP = document.createElement('p')
       priceP.classList.add('item-price')
-      priceP.textContent = `${product.basePrice} €`
+      const totalPrice = (parseFloat(product.basePrice) * parseFloat(product.quantity)).toFixed(2)
+      priceP.textContent = `${totalPrice} €`
 
       orderDetails.appendChild(titleP)
       orderDetails.appendChild(priceP)
@@ -221,23 +227,21 @@ class Repayment extends HTMLElement {
 
       const quantityInput = document.createElement('input')
       quantityInput.type = 'number'
-      quantityInput.value = this.returnQuantities[product.productName] || '0'
+      const productKey = product.productId || product.productName
+      quantityInput.value = this.returnQuantities[productKey] || '0'
       quantityInput.min = '0'
       quantityInput.max = product.quantity
       quantityInput.dataset.productName = product.productName
+      quantityInput.dataset.index = index
 
       const plusButton = document.createElement('button')
       plusButton.textContent = '+'
-
-      if (!(product.productName in this.returnQuantities)) {
-        this.returnQuantities[product.productName] = 0
-      }
 
       minusButton.addEventListener('click', () => {
         const quantity = parseInt(quantityInput.value)
         if (quantity > 0) {
           quantityInput.value = quantity - 1
-          this.returnQuantities[product.productName] = quantity - 1
+          this.returnQuantities[productKey] = quantity - 1
         }
       })
 
@@ -246,7 +250,7 @@ class Repayment extends HTMLElement {
         const maxQuantity = parseInt(quantityInput.max)
         if (quantity < maxQuantity) {
           quantityInput.value = quantity + 1
-          this.returnQuantities[product.productName] = quantity + 1
+          this.returnQuantities[productKey] = quantity + 1
         }
       })
 
@@ -260,64 +264,107 @@ class Repayment extends HTMLElement {
       itemDetail.appendChild(orderDetails)
       itemDetail.appendChild(quantityControl)
       orderElement.appendChild(itemDetail)
+
       fragment.appendChild(orderElement)
     })
+
     ordersContainer.appendChild(fragment)
+  }
+
+  getUpdatedProductDetails() {
+    const productDetails = []
+    const orderItems = this.shadow.querySelectorAll('.order')
+    const state = store.getState()
+
+    const productsInOrderDetails = state.crud.orderDetails
+
+    orderItems.forEach(orderItem => {
+      const quantityInput = orderItem.querySelector('input[type="number"]')
+      const productName = orderItem.querySelector('.item-name').textContent
+
+      if (quantityInput) {
+        const quantity = parseInt(quantityInput.value)
+
+        const product = productsInOrderDetails.find(p => p.productName === productName)
+
+        if (product) {
+          productDetails.push({
+            productName,
+            quantity,
+            basePrice: product.basePrice,
+            priceId: product.priceId,
+            saledetailId: product.saledetailId,
+            productId: product.productId
+          })
+        }
+      }
+    })
+
+    return productDetails
   }
 
   async renderOrderButton() {
     const button = this.shadow.querySelector('.view-order-button')
+
     button.addEventListener('click', async () => {
+      const productDetails = this.getUpdatedProductDetails()
+
+      if (!productDetails || productDetails.length === 0) {
+        console.error('No se encontraron detalles de productos.')
+        return
+      }
+
       const state = store.getState()
       const saleId = state.crud.saleId
+      const customerId = state.crud.customerId || 1
+      let totalBasePrice = 0
+
       const reference = state.crud.reference
 
-      console.log('Estado del store:', state)
-      console.log('ID de venta:', saleId)
-      console.log('Referencia:', reference)
+      productDetails.forEach(product => {
+        const { quantity, basePrice, productName } = product
 
-      if (!saleId) {
-        alert('El ID de venta no es válido.')
-        return
-      }
+        const quantityNumber = Number(quantity)
+        const basePriceNumber = Number(basePrice)
 
-      const orderDetails = await this.getSaleDetails(saleId)
-      console.log('Detalles de la venta:', orderDetails)
+        if (!isNaN(quantityNumber) && !isNaN(basePriceNumber) && quantityNumber > 0 && basePriceNumber > 0) {
+          const productTotal = quantityNumber * basePriceNumber
+          totalBasePrice += productTotal
 
-      if (orderDetails === null || !Array.isArray(orderDetails) || orderDetails.length === 0) {
-        alert('No se pudieron obtener los detalles de la venta. Verifica la consola para más detalles.')
-        return
-      }
+          console.log(`Producto: ${productName}, Cantidad: ${quantityNumber}, Precio Base: ${basePriceNumber}, Total: ${productTotal.toFixed(2)} €`)
+        } else {
+          console.error(`Datos inválidos para el producto ${product.productName}: cantidad o precio base no válidos`)
+        }
+      })
 
-      const totalBasePrice = orderDetails.reduce((acc, product) => {
-        const quantityInput = this.shadow.querySelector(`input[data-product-name="${product.productName}"]`)
-        const quantity = quantityInput ? parseInt(quantityInput.value) : 0
-        return acc + parseFloat(product.basePrice) * quantity
-      }, 0)
-
-      console.log('Precio total base:', totalBasePrice)
+      const orderDetails = productDetails.map(product => ({
+        productName: product.productName,
+        productId: product.productId,
+        priceId: product.priceId,
+        quantity: product.quantity,
+        saledetailId: product.saledetailId
+      }))
 
       const returnData = {
         saleId,
-        customerId: 1,
         reference,
+        customerId,
         totalBasePrice,
         returnDate: new Date().toISOString().split('T')[0],
         returnTime: new Date().toLocaleTimeString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         returnDetails: orderDetails.map(product => {
-          const quantityInput = this.shadow.querySelector(`input[data-product-name="${product.productName}"]`)
-          const quantity = quantityInput ? parseInt(quantityInput.value) : 0
           return {
-            saleDetailId: product.saleDetailId || 'No saleDetailId',
-            productId: product.productId || 'No productId',
-            productName: product.productName || 'No productName',
-            quantity,
-            priceId: product.priceId || product.basePrice
+            productName: product.productName,
+            productId: product.productId,
+            priceId: product.priceId,
+            quantity: product.quantity,
+            saledetailId: product.saledetailId
           }
         })
       }
+
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/returns`, {
           method: 'POST',
@@ -329,14 +376,34 @@ class Repayment extends HTMLElement {
           this.resetOrderItems()
           this.returnQuantities = {}
           this.render()
+
+          document.dispatchEvent(new CustomEvent('message', {
+            detail: {
+              message: 'Devolución procesada correctamente',
+              type: 'success'
+            }
+          }))
         } else {
           const error = await response.json()
           if (Array.isArray(error.message)) {
             alert('Error al procesar la devolución:\n' + error.message.join('\n'))
+
+            document.dispatchEvent(new CustomEvent('message', {
+              detail: {
+                message: 'Error al procesar la devolución',
+                type: 'error'
+              }
+            }))
           }
         }
       } catch (error) {
         alert('Error en la solicitud de devolución: ' + error.message)
+        document.dispatchEvent(new CustomEvent('message', {
+          detail: {
+            message: 'Error en la solicitud de devolución',
+            type: 'error'
+          }
+        }))
       }
     })
   }
