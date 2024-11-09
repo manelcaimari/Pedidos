@@ -23,8 +23,6 @@ class Devolution extends HTMLElement {
             this.render()
           })
           this.getReturns(this.saleId)
-        } else {
-          console.error('No valid saleId to fetch details')
         }
       }
     })
@@ -43,8 +41,6 @@ class Devolution extends HTMLElement {
     const filterModal = this.shadow.querySelector('.filter-modal')
     if (filterModal) {
       filterModal.classList.add('visible')
-    } else {
-      console.warn('El elemento .filter-modal no está disponible en el DOM')
     }
   }
 
@@ -179,6 +175,7 @@ class Devolution extends HTMLElement {
         </div>
       </div>
     `
+
     this.renderOrderButton()
     this.populateOrderItems(this.data.rows)
     this.totalPrice()
@@ -203,29 +200,18 @@ class Devolution extends HTMLElement {
 
   async getReturns(saleId) {
     try {
-      console.log(`Fetching returns for saleId: ${saleId}`) // Log para verificar el saleId
-
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/returns?saleId=${saleId}`)
-
       if (!response.ok) {
         throw new Error('Network response was not ok')
       }
-
       const data = await response.json()
-
-      console.log('Data received from API:', data)
-
       if (data.rows && data.rows.length > 0) {
         const returnIds = data.rows.map(row => row.id)
-
-        console.log('Return IDs found:', returnIds)
         const returnDetailsPromises = returnIds.map(returnId => this.getReturnDetails(returnId))
         await Promise.all(returnDetailsPromises)
         return { returnIds }
-      } else {
-        console.log('No returns found for this saleId')
-        return { returnIds: null }
       }
+      return { returnIds: null }
     } catch (error) {
       console.error('Error fetching returns:', error)
       return { returnIds: null }
@@ -235,32 +221,32 @@ class Devolution extends HTMLElement {
   async getReturnDetails(returnId) {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/return-details?returnId=${returnId}`)
-
       if (!response.ok) {
         throw new Error('Error al obtener los detalles de la devolución: ' + response.statusText)
       }
-
       const data = await response.json()
       if (data.rows && data.rows.length > 0) {
-        console.log(`Details received for returnId ${returnId}:`, data.rows)
-
+        const groupedItems = {}
         data.rows.forEach(returnedItem => {
-          const itemInSale = this.data.rows.find(item => item.productId === returnedItem.productId)
-          if (itemInSale) {
-            itemInSale.returnedQuantity = returnedItem.quantity
+          const { productId, quantity } = returnedItem
+          if (groupedItems[productId]) {
+            groupedItems[productId] += quantity
           } else {
-            console.warn(`No se encontró el producto en la venta para productId: ${returnedItem.productId}`)
+            groupedItems[productId] = quantity
           }
         })
-      } else {
-        console.warn('No hay filas en los detalles de la devolución.')
+        Object.entries(groupedItems).forEach(([productId, totalQuantity]) => {
+          const itemInSale = this.data.rows.find(item => item.productId == productId)
+          if (itemInSale) {
+            itemInSale.returnedQuantity = itemInSale.returnedQuantity ? itemInSale.returnedQuantity + totalQuantity : totalQuantity
+          }
+        })
+        this.populateOrderItems(this.data.rows)
       }
-      this.populateOrderItems(this.data.rows)
     } catch (error) {
-      console.error('Error fetching return details:', error)
+      console.error('Error al obtener los detalles de la devolución:', error)
     }
   }
-
   populateOrderItems(items) {
     const orderItem = this.shadow.querySelector('.order-item')
     if (!orderItem) {

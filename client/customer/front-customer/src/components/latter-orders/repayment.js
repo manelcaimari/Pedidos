@@ -42,7 +42,6 @@ class Repayment extends HTMLElement {
       detailsElement.classList.add('visible')
       this.handleBoundMessage = this.handleMessage.bind(this)
       document.addEventListener('showFilterModal', this.handleBoundMessage)
-      // y en disconnectedCallback
       document.removeEventListener('showFilterModal', this.handleBoundMessage)
     }
   }

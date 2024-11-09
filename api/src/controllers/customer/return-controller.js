@@ -10,7 +10,6 @@ exports.create = async (req, res) => {
     console.log('Datos recibidos:', req.body)
 
     const { saleId, customerId, reference, totalBasePrice, returnDetails } = req.body
-
     if (!saleId || !customerId || !reference || totalBasePrice === undefined || !Array.isArray(returnDetails) || returnDetails.length === 0) {
       return res.status(400).json({ message: 'Faltan datos requeridos para procesar la devolución.' })
     }
@@ -24,38 +23,37 @@ exports.create = async (req, res) => {
       returnTime: new Date().toLocaleTimeString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }, { transaction: t })
+    }, { transaction: t });
 
-    console.log('Detalles de la devolución recibidos:', returnDetails)
-    const returnDetailsToCreate = returnDetails.map(detail => {
-      console.log('Detalle completo recibido:', detail)
+    const returnDetailsToCreate = returnDetails
+      .filter(detail => detail.quantity > 0)
+      .map(detail => {
+        if (!detail.productId || !detail.priceId || !detail.quantity) {
+          throw new Error(`Faltan campos necesarios en el producto ${detail.productName}`)
+        }
 
-      if (!detail.productId || !detail.priceId || !detail.quantity) {
-        throw new Error(`Faltan campos necesarios en el producto ${detail.productName}`)
-      }
+        console.log('Detalle procesado para inserción:', {
+          returnId: newReturn.id,
+          productName: detail.productName,
+          productId: detail.productId,
+          priceId: detail.priceId,
+          quantity: detail.quantity,
+          saledetailId: detail.saledetailId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
 
-      console.log('Detalle procesado para inserción:', {
-        returnId: newReturn.id,
-        productName: detail.productName,
-        productId: detail.productId,
-        priceId: detail.priceId,
-        quantity: detail.quantity,
-        saledetailId: detail.saledetailId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      })
-
-      return {
-        returnId: newReturn.id,
-        productName: detail.productName,
-        productId: detail.productId,
-        priceId: detail.priceId,
-        quantity: detail.quantity,
-        saledetailId: detail.saledetailId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    })
+        return {
+          returnId: newReturn.id,
+          productName: detail.productName,
+          productId: detail.productId,
+          priceId: detail.priceId,
+          quantity: detail.quantity,
+          saledetailId: detail.saledetailId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+      });
 
     await ReturnDetail.bulkCreate(returnDetailsToCreate, { transaction: t })
 
@@ -70,7 +68,7 @@ exports.create = async (req, res) => {
     console.error('Error durante la transacción:', error)
     res.status(500).json({ message: 'Error procesando la devolución.', details: error.message })
   }
-}
+};
 
 exports.findAll = (req, res) => {
   const page = req.query.page || 1
