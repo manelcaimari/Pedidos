@@ -66,12 +66,14 @@ class Repayment extends HTMLElement {
           align-items: center;
           visibility: hidden;
           opacity: 0;
-          transition: opacity 0.3s ease-in-out, visibility 0.3s;
+          transform: translateX(100%);
+          transition: transform 0.5s ease, opacity 0.5s ease;
           z-index: 10;
         }
         .detalls.visible {
           visibility: visible;
           opacity: 1;
+          transform: translateX(0);
         }
         .order-item {
           min-height: 75vh;

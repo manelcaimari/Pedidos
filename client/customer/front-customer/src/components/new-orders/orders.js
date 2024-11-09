@@ -1,26 +1,26 @@
 class orders extends HTMLElement {
-  constructor () {
+  constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.data = null
   }
 
-  connectedCallback () {
+  connectedCallback() {
     document.addEventListener('showrenferentModal', this.handleMessage.bind(this))
     this.render()
   }
 
-  disconnectedCallback () {
+  disconnectedCallback() {
     document.removeEventListener('showrenferentModal', this.handleMessage.bind(this))
   }
 
-  handleMessage (event) {
+  handleMessage(event) {
     this.data = event.detail
     this.render()
     this.shadow.querySelector('.reference').classList.add('visible')
   }
 
-  render () {
+  render() {
     this.shadow.innerHTML =
       /* html */`
         <style>
@@ -38,11 +38,13 @@ class orders extends HTMLElement {
           padding: 10px;
           visibility: hidden;
           opacity: 0;
-          transition: opacity 0.3s ease-in-out, visibility 0.3s;
+          transform: translateX(100%);
+          transition: transform 0.5s ease, opacity 0.5s ease;
           z-index: 10;
         }
         .reference.visible {
           opacity: 1;
+          transform: translateX(0);
           visibility: visible;
         }
         .main{

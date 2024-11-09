@@ -1,5 +1,5 @@
 import { store } from '../../redux/store.js'
-import { setOrderDetails, setReference } from '../../redux/crud-slice.js'
+import { setOrderDetails } from '../../redux/crud-slice.js'
 
 class Devolution extends HTMLElement {
   constructor() {
@@ -20,7 +20,6 @@ class Devolution extends HTMLElement {
         this.saleId = newSaleId
         if (this.saleId) {
           this.getSaleDetails(this.saleId).then(() => {
-            this.render()
           })
           this.getReturns(this.saleId)
         }
@@ -31,17 +30,10 @@ class Devolution extends HTMLElement {
 
   disconnectedCallback() {
     document.removeEventListener('showorderModal', this.handleMessage.bind(this))
-
-    if (this.unsubscribe) {
-      this.unsubscribe()
-    }
   }
 
   handleMessage(event) {
-    const filterModal = this.shadow.querySelector('.filter-modal')
-    if (filterModal) {
-      filterModal.classList.add('visible')
-    }
+    this.shadow.querySelector('.filter-modal').classList.add('visible')
   }
 
   render() {
@@ -66,11 +58,13 @@ class Devolution extends HTMLElement {
           padding: 10px;
           visibility: hidden; 
           opacity: 0; 
-          transition: opacity 0.3s ease-in-out, visibility 0.3s;
+          transform: translateX(100%);
+          transition: transform 0.5s ease, opacity 0.5s ease;
           z-index: 10;
         }
         .filter-modal.visible {
           opacity: 1;
+          transform: translateX(0);
           visibility: visible; 
         }
         .main{
@@ -339,16 +333,15 @@ class Devolution extends HTMLElement {
     console.log(orderDetails)
 
     store.dispatch(setOrderDetails(orderDetails))
-    store.dispatch(setReference(reference))
 
     this.shadow.querySelector('.filter-modal').classList.remove('visible')
 
     document.dispatchEvent(new CustomEvent('showFilterModal', {
-      detail: { saleId, reference }
+      detail: { saleId }
     }))
     document.dispatchEvent(new CustomEvent('changeHeader', {
       detail: {
-        title: `Tu Pedido: ${reference}`,
+        title: `Tu Pedido`,
         svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>',
         linkHref: 'http://dev-pedidos.com/cliente/pedidos-anteriores'
       }

@@ -52,11 +52,13 @@ class Shoppingcart extends HTMLElement {
           padding: 10px;
           visibility: hidden;
           opacity: 0;
-          transition: opacity 0.3s ease-in-out, visibility 0.3s;
+          transform: translateX(100%);
+          transition: transform 0.5s ease, opacity 0.5s ease;
           z-index: 10;
         }
         .filter-modal.visible {
           opacity: 1;
+          transform: translateX(0);
           visibility: visible;
         }
         .main{
