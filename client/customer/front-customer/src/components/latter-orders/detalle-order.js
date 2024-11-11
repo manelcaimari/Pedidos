@@ -230,9 +230,11 @@ class Devolution extends HTMLElement {
           }
         })
         Object.entries(groupedItems).forEach(([productId, totalQuantity]) => {
-          const itemInSale = this.data.rows.find(item => item.productId == productId)
+          const itemInSale = this.data.rows.find(item => String(item.productId) === String(productId))
           if (itemInSale) {
-            itemInSale.returnedQuantity = itemInSale.returnedQuantity ? itemInSale.returnedQuantity + totalQuantity : totalQuantity
+            itemInSale.returnedQuantity = itemInSale.returnedQuantity
+              ? itemInSale.returnedQuantity + totalQuantity
+              : totalQuantity
           }
         })
         this.populateOrderItems(this.data.rows)
@@ -241,6 +243,7 @@ class Devolution extends HTMLElement {
       console.error('Error al obtener los detalles de la devolución:', error)
     }
   }
+
   populateOrderItems(items) {
     const orderItem = this.shadow.querySelector('.order-item')
     if (!orderItem) {
@@ -341,7 +344,7 @@ class Devolution extends HTMLElement {
     }))
     document.dispatchEvent(new CustomEvent('changeHeader', {
       detail: {
-        title: `Tu Pedido`,
+        title: 'Tu Pedido',
         svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>',
         linkHref: 'http://dev-pedidos.com/cliente/pedidos-anteriores'
       }

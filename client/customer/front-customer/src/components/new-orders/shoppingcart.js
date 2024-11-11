@@ -8,13 +8,12 @@ class Shoppingcart extends HTMLElement {
     this.endpoint = `${import.meta.env.VITE_API_URL}/api/client/sales`
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     document.addEventListener('showFilterModal', this.handleMessage.bind(this))
     this.unsubscribe = store.subscribe(() => {
       this.cartItems = store.getState().crud.cart
       this.render()
     })
-
     this.render()
   }
 
@@ -159,7 +158,7 @@ class Shoppingcart extends HTMLElement {
               </div>
             </div>
             <div class="orders">
-              <button>Finalizar pedido</button>
+              <button>Pagar Ahora</button>
             </div>
           </div>
         </div>
@@ -266,7 +265,7 @@ class Shoppingcart extends HTMLElement {
           const data = await response.json()
 
           this.shadow.querySelector('.filter-modal').classList.remove('visible')
-          document.dispatchEvent(new CustomEvent('showrenferentModal', {
+          document.dispatchEvent(new CustomEvent('showCheckoutModal', {
             detail: { reference: data.reference }
           }))
         } else {

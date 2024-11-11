@@ -9,9 +9,9 @@ module.exports = {
   },
   rules: {
     'space-before-function-paren': 'off',
-    "semi": ["error", "never"],
-    "quotes": ["error", "single"],
-    "no-unused-vars": "warn"
+    semi: ['error', 'never'],
+    quotes: ['error', 'single'],
+    'no-unused-vars': 'warn'
     // Aquí puedes añadir o sobrescribir reglas específicas
   }
 }
