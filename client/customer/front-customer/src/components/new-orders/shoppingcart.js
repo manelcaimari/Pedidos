@@ -230,7 +230,7 @@ class Shoppingcart extends HTMLElement {
   async buttonfinality() {
     const finishOrderBtn = this.shadow.querySelector('.orders button')
 
-    finishOrderBtn.addEventListener('click', async () => {
+    finishOrderBtn.addEventListener('click', () => {
       if (this.cartItems.length === 0) {
         document.dispatchEvent(new CustomEvent('message', {
           detail: {
@@ -241,54 +241,10 @@ class Shoppingcart extends HTMLElement {
         return
       }
 
-      const saleData = {
-        customerId: 1,
-        items: this.cartItems.map(item => ({
-          productId: item.productId,
-          priceId: item.priceId,
-          productName: item.name,
-          basePrice: item.price,
-          quantity: item.quantity
-        }))
-      }
-
-      try {
-        const response = await fetch(this.endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(saleData)
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-
-          this.shadow.querySelector('.filter-modal').classList.remove('visible')
-          document.dispatchEvent(new CustomEvent('showCheckoutModal', {
-            detail: { reference: data.reference }
-          }))
-        } else {
-          const errorData = await response.json()
-          console.error('Error al crear la venta:', errorData)
-
-          document.dispatchEvent(new CustomEvent('message', {
-            detail: {
-              type: 'error',
-              message: 'No se pudo finalizar el pedido. Inténtalo de nuevo.'
-            }
-          }))
-        }
-      } catch (error) {
-        console.error('Error en la solicitud:', error)
-
-        document.dispatchEvent(new CustomEvent('message', {
-          detail: {
-            type: 'error',
-            message: 'Ocurrió un error al finalizar el pedido. Verifica tu conexión a internet.'
-          }
-        }))
-      }
+      const total = this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)
+      document.dispatchEvent(new CustomEvent('showCheckoutModal', {
+        detail: { total }
+      }))
     })
   }
 }

@@ -1,17 +1,18 @@
 module.exports = (app) => {
   const router = require('express').Router()
-  const controller = require('../controllers/customer/payment-controller.js')
+  const paymentController = require('../controllers/customer/payment-controller.js')
 
-  router.post('/', controller.create)
-  router.get('/', controller.findAll)
-  router.get('/:id', controller.findOne)
-  router.post('/:id/cancel', controller.cancel)
-  router.post('/:id/capture', controller.capture)
-  router.post('/:id/confirm', controller.confirm)
-  router.post('/:id/increment_authorization', controller.incrementAuthorization)
-  router.post('/:id/apply_customer_balance', controller.applyCustomerBalance)
-  router.post('/search', controller.search)
-  router.post('/:id/verify_microdeposits', controller.verifyMicrodeposits)
+  app.post('/api/payments', paymentController.create)
+  app.get('/api/payments', paymentController.findAll)
+  app.get('/api/payments/:id', paymentController.findOne)
+  app.post('/api/payments/:id/cancel', paymentController.cancel)
+  app.post('/api/payments/:id/capture', paymentController.capture)
+  app.post('/api/payments/:id/confirm', paymentController.confirm)
+
+  router.post('/:id/increment_authorization', paymentController.incrementAuthorization)
+  router.post('/:id/apply_customer_balance', paymentController.applyCustomerBalance)
+  router.post('/search', paymentController.search)
+  router.post('/:id/verify_microdeposits', paymentController.verifyMicrodeposits)
 
   app.use('/api/client/payments', router)
 }

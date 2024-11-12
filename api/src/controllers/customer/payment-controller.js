@@ -4,6 +4,12 @@ module.exports = {
   create: async (req, res) => {
     try {
       const { amount, currency } = req.body
+
+      if (!amount || !currency) {
+        console.error('Missing amount or currency')
+        return res.status(400).send({ error: 'Amount and currency are required' })
+      }
+
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
         currency
@@ -11,8 +17,8 @@ module.exports = {
 
       res.send({ clientSecret: paymentIntent.client_secret })
     } catch (error) {
-      console.error('Error creando el PaymentIntent:', error)
-      res.status(500).send({ error: 'Error interno al crear el PaymentIntent' })
+      console.error('Error creating PaymentIntent:', error)
+      res.status(500).send({ error: 'Internal server error creating PaymentIntent' })
     }
   },
 
@@ -97,6 +103,7 @@ module.exports = {
       res.status(500).send({ error: 'Error interno al buscar PaymentIntents' })
     }
   },
+
   verifyMicrodeposits: async (req, res) => {
     try {
       const { amounts } = req.body

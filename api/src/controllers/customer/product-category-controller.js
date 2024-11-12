@@ -2,8 +2,6 @@ const sequelizeDb = require('../../models')
 const ProductCategory = sequelizeDb.ProductCategory
 const Op = sequelizeDb.Sequelize.Op
 
-
-
 exports.findAll = (req, res) => {
   const page = req.query.page || 1
   const limit = parseInt(req.query.size) || 10
@@ -58,5 +56,3 @@ exports.findOne = (req, res) => {
     })
   })
 }
-
-

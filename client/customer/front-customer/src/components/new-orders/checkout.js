@@ -5,27 +5,85 @@ class Checkout extends HTMLElement {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.data = null
-    this.stripe = loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
+    this.stripe = null
+    this.elements = null
   }
 
   async connectedCallback() {
+    this.stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
     document.addEventListener('showCheckoutModal', this.handleMessage.bind(this))
 
     if (this.stripe) {
       this.render()
+      // Espera un pequeño retraso antes de inicializar el pago
+      setTimeout(() => {
+        this.initializePayment()
+      }, 100)
     } else {
       console.error('Stripe no se cargó correctamente')
     }
   }
 
-  disconnectedCallback() {
-    document.removeEventListener('showCheckoutModal', this.handleMessage.bind(this))
-  }
-
   async handleMessage(event) {
     this.data = event.detail
+    console.log('Datos recibidos en Checkout:', this.data)
     this.shadow.querySelector('.checkout').classList.add('visible')
     await this.initializePayment()
+  }
+
+  async initializePayment() {
+    const amount = 1000 // Reemplazar con un valor dinámico
+    const currency = 'usd' // Reemplazar con un valor dinámico
+
+    // Validación antes de enviar la solicitud
+    if (!amount || !currency) {
+      console.error('Falta el monto o la moneda')
+      return // Abortamos si falta información
+    }
+
+    // Verificar si el elemento #payment-element existe
+    const paymentElementContainer = this.shadow.querySelector('#payment-element')
+    if (!paymentElementContainer) {
+      console.error('El contenedor #payment-element no se encuentra en el DOM')
+      return // Abortamos si el contenedor no está disponible
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer <tu_token_aqui>' // Si se requiere autenticación
+      },
+      body: JSON.stringify({
+        amount: 500, // 5.00 en centavos si es necesario
+        currency: 'usd'
+      })
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Error de inicialización del pago:', errorText)
+      return
+    }
+
+    const { clientSecret } = await response.json()
+    if (!clientSecret) {
+      console.error('Falta clientSecret')
+      return
+    }
+
+    const appearance = { theme: 'stripe' }
+    this.elements = this.stripe.elements({ appearance, clientSecret })
+    if (this.elements) {
+      const paymentElement = this.elements.create('payment')
+      paymentElement.mount('#payment-element')
+
+      const paymentElementContainer = this.shadow.querySelector('#payment-element')
+      if (!paymentElementContainer) {
+        console.error('El contenedor #payment-element no se encuentra en el DOM')
+        // Abortamos si el contenedor no está disponible
+      }
+    }
   }
 
   render() {
@@ -296,7 +354,7 @@ class Checkout extends HTMLElement {
         </style>
         <div class="checkout">
           <form id="payment-form">
-            <div class="payment-element-container"></div>
+          <div id="payment-element"></div>
             <button id="submit">
               <div class="spinner hidden" id="spinner"></div>
               <span id="button-text">Finalizar compra</span>
@@ -305,56 +363,60 @@ class Checkout extends HTMLElement {
           </form>
         </div>
       `
+    this.shadow.querySelector('#payment-form').addEventListener('submit', (e) => this.handleSubmit(e))
+    console.log('Renderizado el checkout y el contenedor del payment-element')
   }
 
-  async initializePayment() {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 10000, currency: 'eur' })
-      })
+  async handleSubmit(e) {
+    e.preventDefault()
+    this.setLoading(true)
 
-      const data = await response.json()
-      const clientSecret = data.clientSecret
-
-      if (!clientSecret) {
-        console.error('Client secret is missing')
-        return
+    const { error } = await this.stripe.confirmPayment({
+      elements: this.elements,
+      confirmParams: {
+        return_url: 'https://localhost:4242/complete.html'
       }
+    })
 
-      const appearance = {
-        theme: 'flat',
-        labels: 'floating',
-        variables: {
-          fontFamily: '"Gill Sans", sans-serif',
-          fontLineHeight: '1.5',
-          borderRadius: '4px',
-          spacingUnit: '2px'
-        }
-      }
+    if (error) {
+      this.showMessage(error.message)
+    } else {
+      this.showMessage('Pago completado con éxito.')
+    }
 
-      const options = {
-        clientSecret,
-        appearance
-      }
+    this.setLoading(false)
+  }
 
-      this.elements = await this.stripe.elements(options)
+  showMessage(messageText) {
+    const messageContainer = this.shadow.querySelector('#payment-message')
+    messageContainer.classList.remove('hidden')
+    messageContainer.textContent = messageText
 
-      console.log(this.elements)
-      this.paymentElement = await this.elements.create('payment')
+    setTimeout(function () {
+      messageContainer.classList.add('hidden')
+      messageContainer.textContent = ''
+    }, 4000)
+  }
 
-      const container = this.shadow.querySelector('.payment-element-container')
+  setLoading(isLoading) {
+    const submitButton = this.shadow.querySelector('#submit')
+    const spinner = this.shadow.querySelector('#spinner')
+    const buttonText = this.shadow.querySelector('#button-text')
 
-      if (container) {
-        await this.paymentElement.mount(container)
-        console.log('PaymentElement montado correctamente.')
-      } else {
-        console.error('Contenedor de pago no encontrado!')
-      }
-    } catch (error) {
-      console.error('Error al inicializar el pago:', error)
+    if (isLoading) {
+      submitButton.disabled = true
+      spinner.classList.remove('hidden')
+      buttonText.classList.add('hidden')
+    } else {
+      submitButton.disabled = false
+      spinner.classList.add('hidden')
+      buttonText.classList.remove('hidden')
     }
   }
+
+  setDpmCheckerLink(url) {
+    this.shadow.querySelector('#dpm-integration-checker').href = url
+  }
 }
+
 customElements.define('checkout-component', Checkout)
