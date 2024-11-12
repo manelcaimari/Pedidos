@@ -1,9 +1,15 @@
 const { defineConfig } = require('vite')
+const fs = require('fs')
 
 export default defineConfig({
   base: '/cliente/login',
   server: {
-    port: 5176
+    host: 'dev-pedidos.com',
+    port: 5176,
+    https: {
+      key: fs.readFileSync('../../../certs/key_decrypted.pem'),
+      cert: fs.readFileSync('../../../certs/certificate.pem')
+    }
   },
   build: {
     outDir: 'dist',
