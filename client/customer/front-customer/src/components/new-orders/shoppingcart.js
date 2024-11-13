@@ -241,9 +241,10 @@ class Shoppingcart extends HTMLElement {
         return
       }
 
-      const total = this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)
       document.dispatchEvent(new CustomEvent('showCheckoutModal', {
-        detail: { total }
+        detail: {
+          amount: 5000
+        }
       }))
     })
   }

@@ -1,37 +1,54 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 module.exports = {
+
   create: async (req, res) => {
     try {
-      const { amount, currency } = req.body
+      const { amount, currency, customer } = req.body
+      console.log('Datos recibidos en el backend (create):', { amount, currency, customer })
 
-      if (!amount || !currency) {
-        console.error('Missing amount or currency')
-        return res.status(400).send({ error: 'Amount and currency are required' })
+      if (typeof amount !== 'number' || typeof currency !== 'string') {
+        console.log('Error en validación de tipos en create')
+        return res.status(400).send({ error: 'Amount debe ser número y currency debe ser string' })
       }
+
+      if (!customer || typeof customer.name !== 'string' || typeof customer.email !== 'string' || typeof customer.address !== 'object') {
+        console.log('Error en validación de customer en create')
+        return res.status(400).send({ error: 'Customer debe tener nombre, email y dirección válidos' })
+      }
+
+      console.log('Validación correcta, creando PaymentIntent...')
 
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
-        currency
+        currency,
+        description: `Pago de ${customer.name}`,
+        metadata: {
+          name: customer.name,
+          email: customer.email,
+          address: JSON.stringify(customer.address)
+        }
       })
 
+      console.log('PaymentIntent creado:', paymentIntent)
       res.send({ clientSecret: paymentIntent.client_secret })
     } catch (error) {
-      console.error('Error creating PaymentIntent:', error)
-      res.status(500).send({ error: 'Internal server error creating PaymentIntent' })
+      console.error('Error creando PaymentIntent en create:', error.message || error)
+      res.status(500).send({ error: 'Error interno al crear PaymentIntent' })
     }
   },
 
   findAll: async (req, res) => {
+    console.log('Ejecutando findAll...')
     try {
       const paymentIntents = await stripe.paymentIntents.list()
+      console.log('PaymentIntents obtenidos:', paymentIntents)
       res.send(paymentIntents)
     } catch (error) {
-      console.error('Error obteniendo los PaymentIntents:', error)
+      console.error('Error en findAll:', error)
       res.status(500).send({ error: 'Error interno al obtener los PaymentIntents' })
     }
   },
-
   findOne: async (req, res) => {
     try {
       const paymentIntent = await stripe.paymentIntents.retrieve(req.params.id)

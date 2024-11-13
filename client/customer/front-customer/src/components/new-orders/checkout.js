@@ -1,422 +1,288 @@
 import { loadStripe } from '@stripe/stripe-js'
 
-class Checkout extends HTMLElement {
+class CheckoutComponent extends HTMLElement {
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.data = null
-    this.stripe = null
-    this.elements = null
   }
 
   async connectedCallback() {
-    this.stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
+    await this.render()
     document.addEventListener('showCheckoutModal', this.handleMessage.bind(this))
-
-    if (this.stripe) {
-      this.render()
-      // Espera un pequeño retraso antes de inicializar el pago
-      setTimeout(() => {
-        this.initializePayment()
-      }, 100)
-    } else {
-      console.error('Stripe no se cargó correctamente')
-    }
   }
 
   async handleMessage(event) {
-    this.data = event.detail
-    console.log('Datos recibidos en Checkout:', this.data)
-    this.shadow.querySelector('.checkout').classList.add('visible')
-    await this.initializePayment()
-  }
+    console.log('Evento recibido: showCheckoutModal')
+    console.log('Detalles del evento:', event.detail)
 
-  async initializePayment() {
-    const amount = 1000 // Reemplazar con un valor dinámico
-    const currency = 'usd' // Reemplazar con un valor dinámico
-
-    // Validación antes de enviar la solicitud
-    if (!amount || !currency) {
-      console.error('Falta el monto o la moneda')
-      return // Abortamos si falta información
+    if (!this.stripe) {
+      console.log('Inicializando Stripe...')
+      await this.initStripe()
     }
 
-    // Verificar si el elemento #payment-element existe
-    const paymentElementContainer = this.shadow.querySelector('#payment-element')
-    if (!paymentElementContainer) {
-      console.error('El contenedor #payment-element no se encuentra en el DOM')
-      return // Abortamos si el contenedor no está disponible
+    const checkout = this.shadowRoot.querySelector('.checkout')
+    if (checkout) {
+      checkout.classList.add('visible')
+      console.log('Formulario de pago mostrado')
+    } else {
+      console.error('Elemento .checkout no encontrado')
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer <tu_token_aqui>' // Si se requiere autenticación
-      },
-      body: JSON.stringify({
-        amount: 500, // 5.00 en centavos si es necesario
-        currency: 'usd'
-      })
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Error de inicialización del pago:', errorText)
-      return
-    }
-
-    const { clientSecret } = await response.json()
-    if (!clientSecret) {
-      console.error('Falta clientSecret')
-      return
-    }
-
-    const appearance = { theme: 'stripe' }
-    this.elements = this.stripe.elements({ appearance, clientSecret })
-    if (this.elements) {
-      const paymentElement = this.elements.create('payment')
-      paymentElement.mount('#payment-element')
-
-      const paymentElementContainer = this.shadow.querySelector('#payment-element')
-      if (!paymentElementContainer) {
-        console.error('El contenedor #payment-element no se encuentra en el DOM')
-        // Abortamos si el contenedor no está disponible
-      }
+    // Si necesitas usar los datos, como el monto, puedes hacer algo como esto:
+    if (event.detail && event.detail.amount) {
+      console.log(`Monto recibido: $${event.detail.amount / 100}`)
     }
   }
 
   render() {
     this.shadow.innerHTML =
       /* html */`
-        <style>
+      <style>
         * {
-            box-sizing: border-box;
+          box-sizing: border-box;
         }
+
         .checkout {
           position: fixed;
+          top: 0;
           left: 0;
-          width: 100%;
-          height: 100%;
-          padding: 10px;
-          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-          font-size: 16px;
-          -webkit-font-smoothing: antialiased;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
           display: flex;
-          flex-direction: column;
           justify-content: center;
-          align-content: center;
+          align-items: center;
           visibility: hidden;
-          background-color: '#F6F8FA';
           opacity: 0;
           transform: translateX(100%);
           transition: transform 0.5s ease, opacity 0.5s ease;
           z-index: 10;
         }
+
         .checkout.visible {
+          visibility: visible;
           opacity: 1;
           transform: translateX(0);
-          visibility: visible;
         }
-
-       
 
         form {
-          width: 30vw;
-          min-width: 500px;
-          align-self: center;
-          box-shadow: 0px 0px 0px 0.5px rgba(50, 50, 93, 0.1),0px 2px 5px 0px rgba(50, 50, 93, 0.1), 0px 1px 1.5px 0px rgba(0, 0, 0, 0.07);
-          border-radius: 7px;
+          background-color: white;
           padding: 40px;
-          margin-top: auto;
-          margin-bottom: auto;
-        }
-
-        .hidden {
-          display: none;
-        }
-
-        #payment-message {
-          color: rgb(105, 115, 134);
-          font-size: 16px;
-          line-height: 20px;
-          padding-top: 12px;
-          text-align: center;
-        }
-        #payment-element {
-          margin-bottom: 24px;
-        }
-        button {
-          background: #0055DE;
-          font-family: Arial, sans-serif;
-          color: #ffffff;
-          border-radius: 4px;
-          border: 0;
-          padding: 12px 16px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          display: block;
-          transition: all 0.2s ease;
-          box-shadow: 0px 4px 5.5px 0px rgba(0, 0, 0, 0.07);
+          box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
           width: 100%;
-        }
-        button:hover {
-          filter: contrast(115%);
-        }
-        button:disabled {
-          opacity: 0.5;
-          cursor: default;
-        }
-
-        .spinner,
-        .spinner:before,
-        .spinner:after {
-          border-radius: 50%;
-        }
-        .spinner {
-          color: #ffffff;
-          font-size: 22px;
-          text-indent: -99999px;
-          margin: 0px auto;
-          position: relative;
-          width: 20px;
-          height: 20px;
-          box-shadow: inset 0 0 0 2px;
-          -webkit-transform: translateZ(0);
-          -ms-transform: translateZ(0);
-          transform: translateZ(0);
-        }
-        .spinner:before,
-        .spinner:after {
-          position: absolute;
-          content: "";
-        }
-        .spinner:before {
-          width: 10.4px;
-          height: 20.4px;
-          background: #0055DE;
-          border-radius: 20.4px 0 0 20.4px;
-          top: -0.2px;
-          left: -0.2px;
-          -webkit-transform-origin: 10.4px 10.2px;
-          transform-origin: 10.4px 10.2px;
-          -webkit-animation: loading 2s infinite ease 1.5s;
-          animation: loading 2s infinite ease 1.5s;
-        }
-        .spinner:after {
-          width: 10.4px;
-          height: 10.2px;
-          background: #0055DE;
-          border-radius: 0 10.2px 10.2px 0;
-          top: -0.1px;
-          left: 10.2px;
-          -webkit-transform-origin: 0px 10.2px;
-          transform-origin: 0px 10.2px;
-          -webkit-animation: loading 2s infinite ease;
-          animation: loading 2s infinite ease;
-        }
-        #dpm-annotation {
-          align-self: center;
-          color: #353A44;
-          width: 30vw;
-          min-width: 500px;
-          line-height: 20px;
-          margin-bottom: 20px;
-        }
-
-        #dpm-integration-checker {
-          display: inline;
-          color: #533AFD;
-        }
-
-        #payment-status {
+          max-width: 600px;
           display: flex;
-          justify-content: center;
-          align-items: center;
           flex-direction: column;
-          row-gap: 30px;
-          width: 30vw;
-          min-width: 500px;
-          min-height: 380px;
-          align-self: center;
-          box-shadow: 0px 0px 0px 0.5px rgba(50, 50, 93, 0.1),
-            0px 2px 5px 0px rgba(50, 50, 93, 0.1), 0px 1px 1.5px 0px rgba(0, 0, 0, 0.07);
-          border-radius: 7px;
-          padding: 40px;
-          opacity: 0;
-          animation: fadeInAnimation 1s ease forwards;
-        }
-
-        #status-icon {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 40px;
-          width: 40px;
-          border-radius: 50%;
         }
 
         h2 {
-          margin: 0;
-          color: #30313D;
           text-align: center;
+          color: #30313D;
+          margin-bottom: 20px;
         }
 
-        a {
-          text-decoration: none;
-          font-size: 16px;
-          font-weight: 600;
-          font-family: Arial, sans-serif;
+        label {
           display: block;
-        }
-        a:hover {
-          filter: contrast(120%);
-        }
-
-        #details-table {
-          overflow-x: auto;
-          width: 100%;
-        }
-
-        table {
-          width: 100%;
-          font-size: 14px;
-          border-collapse: collapse;
-        }
-        table tbody tr:first-child td {
-          border-top: 1px solid #E6E6E6; 
-          padding-top: 10px;
-        }
-        table tbody tr:last-child td {
-          border-bottom: 1px solid #E6E6E6; 
-        }
-        td {
-          padding-bottom: 10px;
-        }
-
-        .TableContent {
-          text-align: right;
-          color: #6D6E78;
-        }
-
-        .TableLabel {
-          font-weight: 600;
+          margin-bottom: 8px;
           color: #30313D;
+          font-weight: 600;
         }
 
-        #view-details {
-          color: #0055DE;
+        input,
+        button {
+          width: 100%;
+          padding: 12px;
+          margin-bottom: 16px;
+          border-radius: 5px;
+          font-size: 16px;
         }
 
-        #retry-button {
-          text-align: center;
+        button {
           background: #0055DE;
-          color: #ffffff;
-          border-radius: 4px;
-          border: 0;
-          padding: 12px 16px;
-          transition: all 0.2s ease;
-          box-shadow: 0px 4px 5.5px 0px rgba(0, 0, 0, 0.07);
+          color: white;
+          border: none;
+          cursor: pointer;
+          transition: background 0.3s ease;
+        }
+
+        button:hover {
+          background: #004BB5;
+        }
+
+        #card-element {
+          height: 40px;
+          border: 1px solid #ccc;
+          margin-bottom: 16px;
+        }
+
+        .form-group {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px; 
+        }
+
+        .form-group input {
           width: 100%;
         }
-        @-webkit-keyframes loading {
-          0% {
-            -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
+
+
+        #error-message,
+        #success-message {
+          font-size: 14px;
+          text-align: center;
+          padding-top: 12px;
+        }
+
+        .error-message {
+          color: red;
+        }
+
+        .success-message {
+          color: green;
+        }
+
+        /* Responsividad para dispositivos pequeños */
+        @media (max-width: 600px) {
+          .form-group {
+            flex-direction: column;
           }
-          100% {
-            -webkit-transform: rotate(360deg);
-            transform: rotate(360deg);
+
+          .form-group input {
+            width: 100%; /* En pantallas pequeñas, los campos ocupan el 100% del ancho */
           }
         }
-        @keyframes loading {
-          0% {
-            -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
-          }
-          100% {
-            -webkit-transform: rotate(360deg);
-            transform: rotate(360deg);
-          }
-        }
-        @keyframes fadeInAnimation {
-          to {
-            opacity: 1;
-          }
-        }
-        @media only screen and (max-width: 600px) {
-          form, #dpm-annotation, #payment-status{
-            width: 80vw;
-            min-width: initial;
-          }
-        }
-        </style>
+      </style>
         <div class="checkout">
           <form id="payment-form">
-          <div id="payment-element"></div>
-            <button id="submit">
-              <div class="spinner hidden" id="spinner"></div>
-              <span id="button-text">Finalizar compra</span>
-            </button>
-            <div id="payment-message" class="hidden"></div>
+          <label for="card-element">Tarjeta de Crédito</label>
+          <div id="card-element"></div>
+            <div class="form-group">
+              <div>
+                <label for="name">Nombre Completo</label>
+                <input type="text" id="name" name="name" required />
+              </div>
+              <div>
+                <label for="email">Correo Electrónico</label>
+                <input type="email" id="email" name="email" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <div>
+                <label for="address">Dirección</label>
+                <input type="text" id="address" name="address" required />
+              </div>
+              <div>
+                <label for="city">Ciudad</label>
+                <input type="text" id="city" name="city" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <div>
+                <label for="postal_code">Código Postal</label>
+                <input type="text" id="postal_code" name="postal_code" required />
+              </div>
+              <div>
+                <label for="country">País</label>
+                <input type="text" id="country" name="country" required />
+              </div>
+            </div>
+            <button type="submit">Pago</button>
+            <div id="card-errors" class="error-message"></div>
+            <div id="success-message" class="success-message"></div>
           </form>
         </div>
-      `
-    this.shadow.querySelector('#payment-form').addEventListener('submit', (e) => this.handleSubmit(e))
-    console.log('Renderizado el checkout y el contenedor del payment-element')
+    `
   }
 
-  async handleSubmit(e) {
-    e.preventDefault()
-    this.setLoading(true)
-
-    const { error } = await this.stripe.confirmPayment({
-      elements: this.elements,
-      confirmParams: {
-        return_url: 'https://localhost:4242/complete.html'
+  async initStripe() {
+    try {
+      console.log('Cargando Stripe...')
+      this.stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
+      if (!this.stripe) {
+        console.error('Error al cargar Stripe')
+        return
       }
-    })
 
-    if (error) {
-      this.showMessage(error.message)
-    } else {
-      this.showMessage('Pago completado con éxito.')
+      this.elements = this.stripe.elements()
+      const style = {
+        base: {
+          iconColor: '#4CAF50',
+          color: '#333',
+          fontWeight: '500',
+          fontFamily: 'Arial, sans-serif',
+          fontSize: '16px',
+          fontSmoothing: 'antialiased',
+          ':-webkit-autofill': { color: '#fce883' },
+          '::placeholder': { color: '#888888' },
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          padding: '12px'
+        },
+        invalid: {
+          iconColor: '#FF3B30',
+          color: '#FF3B30',
+          borderColor: '#FF3B30'
+        },
+        focus: {
+          borderColor: '#0055DE',
+          backgroundColor: '#F1F9FF'
+        }
+      }
+
+      const cardContainer = this.shadowRoot.querySelector('#card-element')
+      if (cardContainer) {
+        this.card = this.elements.create('card', { style })
+        this.card.mount(cardContainer)
+      }
+
+      this.shadowRoot.querySelector('form').addEventListener('submit', async (event) => {
+        event.preventDefault()
+        const { clientSecret } = await this.createPaymentIntent()
+        this.processPayment(clientSecret)
+      })
+    } catch (error) {
+      console.error('Error al cargar Stripe:', error)
     }
-
-    this.setLoading(false)
   }
 
-  showMessage(messageText) {
-    const messageContainer = this.shadow.querySelector('#payment-message')
-    messageContainer.classList.remove('hidden')
-    messageContainer.textContent = messageText
+  async processPayment(clientSecret) {
+    console.log('Procesando pago con clientSecret:', clientSecret)
+    const button = this.shadowRoot.querySelector('button')
+    button.disabled = true
+    button.textContent = 'Procesando...'
 
-    setTimeout(function () {
-      messageContainer.classList.add('hidden')
-      messageContainer.textContent = ''
-    }, 4000)
-  }
+    const spinner = document.createElement('div')
+    spinner.classList.add('spinner')
+    this.shadowRoot.querySelector('form').appendChild(spinner)
 
-  setLoading(isLoading) {
-    const submitButton = this.shadow.querySelector('#submit')
-    const spinner = this.shadow.querySelector('#spinner')
-    const buttonText = this.shadow.querySelector('#button-text')
+    try {
+      const { error, paymentIntent } = await this.stripe.confirmCardPayment(clientSecret, {
+        payment_method: { card: this.card }
+      })
 
-    if (isLoading) {
-      submitButton.disabled = true
-      spinner.classList.remove('hidden')
-      buttonText.classList.add('hidden')
-    } else {
-      submitButton.disabled = false
-      spinner.classList.add('hidden')
-      buttonText.classList.remove('hidden')
+      this.shadowRoot.querySelector('form').removeChild(spinner)
+      button.disabled = false
+      button.textContent = 'Pagar $50.00'
+
+      if (error) {
+        console.log('Error en confirmación de pago:', error)
+        this.shadowRoot.querySelector('#card-errors').textContent = error.message
+      } else if (paymentIntent.status === 'succeeded') {
+        this.shadowRoot.querySelector('#success-message').textContent = 'Pago realizado con éxito'
+        this.shadowRoot.querySelector('#card-errors').textContent = ''
+      }
+    } catch (error) {
+      console.error('Error al procesar pago:', error)
+      this.shadowRoot.querySelector('#card-errors').textContent = 'Ocurrió un error en el pago'
     }
   }
 
-  setDpmCheckerLink(url) {
-    this.shadow.querySelector('#dpm-integration-checker').href = url
+  async createPaymentIntent() {
+    // Simulación de la creación del PaymentIntent
+    const response = await fetch('/create-payment-intent', { method: 'POST' })
+    return response.json()
   }
 }
 
-customElements.define('checkout-component', Checkout)
+customElements.define('checkout-component', CheckoutComponent)
