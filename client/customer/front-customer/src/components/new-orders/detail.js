@@ -1,5 +1,5 @@
 import { store } from '../../redux/store.js'
-import { toggleCart, setCart } from '../../redux/crud-slice.js'
+import { toggleCart, setCart, setCustomerDetails } from '../../redux/crud-slice.js'
 
 class DetailComponent extends HTMLElement {
   constructor() {
@@ -10,12 +10,28 @@ class DetailComponent extends HTMLElement {
     this.cartItems = []
     this.basePricesMap = {}
     this.selectionCounts = {}
+    this.customer = {}
   }
 
   async connectedCallback() {
     await this.loadData()
     await this.render()
     await this.getBasePrices()
+    await this.fetchData()
+
+  }
+  async fetchData() {
+    const cosita = await fetch(`${import.meta.env.VITE_API_URL}/api/client/customers?Id=1`)
+    console.log(cosita)
+    if (!cosita.ok) {
+      throw new Error('Error al obtener los detalles del cliente: ' + cosita.statusText)
+    }
+    const customerData = await cosita.json()
+    console.log(cosita)
+    const { email, id, name } = customerData.rows[0]
+    this.customer = { id, name, email }
+    console.log("Detalles del cliente a enviar al store:", this.customer)
+    store.dispatch(setCustomerDetails(this.customer))
   }
 
   async loadData() {
@@ -239,13 +255,14 @@ class DetailComponent extends HTMLElement {
     const orderButton = this.shadow.querySelector('.view-order-button')
 
     orderButton.addEventListener('click', () => {
+
       store.dispatch(toggleCart())
       document.dispatchEvent(new CustomEvent('showFilterModal'))
       document.dispatchEvent(new CustomEvent('changeHeader', {
         detail: {
           title: 'Resumen de tu pedido',
           svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>arrow-left</title><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg>',
-          linkHref: 'http://dev-pedidos.com/cliente/nuevo-pedido'
+          linkHref: 'https://dev-pedidos.com/cliente/nuevo-pedido'
         }
       }))
       document.body.style.overflow = 'hidden'

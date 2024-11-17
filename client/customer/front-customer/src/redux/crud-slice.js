@@ -8,7 +8,8 @@ const crudSlice = createSlice({
     queryString: null,
     saleId: null,
     orderDetails: [],
-    reference: null
+    reference: null,
+    customerDetails: {},
   },
   reducers: {
     toggleCart(state) {
@@ -39,10 +40,13 @@ const crudSlice = createSlice({
     },
     setReference(state, action) {
       state.reference = action.payload
+    },
+    setCustomerDetails(state, action) {
+      console.log("Cliente recibido en el reducer:", action.payload)
+      state.customerDetails = action.payload;
     }
-
   }
 })
 
-export const { toggleCart, setCart, setQueryString, setSaleId, setOrderDetails, setReference } = crudSlice.actions
+export const { toggleCart, setCart, setQueryString, setSaleId, setOrderDetails, setReference, setCustomerDetails } = crudSlice.actions
 export default crudSlice.reducer

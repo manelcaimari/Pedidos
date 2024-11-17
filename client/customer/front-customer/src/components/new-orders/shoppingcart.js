@@ -11,7 +11,9 @@ class Shoppingcart extends HTMLElement {
   async connectedCallback() {
     document.addEventListener('showFilterModal', this.handleMessage.bind(this))
     this.unsubscribe = store.subscribe(() => {
-      this.cartItems = store.getState().crud.cart
+      const state = store.getState()
+      this.cartItems = state.crud.cart
+      this.customerDetails = state.crud.customerDetails
       this.render()
     })
     this.render()
@@ -228,25 +230,25 @@ class Shoppingcart extends HTMLElement {
   }
 
   async buttonfinality() {
-    const finishOrderBtn = this.shadow.querySelector('.orders button')
+    const finishOrderBtn = this.shadow.querySelector('.orders button');
 
     finishOrderBtn.addEventListener('click', () => {
-      if (this.cartItems.length === 0) {
-        document.dispatchEvent(new CustomEvent('message', {
-          detail: {
-            type: 'error',
-            message: 'Tu carrito está vacío. Añade productos antes de finalizar el pedido.'
-          }
-        }))
-        return
-      }
+      // Obtener los datos del cliente y el total
+      const customerName = this.customerDetails.name;
+      const customerEmail = this.customerDetails.email;
+      const totalAmount = this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2);
 
+      // Emisión de un evento con los datos del cliente y el total
       document.dispatchEvent(new CustomEvent('showCheckoutModal', {
         detail: {
-          amount: 5000
+          name: customerName,
+          email: customerEmail,
+          total: totalAmount
         }
-      }))
-    })
+      }));
+
+      this.shadow.querySelector('.filter-modal').classList.remove('visible');
+    });
   }
 }
 customElements.define('shop-component', Shoppingcart)

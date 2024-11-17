@@ -1,15 +1,15 @@
 class menu extends HTMLElement {
-  constructor () {
+  constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
   }
 
-  connectedCallback () {
+  connectedCallback() {
     this.data = {}
     this.render()
   }
 
-  render () {
+  render() {
     this.shadow.innerHTML = /* html */`
       <style>
       .menu {

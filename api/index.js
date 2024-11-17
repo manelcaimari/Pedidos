@@ -15,6 +15,10 @@ const credentials = {
   key,
   cert
 }
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy", "frame-ancestors 'self' https://pay.google.com https://dev-pedidos.com")
+  next()
+})
 
 fs.readdirSync('./src/routes/').forEach(file => {
   require(`./src/routes/${file}`)(app)
