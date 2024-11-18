@@ -29,6 +29,62 @@ class CheckoutComponent extends HTMLElement {
       if (!this.stripe) {
         throw new Error('Stripe failed to initialize.')
       }
+
+
+      // Check if Stripe is initialized
+      if (!this.stripe) {
+        console.error('Stripe is not initialized.');
+        this.showMessage('Error al inicializar el sistema de pago. Intenta de nuevo.');
+        return;
+      }
+      // Inicializa Stripe Elements si aún no lo has hecho
+      if (!this.elements) {
+        this.elements = this.stripe.elements();
+      }
+
+      // Crear un elemento de tarjeta si aún no existe
+      if (!this.cardElement) {
+        this.cardElement = this.elements.create('card', {
+          style: {
+            base: {
+              color: '#32325d',
+              fontFamily: 'Arial, sans-serif',
+              fontSmoothing: 'antialiased',
+              fontSize: '16px',
+              '::placeholder': {
+                color: '#aab7c4',
+              },
+            },
+            invalid: {
+              color: '#fa755a',
+            },
+          },
+        });
+
+        // Montar el elemento en el contenedor
+        const paymentContainer = this.shadowRoot.querySelector('#payment-element-container');
+        if (paymentContainer) {
+          this.cardElement.mount(paymentContainer);
+        } else {
+          console.error('Error: #payment-element-container does not exist in the DOM.');
+        }
+      }
+
+      // Crear el método de pago a partir de los datos de la tarjeta
+      const { error, paymentMethod } = await this.stripe.createPaymentMethod({
+        type: 'card',
+        card: this.cardElement,
+        billing_details: {
+          name,
+          email,
+        },
+      });
+
+      if (error) {
+        console.error('Error al crear el Payment Method:', error.message);
+        this.showMessage('Hubo un problema al procesar el método de pago.');
+        return;
+      }
       console.log('Stripe initialized successfully.')
     } catch (error) {
       console.error('Error initializing Stripe:', error)
@@ -69,14 +125,9 @@ class CheckoutComponent extends HTMLElement {
       return
     }
 
-    // Check if Stripe is initialized
-    if (!this.stripe) {
-      console.error('Stripe is not initialized.')
-      this.showMessage('Error al inicializar el sistema de pago. Intenta de nuevo.')
-      return
-    }
 
     try {
+
       // Fetch clientSecret from your API
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create`, {
         method: 'POST',
@@ -85,7 +136,7 @@ class CheckoutComponent extends HTMLElement {
           amount: this.customerData.total,
           currency: 'eur',
           customer: { name: this.customerData.name, email: this.customerData.email },
-          payment_method: 'pm_card_visa',
+          payment_method: this.paymentMethodId,
           payment_method_types: ['card'], // Corrige el error aquí
           receipt_email: this.customerData.email
         })
