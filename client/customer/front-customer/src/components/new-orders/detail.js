@@ -18,8 +18,8 @@ class DetailComponent extends HTMLElement {
     await this.render()
     await this.getBasePrices()
     await this.fetchData()
-
   }
+
   async fetchData() {
     const cosita = await fetch(`${import.meta.env.VITE_API_URL}/api/client/customers?Id=1`)
     console.log(cosita)
@@ -30,7 +30,7 @@ class DetailComponent extends HTMLElement {
     console.log(cosita)
     const { email, id, name } = customerData.rows[0]
     this.customer = { id, name, email }
-    console.log("Detalles del cliente a enviar al store:", this.customer)
+    console.log('Detalles del cliente a enviar al store:', this.customer)
     store.dispatch(setCustomerDetails(this.customer))
   }
 
@@ -255,7 +255,6 @@ class DetailComponent extends HTMLElement {
     const orderButton = this.shadow.querySelector('.view-order-button')
 
     orderButton.addEventListener('click', () => {
-
       store.dispatch(toggleCart())
       document.dispatchEvent(new CustomEvent('showFilterModal'))
       document.dispatchEvent(new CustomEvent('changeHeader', {

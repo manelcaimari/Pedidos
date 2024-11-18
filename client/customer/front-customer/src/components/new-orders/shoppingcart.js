@@ -230,13 +230,13 @@ class Shoppingcart extends HTMLElement {
   }
 
   async buttonfinality() {
-    const finishOrderBtn = this.shadow.querySelector('.orders button');
+    const finishOrderBtn = this.shadow.querySelector('.orders button')
 
     finishOrderBtn.addEventListener('click', () => {
       // Obtener los datos del cliente y el total
-      const customerName = this.customerDetails.name;
-      const customerEmail = this.customerDetails.email;
-      const totalAmount = this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2);
+      const customerName = this.customerDetails.name
+      const customerEmail = this.customerDetails.email
+      const totalAmount = this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)
 
       // Emisión de un evento con los datos del cliente y el total
       document.dispatchEvent(new CustomEvent('showCheckoutModal', {
@@ -245,10 +245,10 @@ class Shoppingcart extends HTMLElement {
           email: customerEmail,
           total: totalAmount
         }
-      }));
+      }))
 
-      this.shadow.querySelector('.filter-modal').classList.remove('visible');
-    });
+      this.shadow.querySelector('.filter-modal').classList.remove('visible')
+    })
   }
 }
 customElements.define('shop-component', Shoppingcart)

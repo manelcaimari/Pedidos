@@ -1,204 +1,176 @@
 import { loadStripe } from '@stripe/stripe-js'
+
 class CheckoutComponent extends HTMLElement {
   constructor() {
-    super();
-    this.shadow = this.attachShadow({ mode: 'open' });
-    this.stripe = null;
-    this.elements = null;
-    this.customerData = {};
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+    this.stripe = null
+    this.elements = null
+    this.cardElement = null
+    this.customerData = {}
   }
 
   async connectedCallback() {
-    document.addEventListener('showCheckoutModal', this.handleMessage.bind(this));
-
+    document.addEventListener('showCheckoutModal', this.handleMessage.bind(this))
     try {
-      await this.render();
-      console.log("Rendered checkout component");
-
-      const customerForm = this.shadowRoot.querySelector("#customer-form");
-      if (!customerForm) {
-        console.error("Customer form not found in shadow DOM!");
-        return;
-      }
-
-      this.setupEventListeners();
-      await this.initializeStripe();
-      console.log("Stripe initialized");
+      await this.render()
+      console.log('Rendered checkout component')
+      this.setupEventListeners()
+      await this.initializeStripe()
+      console.log('Stripe initialized')
     } catch (error) {
-      console.error("Error in connectedCallback:", error);
-    }
-  }
-
-  handleMessage(event) {
-    const { name, email, total } = event.detail;
-    let sanitizedTotal = total.toString().replace(/[,.]/g, '');
-
-    if (sanitizedTotal.endsWith('00')) {
-      sanitizedTotal = sanitizedTotal.slice(0, -2);
-    }
-
-    const finalTotal = parseFloat(sanitizedTotal);
-
-    this.customerData = {
-      name,
-      email,
-      total: finalTotal * 100 // Stripe usa la cantidad en centavos
-    };
-
-    console.log("Datos del cliente y total:", this.customerData);
-    const checkoutElement = this.shadowRoot.querySelector('.checkout');
-    if (checkoutElement) {
-      checkoutElement.classList.add('visible');
-    } else {
-      console.error('Elemento ".checkout" no encontrado.');
-    }
-  }
-
-  setupEventListeners() {
-    const customerForm = this.shadowRoot.querySelector("#customer-form");
-    if (customerForm) {
-      customerForm.addEventListener("submit", this.handleCustomerFormSubmit.bind(this));
+      console.error('Error in connectedCallback:', error)
     }
   }
 
   async initializeStripe() {
     try {
-      this.stripe = await loadStripe("pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S");
-      console.log("Stripe initialized successfully.");
-
-      // Asegurarte de que Stripe Elements se inicializa correctamente
-      const appearance = { theme: 'stripe' };
-      const paymentElementContainer = this.shadowRoot.querySelector("#payment-element-container");
-
-      if (!paymentElementContainer) {
-        throw new Error("Contenedor de Stripe Elements no encontrado.");
+      this.stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
+      if (!this.stripe) {
+        throw new Error('Stripe failed to initialize.')
       }
-
-      // Inicializar Stripe Elements con el `clientSecret`
-      this.elements = this.stripe.elements({ appearance });
-
-      // Crear el elemento de pago
-      const paymentElement = this.elements.create("payment");
-
-      // Montar el elemento de pago en el contenedor
-      paymentElement.mount(paymentElementContainer);
-
-      // Habilitar el formulario o el botón de envío solo después de que Stripe Elements esté listo
-      const form = this.shadowRoot.querySelector("#customer-form");
-      const submitButton = form.querySelector("button");
-      submitButton.disabled = false;  // Habilitar el botón de envío
+      console.log('Stripe initialized successfully.')
     } catch (error) {
-      console.error("Error initializing Stripe:", error);
-      this.showMessage("Failed to initialize payment system. Please try again later.");
+      console.error('Error initializing Stripe:', error)
+      this.showMessage('Failed to initialize payment system. Please try again later.')
+    }
+  }
+
+  handleMessage(event) {
+    const { name, email, total } = event.detail
+    const sanitizedTotal = parseFloat(total.toString().replace(/[,.]/g, ''))
+    this.customerData = {
+      name,
+      email,
+      total: sanitizedTotal
+    }
+
+    const checkoutElement = this.shadowRoot.querySelector('.checkout')
+    if (checkoutElement) {
+      checkoutElement.classList.add('visible')
+    } else {
+      console.error('Elemento ".checkout" no encontrado.')
+    }
+  }
+
+  setupEventListeners() {
+    const customerForm = this.shadowRoot.querySelector('#customer-form')
+    if (customerForm) {
+      customerForm.addEventListener('submit', this.handleCustomerFormSubmit.bind(this))
     }
   }
 
   async handleCustomerFormSubmit(event) {
-    event.preventDefault();
+    event.preventDefault()
 
-    const { name, email, total } = this.customerData;
+    const { name, email, total } = this.customerData
+    if (!name || !email || total <= 0) {
+      this.showMessage('Por favor, verifica todos los datos ingresados.')
+      return
+    }
 
-    if (!name || !email || !total || total <= 0) {
-      this.showMessage("Por favor, verifica los datos ingresados.");
-      return;
+    // Check if Stripe is initialized
+    if (!this.stripe) {
+      console.error('Stripe is not initialized.')
+      this.showMessage('Error al inicializar el sistema de pago. Intenta de nuevo.')
+      return
     }
 
     try {
-
-
-      // Enviar los datos al backend para crear el PaymentIntent
+      // Fetch clientSecret from your API
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: total, currency: 'eur', customer: { name, email }, payment_method: "pm_card_visa" })
-      });
+        body: JSON.stringify({
+          amount: this.customerData.total,
+          currency: 'eur',
+          customer: { name: this.customerData.name, email: this.customerData.email },
+          payment_method: 'pm_card_visa',
+          payment_method_types: ['card'], // Corrige el error aquí
+          receipt_email: this.customerData.email
+        })
+      })
 
       if (!response.ok) {
-        throw new Error(`Error en la API: ${await response.text()}`);
+        const errorText = await response.text()
+        console.error(`API error: ${errorText}`)
+        throw new Error(`Error en la API: ${errorText}`)
       }
 
-      const { clientSecret } = await response.json();
-      if (!clientSecret) {
-        throw new Error("No se recibió el client secret de la API.");
-      }
+      const { clientSecret } = await response.json()
+      console.log('clientSecret recibido:', clientSecret)
 
-      // Manejar el pago con Stripe
-      await this.handleStripePayment(clientSecret);
+      // Initialize Elements with the clientSecret
+      this.elements = this.stripe.elements({ clientSecret })
+      const paymentElement = this.elements.create('payment')
+      paymentElement.mount('#payment-element-container')
+
+      // Save the clientSecret for payment confirmation
+      this.clientSecret = clientSecret
     } catch (error) {
-      console.error("Error procesando el formulario:", error);
-      this.showMessage("Hubo un problema con el pago. Intenta de nuevo.");
+      console.error('Error procesando el formulario:', error)
+      this.showMessage('Hubo un problema con el pago. Intenta de nuevo.')
     }
   }
 
-  async handleStripePayment(clientSecret) {
+  async handleStripePayment() {
     try {
-      if (!this.stripe) {
-        throw new Error("Stripe no está inicializado.");
+      const { error, paymentIntent } = await this.stripe.confirmPayment({
+        elements: this.elements,
+        clientSecret: this.clientSecret
+      })
+
+      if (error) {
+        console.error('Error confirmando el pago:', error)
+        this.showMessage(error.message)
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        // Aquí desaparece el modal de checkout
+        const checkoutElement = this.shadowRoot.querySelector('.checkout')
+        if (checkoutElement) {
+          checkoutElement.classList.remove('visible')
+        }
+        // Aquí disparas el evento para mostrar el modal de referencia
+        document.dispatchEvent(
+          new CustomEvent('showReferenceModal', {
+            detail: {
+              // Envía detalles del PaymentIntent
+            }
+          })
+        )
+
+        // También puedes agregar un mensaje de éxito si lo deseas
+        this.showMessage('Pago exitoso. Redirigiendo...')
       }
-
-      // Configurar Stripe Elements
-      const appearance = { theme: 'stripe' };
-      const paymentElementContainer = this.shadowRoot.querySelector("#payment-element-container");
-
-      if (!paymentElementContainer) {
-        throw new Error("Contenedor del elemento de pago no encontrado.");
-      }
-
-      // Inicializar Stripe Elements con el `clientSecret`
-      this.elements = this.stripe.elements({ appearance, clientSecret });
-
-      // Crear el elemento de pago
-      const paymentElement = this.elements.create("payment");
-
-      // Montar el elemento de pago
-      paymentElement.mount(paymentElementContainer);
     } catch (error) {
-      console.error("Error configurando Stripe:", error);
-      this.showMessage("Hubo un problema al procesar tu pago.");
-    }
-  }
-
-  // Función para procesar el pago cuando se envía el formulario
-  async handlePaymentSubmit(event, clientSecret) {
-    event.preventDefault();
-
-    // Confirmar el pago con Stripe usando el clientSecret
-    const { error, paymentIntent } = await this.stripe.confirmPayment({
-      elements: this.elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/payment-success`,  // URL a la que Stripe redirigirá después del pago
-      },
-    });
-
-    if (error) {
-      this.showMessage(error.message);
-    } else if (paymentIntent.status === 'succeeded') {
-      this.showMessage("Pago exitoso");
+      console.error('Error al procesar el pago:', error)
+      this.showMessage('Hubo un problema al procesar tu pago. Por favor, intenta de nuevo.')
     }
   }
 
   showMessage(message) {
-    const messageContainer = this.shadowRoot.querySelector(".message-container");
+    const messageContainer = this.shadowRoot.querySelector('.message-container')
     if (messageContainer) {
-      messageContainer.textContent = message;
-      messageContainer.style.display = "block";
+      messageContainer.textContent = message
+      messageContainer.style.display = 'block'
     }
   }
 
   async render() {
-    this.shadow.innerHTML =       /* html */`
-    <style>
+    this.shadow.innerHTML =
+      /* html */`
+      <style>
         * {
           box-sizing: border-box;
           margin: 0;
           padding: 0;
           font-family: 'Arial', sans-serif;
         }
+
         #payment-element-container {
-  border: 1px solid red; /* Para visualizarlo */
-  min-height: 200px; /* Asegura espacio suficiente */
-  display: block; /* Asegúrate de que esté visible */
-}
+          border: 1px solid red;
+          min-height: 200px;
+          display: block;
+        }
 
         .checkout {
           position: fixed;
@@ -320,14 +292,13 @@ class CheckoutComponent extends HTMLElement {
       </style>
 
       <div class="checkout">
-      <form id="customer-form">
-        <h2>Datos de Pago</h2>
-        <div id="payment-element-container"></div>
-        <button type="submit">Submit</button>
-      </form>
-     
-    `;
+        <form id="customer-form">
+          <h2>Datos de Pago</h2>
+          <div id="payment-element-container"></div>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    `
   }
 }
-
-customElements.define("checkout-component", CheckoutComponent);
+customElements.define('checkout-component', CheckoutComponent)
