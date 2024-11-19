@@ -230,25 +230,43 @@ class Shoppingcart extends HTMLElement {
   }
 
   async buttonfinality() {
-    const finishOrderBtn = this.shadow.querySelector('.orders button')
+    const finishOrderBtn = this.shadow.querySelector('.orders button');
 
-    finishOrderBtn.addEventListener('click', () => {
-      // Obtener los datos del cliente y el total
-      const customerName = this.customerDetails.name
-      const customerEmail = this.customerDetails.email
-      const totalAmount = this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)
+    finishOrderBtn.addEventListener('click', async () => {
+      const customerName = this.customerDetails.name;
+      const customerEmail = this.customerDetails.email;
+      const totalAmount = this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2);
 
-      // Emisión de un evento con los datos del cliente y el total
-      document.dispatchEvent(new CustomEvent('showCheckoutModal', {
-        detail: {
-          name: customerName,
-          email: customerEmail,
-          total: totalAmount
+      try {
+        // Crear cliente en Stripe
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-customer`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer: { email: customerEmail, name: customerName, receipt_email: customerEmail } })
+        });
+
+        const { customerId } = await response.json();
+
+        if (!customerId) {
+          console.error('Error al crear el cliente en Stripe.');
+          return;
         }
-      }))
 
-      this.shadow.querySelector('.filter-modal').classList.remove('visible')
-    })
+        // Emitir evento con los datos del cliente y el total
+        document.dispatchEvent(new CustomEvent('showCheckoutModal', {
+          detail: {
+            name: customerName,
+            email: customerEmail,
+            total: totalAmount,
+            customerId
+          }
+        }));
+
+        this.shadow.querySelector('.filter-modal').classList.remove('visible');
+      } catch (error) {
+        console.error('Error al crear cliente en Stripe:', error);
+      }
+    });
   }
 }
 customElements.define('shop-component', Shoppingcart)

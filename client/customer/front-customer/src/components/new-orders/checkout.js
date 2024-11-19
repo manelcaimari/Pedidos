@@ -1,185 +1,117 @@
-import { loadStripe } from '@stripe/stripe-js'
-
+import { StripeElements } from '../stripe-elements.js';
 class CheckoutComponent extends HTMLElement {
   constructor() {
-    super()
-    this.shadow = this.attachShadow({ mode: 'open' })
-    this.stripe = null
-    this.elements = null
-    this.cardElement = null
-    this.customerData = {}
+    super();
+    this.stripeElements = null; // Aquí almacenamos la instancia de StripeElements
+    this.customerData = {};
+    this.attachShadow({ mode: 'open' }); // Attach the shadow root
   }
-
   async connectedCallback() {
-    document.addEventListener('showCheckoutModal', this.handleMessage.bind(this))
+    document.addEventListener('showCheckoutModal', this.handleMessage.bind(this));
     try {
-      await this.render()
-      console.log('Rendered checkout component')
-      this.setupEventListeners()
-      await this.initializeStripe()
-      console.log('Stripe initialized')
+      console.log('Iniciando renderizado...');
+      await this.render();
+      console.log('Componente renderizado con éxito');
+
+      this.setupEventListeners();
+      console.log('Event listeners configurados');
+
+      this.stripeElements = new StripeElements('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S');
+      console.log('StripeElements creado con la clave proporcionada');
+
+      await this.stripeElements.initializeStripe();
+      console.log('Stripe inicializado con éxito');
+
+      this.setupStripe(); // Asegúrate de que esto se ejecute después de la inicialización
+      console.log('Stripe configurado');
     } catch (error) {
-      console.error('Error in connectedCallback:', error)
+      console.error('Error en connectedCallback:', error);
     }
   }
 
-  async initializeStripe() {
-    this.stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
-
-    if (!this.stripe) {
-      throw new Error('Stripe failed to initialize.')
-    }
-
-    this.elements = this.stripe.elements()
-    this.cardElement = this.elements.create('card')
-
-    const paymentElementContainer = this.shadowRoot.querySelector('#payment-element-container')
+  setupStripe() {
+    const paymentElementContainer = document.querySelector('#payment-element-container');
     if (paymentElementContainer) {
-      this.cardElement.mount(paymentElementContainer) // Asegúrate de que se monta correctamente
+      console.log('Contenedor de Stripe encontrado, montando el elemento...');
+      this.stripeElements.mountCardElement(paymentElementContainer);
     } else {
-      console.error('No se encontró el contenedor para el CardElement.')
+      console.error('Contenedor #payment-element-container no encontrado en el Light DOM');
     }
-    const initiateButton = this.shadowRoot.querySelector('#initiate-payment')
-    const form = this.shadowRoot.querySelector('#customer-form')
-
-    if (initiateButton) initiateButton.classList.add('hidden') // Oculta el botón
-    if (form) form.classList.remove('hidden') // Muestra el formulario
-  }
-
-  handleMessage(event) {
-    const { name, email, total } = event.detail
-    const sanitizedTotal = parseFloat(total.toString().replace(/[,.]/g, ''))
-    this.customerData = {
-      name,
-      email,
-      total: sanitizedTotal
-    }
-
-    const checkoutElement = this.shadowRoot.querySelector('.checkout')
-    if (checkoutElement) {
-      checkoutElement.classList.add('visible')
-    } else {
-      console.error('Elemento ".checkout" no encontrado.')
-    }
-  }
-
-  async createPaymentMethod() {
-    if (!this.cardElement) {
-      console.error('El CardElement no está inicializado correctamente.')
-      return null
-    }
-
-    const { paymentMethod, error } = await this.stripe.createPaymentMethod({
-      type: 'card',
-      card: this.cardElement,
-      billing_details: {
-        name: this.customerData.name,
-        email: this.customerData.email
-      }
-    })
-
-    if (error) {
-      console.error('Error creando el método de pago:', error)
-      this.showMessage(`Error: ${error.message}`)
-      return null
-    }
-
-    return paymentMethod
   }
 
   setupEventListeners() {
-    const initiatePaymentButton = this.shadowRoot.querySelector('#initiate-payment')
-    if (initiatePaymentButton) {
-      initiatePaymentButton.addEventListener('click', (event) => {
-        this.initiatePayment(event)
-        initiatePaymentButton.style.display = 'none' // Hace que el botón desaparezca
-        const form = this.shadowRoot.querySelector('#customer-form')
-        if (form) form.classList.remove('hidden') // Asegura que el formulario sea visible
-      })
-    }
-
-    const customerForm = this.shadowRoot.querySelector('#customer-form')
-    if (customerForm) {
-      customerForm.addEventListener('submit', this.handleCustomerFormSubmit.bind(this)) // Asegúrate de que este método esté definido
+    const form = this.querySelector('#customer-form');
+    if (form) {
+      form.addEventListener('submit', this.handleCustomerFormSubmit.bind(this));
+    } else {
+      console.error('Form not found when setting up event listeners.');
     }
   }
 
-  handleCustomerFormSubmit(event) {
-    event.preventDefault() // Evitar el comportamiento predeterminado del formulario
-    this.initiatePayment() // Llamar a la función que maneja el proceso de pago
+  handleMessage(event) {
+    const { name, email, total } = event.detail;
+    this.customerData = { name, email, total };
+    const checkoutElement = this.shadowRoot.querySelector('.checkout');
+    if (checkoutElement) {
+      checkoutElement.classList.add('visible');
+    } else {
+      console.error('Elemento ".checkout" no encontrado.');
+    }
   }
 
   async initiatePayment() {
-    const { name, email, total } = this.customerData
-
-    if (!name || !email || total <= 0) {
-      this.showMessage('Por favor, ingresa tus datos antes de continuar.')
-      return
+    const paymentMethod = await this.stripeElements.createPaymentMethod(this.stripeElements.cardElement, this.customerData);
+    if (!paymentMethod) {
+      this.showMessage('No se pudo crear el método de pago. Intenta nuevamente.');
+      return;
     }
 
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-customer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customer: { email, name, receipt_email: email } })
-      })
-
-      const { customerId } = await response.json()
-
-      if (!customerId) {
-        this.showMessage('Error creando el cliente. Intenta de nuevo.')
-        return
-      }
-
-      const paymentMethod = await this.createPaymentMethod()
-      if (!paymentMethod) {
-        this.showMessage('No se pudo crear el método de pago. Intenta nuevamente.')
-        return
-      }
-
-      const paymentResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-payment-intent`, {
+    const paymentResponse = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/client/payments/create-payment-intent`,
+      {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: total * 100,
+          amount: this.customerData.total * 100, // Convertir a céntimos
           currency: 'eur',
-          customerId,
+          customerId: this.customerData.customerId,
           payment_method: paymentMethod.id,
-          receipt_email: email
-        })
-      })
-
-      const { clientSecret } = await paymentResponse.json()
-
-      const { error, paymentIntent } = await this.stripe.confirmCardPayment(clientSecret, {
-        payment_method: paymentMethod.id
-      })
-
-      if (error) {
-        console.error('Error de pago:', error)
-        this.showMessage(`Error: ${error.message}`)
-      } else if (paymentIntent.status === 'succeeded') {
-        console.log('Pago completado:', paymentIntent)
-        this.showMessage('Pago completado con éxito!')
-      } else {
-        console.error('Error desconocido en el estado del PaymentIntent')
+          receipt_email: this.customerData.email,
+        }),
       }
-    } catch (error) {
-      console.error('Error en el proceso de pago:', error)
-      this.showMessage('Error al procesar el pago. Intenta nuevamente.')
+    );
+
+    const paymentResponseJson = await paymentResponse.json();
+    console.log('Respuesta del servidor:', paymentResponseJson);
+
+    const { clientSecret } = paymentResponseJson;
+    if (!clientSecret) {
+      console.error('No se recibió el clientSecret del servidor');
+      return;
+    }
+
+    const result = await this.stripeElements.confirmPayment(clientSecret, paymentMethod.id);
+    if (result.success) {
+      console.log('Pago completado con éxito:', result.paymentIntent);
+      this.showMessage('¡Pago completado con éxito!');
+    } else {
+      console.error('Error al procesar el pago:', result.message);
+      this.showMessage('Ocurrió un error al procesar el pago. Intenta nuevamente.');
     }
   }
 
   showMessage(message) {
-    const messageContainer = this.shadowRoot.querySelector('.message-container')
+    const messageContainer = this.shadowRoot.querySelector('.message-container');
     if (messageContainer) {
-      messageContainer.textContent = message
-      messageContainer.style.display = 'block'
+      messageContainer.textContent = message;
+      messageContainer.style.display = 'block';
     }
   }
 
+
+
   async render() {
-    this.shadow.innerHTML =
+    this.shadowRoot.innerHTML =
       /* html */`
       <style>
       .hidden {
@@ -318,14 +250,19 @@ class CheckoutComponent extends HTMLElement {
       </style>
 
       <div class="checkout">
-      <button id="initiate-payment">Iniciar Pago</button>
-      <form id="customer-form" class="hidden">
+      <form id="customer-form">
           <h2>Datos de Pago</h2>
           <div id="payment-element-container"></div>
           <button type="submit">Submit</button>
         </form>
       </div>
     `
+    const checkoutElement = this.shadowRoot.querySelector('.checkout');
+    if (checkoutElement) {
+      console.log('Elemento de checkout encontrado en el Shadow DOM');
+    } else {
+      console.error('No se encontró el elemento .checkout en el Shadow DOM');
+    }
   }
 }
 customElements.define('checkout-component', CheckoutComponent)

@@ -1,5 +1,6 @@
 import './components/header.js'
 import './components/menu.js'
+import './components/stripe-elements.js'
 import './components/new-orders/shoppingcart.js'
 import './components/new-orders/detail.js'
 import './components/new-orders/orders.js'
