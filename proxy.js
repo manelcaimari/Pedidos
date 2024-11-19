@@ -27,6 +27,9 @@ app.use('/api', createProxyMiddleware(options));
 options.target = 'https://localhost:5170';
 app.use('/admin/login', createProxyMiddleware(options));
 
+options.target = 'https://localhost:5180';
+app.use('/auth/activate', createProxyMiddleware(options));
+
 options.target = 'https://localhost:5171';
 app.use('/admin', createProxyMiddleware(options));
 

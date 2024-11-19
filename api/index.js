@@ -16,7 +16,7 @@ const credentials = {
   cert
 }
 app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy", "frame-ancestors 'self' https://pay.google.com https://dev-pedidos.com")
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'self' https://pay.google.com https://dev-pedidos.com")
   next()
 })
 

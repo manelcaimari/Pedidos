@@ -23,7 +23,7 @@ exports.create = async (req, res) => {
       returnTime: new Date().toLocaleTimeString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    }, { transaction: t });
+    }, { transaction: t })
 
     const returnDetailsToCreate = returnDetails
       .filter(detail => detail.quantity > 0)
@@ -41,7 +41,7 @@ exports.create = async (req, res) => {
           saledetailId: detail.saledetailId,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
-        });
+        })
 
         return {
           returnId: newReturn.id,
@@ -52,8 +52,8 @@ exports.create = async (req, res) => {
           saledetailId: detail.saledetailId,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
-        };
-      });
+        }
+      })
 
     await ReturnDetail.bulkCreate(returnDetailsToCreate, { transaction: t })
 
@@ -68,7 +68,7 @@ exports.create = async (req, res) => {
     console.error('Error durante la transacción:', error)
     res.status(500).json({ message: 'Error procesando la devolución.', details: error.message })
   }
-};
+}
 
 exports.findAll = (req, res) => {
   const page = req.query.page || 1
