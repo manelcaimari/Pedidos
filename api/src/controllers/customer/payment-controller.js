@@ -1,55 +1,68 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 module.exports = {
-  create: async (req, res) => {
+  createCustomer: async (req, res) => {
     try {
-      const { amount, currency, customer, payment_method, receipt_email } = req.body
-      console.log('Datos recibidos en el backend (create):', { amount, currency, customer, payment_method, receipt_email })
+      const { email, name, receipt_email } = req.body.customer
+      console.log('Datos recibidos para crear cliente:', { email, name, receipt_email })
 
-      // Crear un cliente en Stripe si no existe
+      // Buscar cliente existente por email
+      const existingCustomer = await stripe.customers.list({
+        email
+      })
+
       let stripeCustomer
-      if (customer.email) {
-        const existingCustomer = await stripe.customers.list({
-          email: customer.email
-        })
 
-        if (existingCustomer.data.length > 0) {
-          stripeCustomer = existingCustomer.data[0] // Si el cliente ya existe
-        } else {
-          // Crear un nuevo cliente si no existe
-          stripeCustomer = await stripe.customers.create({
-            email: customer.email,
-            name: customer.name,
-            receipt_email
-          })
-        }
+      if (existingCustomer.data.length > 0) {
+        stripeCustomer = existingCustomer.data[0] // Cliente ya existe
+        console.log('Cliente encontrado:', stripeCustomer.id)
+      } else {
+        // Crear un nuevo cliente si no existe
+        stripeCustomer = await stripe.customers.create({
+          email,
+          name,
+          receipt_email
+        })
+        console.log('Cliente creado:', stripeCustomer.id)
       }
 
-      // Verificar si se proporcionó un método de pago
+      // Devolver el ID del cliente y el clientSecret para el PaymentIntent
+      res.send({ customerId: stripeCustomer.id })
+    } catch (error) {
+      console.error('Error al crear cliente en Stripe:', error)
+      res.status(500).send({ error: 'Error al crear el cliente' })
+    }
+  },
+
+  createPaymentIntent: async (req, res) => {
+    try {
+      const { amount, currency, customerId, payment_method, receipt_email } = req.body
+      console.log('Datos recibidos para crear PaymentIntent:', { amount, currency, customerId, payment_method, receipt_email })
+
       if (!payment_method) {
         return res.status(400).send({ error: 'El método de pago es necesario.' })
       }
 
-      // Crear el PaymentIntent con el ID del cliente de Stripe y el método de pago proporcionado
+      // Crear el PaymentIntent
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
         currency,
-        customer: stripeCustomer.id,
-        description: `Pago de ${customer.name}`,
-        metadata: { name: customer.name, email: customer.email },
+        customer: customerId, // Usar el customerId creado previamente
+        description: `Pago de ${customerId}`,
         receipt_email,
-        payment_method, // Aquí se pasa el método de pago proporcionado
-        payment_method_types: ['card'] // Lista explícita de métodos de pago soportados
+        payment_method, // Método de pago proporcionado
+        payment_method_types: ['card'] // Tipo de pago (solo tarjeta por ahora)
       })
 
       // Confirmar el PaymentIntent
       const confirmedPaymentIntent = await stripe.paymentIntents.confirm(paymentIntent.id)
       console.log('PaymentIntent confirmado:', confirmedPaymentIntent)
 
+      // Devolver el clientSecret para el frontend
       res.send({ clientSecret: confirmedPaymentIntent.client_secret })
     } catch (error) {
-      console.error('Error creando PaymentIntent:', error)
-      res.status(500).send({ error: 'Error interno al crear PaymentIntent' })
+      console.error('Error al crear y confirmar PaymentIntent:', error)
+      res.status(500).send({ error: 'Error al crear PaymentIntent' })
     }
   },
 

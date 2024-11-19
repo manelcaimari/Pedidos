@@ -24,72 +24,26 @@ class CheckoutComponent extends HTMLElement {
   }
 
   async initializeStripe() {
-    try {
-      this.stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
-      if (!this.stripe) {
-        throw new Error('Stripe failed to initialize.')
-      }
+    this.stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
 
-
-      // Check if Stripe is initialized
-      if (!this.stripe) {
-        console.error('Stripe is not initialized.');
-        this.showMessage('Error al inicializar el sistema de pago. Intenta de nuevo.');
-        return;
-      }
-      // Inicializa Stripe Elements si aún no lo has hecho
-      if (!this.elements) {
-        this.elements = this.stripe.elements();
-      }
-
-      // Crear un elemento de tarjeta si aún no existe
-      if (!this.cardElement) {
-        this.cardElement = this.elements.create('card', {
-          style: {
-            base: {
-              color: '#32325d',
-              fontFamily: 'Arial, sans-serif',
-              fontSmoothing: 'antialiased',
-              fontSize: '16px',
-              '::placeholder': {
-                color: '#aab7c4',
-              },
-            },
-            invalid: {
-              color: '#fa755a',
-            },
-          },
-        });
-
-        // Montar el elemento en el contenedor
-        const paymentContainer = this.shadowRoot.querySelector('#payment-element-container');
-        if (paymentContainer) {
-          this.cardElement.mount(paymentContainer);
-        } else {
-          console.error('Error: #payment-element-container does not exist in the DOM.');
-        }
-      }
-
-      // Crear el método de pago a partir de los datos de la tarjeta
-      const { error, paymentMethod } = await this.stripe.createPaymentMethod({
-        type: 'card',
-        card: this.cardElement,
-        billing_details: {
-          name,
-          email,
-        },
-      });
-
-      if (error) {
-        console.error('Error al crear el Payment Method:', error.message);
-        this.showMessage('Hubo un problema al procesar el método de pago.');
-        return;
-      }
-      console.log('Stripe initialized successfully.')
-    } catch (error) {
-      console.error('Error initializing Stripe:', error)
-      this.showMessage('Failed to initialize payment system. Please try again later.')
+    if (!this.stripe) {
+      throw new Error('Stripe failed to initialize.')
     }
+
+    this.elements = this.stripe.elements()
+    this.cardElement = this.elements.create('card')
+
+    const paymentElementContainer = this.shadowRoot.querySelector('#payment-element-container')
+    if (paymentElementContainer) {
+      this.cardElement.mount(paymentElementContainer) // Asegúrate de que se monta correctamente
+    } else {
+      console.error('No se encontró el contenedor para el CardElement.')
+    }
+    const initiateButton = this.shadowRoot.querySelector('#initiate-payment')
+    const form = this.shadowRoot.querySelector('#customer-form')
+
+    if (initiateButton) initiateButton.classList.add('hidden') // Oculta el botón
+    if (form) form.classList.remove('hidden') // Muestra el formulario
   }
 
   handleMessage(event) {
@@ -109,92 +63,110 @@ class CheckoutComponent extends HTMLElement {
     }
   }
 
+  async createPaymentMethod() {
+    if (!this.cardElement) {
+      console.error('El CardElement no está inicializado correctamente.')
+      return null
+    }
+
+    const { paymentMethod, error } = await this.stripe.createPaymentMethod({
+      type: 'card',
+      card: this.cardElement,
+      billing_details: {
+        name: this.customerData.name,
+        email: this.customerData.email
+      }
+    })
+
+    if (error) {
+      console.error('Error creando el método de pago:', error)
+      this.showMessage(`Error: ${error.message}`)
+      return null
+    }
+
+    return paymentMethod
+  }
+
   setupEventListeners() {
+    const initiatePaymentButton = this.shadowRoot.querySelector('#initiate-payment')
+    if (initiatePaymentButton) {
+      initiatePaymentButton.addEventListener('click', (event) => {
+        this.initiatePayment(event)
+        initiatePaymentButton.style.display = 'none' // Hace que el botón desaparezca
+        const form = this.shadowRoot.querySelector('#customer-form')
+        if (form) form.classList.remove('hidden') // Asegura que el formulario sea visible
+      })
+    }
+
     const customerForm = this.shadowRoot.querySelector('#customer-form')
     if (customerForm) {
-      customerForm.addEventListener('submit', this.handleCustomerFormSubmit.bind(this))
+      customerForm.addEventListener('submit', this.handleCustomerFormSubmit.bind(this)) // Asegúrate de que este método esté definido
     }
   }
 
-  async handleCustomerFormSubmit(event) {
-    event.preventDefault()
+  handleCustomerFormSubmit(event) {
+    event.preventDefault() // Evitar el comportamiento predeterminado del formulario
+    this.initiatePayment() // Llamar a la función que maneja el proceso de pago
+  }
 
+  async initiatePayment() {
     const { name, email, total } = this.customerData
+
     if (!name || !email || total <= 0) {
-      this.showMessage('Por favor, verifica todos los datos ingresados.')
+      this.showMessage('Por favor, ingresa tus datos antes de continuar.')
       return
     }
 
-
     try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-customer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer: { email, name, receipt_email: email } })
+      })
 
-      // Fetch clientSecret from your API
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create`, {
+      const { customerId } = await response.json()
+
+      if (!customerId) {
+        this.showMessage('Error creando el cliente. Intenta de nuevo.')
+        return
+      }
+
+      const paymentMethod = await this.createPaymentMethod()
+      if (!paymentMethod) {
+        this.showMessage('No se pudo crear el método de pago. Intenta nuevamente.')
+        return
+      }
+
+      const paymentResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-payment-intent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: this.customerData.total,
+          amount: total * 100,
           currency: 'eur',
-          customer: { name: this.customerData.name, email: this.customerData.email },
-          payment_method: this.paymentMethodId,
-          payment_method_types: ['card'], // Corrige el error aquí
-          receipt_email: this.customerData.email
+          customerId,
+          payment_method: paymentMethod.id,
+          receipt_email: email
         })
       })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error(`API error: ${errorText}`)
-        throw new Error(`Error en la API: ${errorText}`)
-      }
+      const { clientSecret } = await paymentResponse.json()
 
-      const { clientSecret } = await response.json()
-      console.log('clientSecret recibido:', clientSecret)
-
-      // Initialize Elements with the clientSecret
-      this.elements = this.stripe.elements({ clientSecret })
-      const paymentElement = this.elements.create('payment')
-      paymentElement.mount('#payment-element-container')
-
-      // Save the clientSecret for payment confirmation
-      this.clientSecret = clientSecret
-    } catch (error) {
-      console.error('Error procesando el formulario:', error)
-      this.showMessage('Hubo un problema con el pago. Intenta de nuevo.')
-    }
-  }
-
-  async handleStripePayment() {
-    try {
-      const { error, paymentIntent } = await this.stripe.confirmPayment({
-        elements: this.elements,
-        clientSecret: this.clientSecret
+      const { error, paymentIntent } = await this.stripe.confirmCardPayment(clientSecret, {
+        payment_method: paymentMethod.id
       })
 
       if (error) {
-        console.error('Error confirmando el pago:', error)
-        this.showMessage(error.message)
-      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Aquí desaparece el modal de checkout
-        const checkoutElement = this.shadowRoot.querySelector('.checkout')
-        if (checkoutElement) {
-          checkoutElement.classList.remove('visible')
-        }
-        // Aquí disparas el evento para mostrar el modal de referencia
-        document.dispatchEvent(
-          new CustomEvent('showReferenceModal', {
-            detail: {
-              // Envía detalles del PaymentIntent
-            }
-          })
-        )
-
-        // También puedes agregar un mensaje de éxito si lo deseas
-        this.showMessage('Pago exitoso. Redirigiendo...')
+        console.error('Error de pago:', error)
+        this.showMessage(`Error: ${error.message}`)
+      } else if (paymentIntent.status === 'succeeded') {
+        console.log('Pago completado:', paymentIntent)
+        this.showMessage('Pago completado con éxito!')
+      } else {
+        console.error('Error desconocido en el estado del PaymentIntent')
       }
     } catch (error) {
-      console.error('Error al procesar el pago:', error)
-      this.showMessage('Hubo un problema al procesar tu pago. Por favor, intenta de nuevo.')
+      console.error('Error en el proceso de pago:', error)
+      this.showMessage('Error al procesar el pago. Intenta nuevamente.')
     }
   }
 
@@ -210,6 +182,9 @@ class CheckoutComponent extends HTMLElement {
     this.shadow.innerHTML =
       /* html */`
       <style>
+      .hidden {
+  display: none;
+}
         * {
           box-sizing: border-box;
           margin: 0;
@@ -343,7 +318,8 @@ class CheckoutComponent extends HTMLElement {
       </style>
 
       <div class="checkout">
-        <form id="customer-form">
+      <button id="initiate-payment">Iniciar Pago</button>
+      <form id="customer-form" class="hidden">
           <h2>Datos de Pago</h2>
           <div id="payment-element-container"></div>
           <button type="submit">Submit</button>
