@@ -1,22 +1,20 @@
 'use strict'
 
-const { sequelize } = require('../models')
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('user_activation_tokens', {
+    await queryInterface.createTable('customer_reset_password_tokens', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false
       },
-      userId: {
+      customerId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'users',
+          model: 'customers',
           key: 'id'
         },
         onUpdate: 'CASCADE',
@@ -46,12 +44,12 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
-    await queryInterface.addIndex('user_activation_tokens', ['userId'], {
-      name: 'user_activation_tokens_userId_index'
+    await queryInterface.addIndex('customer_reset_password_tokens', ['customerId'], {
+      name: 'customer_reset_password_tokens_customerId_index'
     })
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('user_activation_tokens')
+    await queryInterface.dropTable('customer_reset_password_tokens')
   }
 }

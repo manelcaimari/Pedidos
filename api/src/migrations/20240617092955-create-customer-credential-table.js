@@ -1,45 +1,35 @@
 'use strict'
 
-const { sequelize } = require('../models')
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('sent_emails', {
+    await queryInterface.createTable('customer_credentials', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false
       },
-      userId: {
+      customerId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'users',
+          model: 'customers',
           key: 'id'
         },
         onUpdate: 'CASCADE',
         onDelete: 'NO ACTION'
       },
-      userType: {
+      email: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      emailTemplate: {
+      password: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      sendAt: {
+      lastPasswodChange: {
         type: Sequelize.DATE,
-        allowNull: false
-      },
-      readedAt: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      uuid: {
-        type: Sequelize.STRING,
         allowNull: false
       },
       createdAt: {
@@ -54,12 +44,12 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
-    await queryInterface.addIndex('sent_emails', ['userId'], {
-      name: 'sent_emails_userId_index'
+    await queryInterface.addIndex('customer_credentials', ['customerId'], {
+      name: 'customer_credentials_customerId_index'
     })
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('sent_emails')
+    await queryInterface.dropTable('customer_credentials')
   }
 }

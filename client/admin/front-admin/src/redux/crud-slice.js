@@ -12,7 +12,7 @@ export const crudSlice = createSlice({
       data: null
     },
     saleDetails: null,
-    saleId: null,
+    saleId: null
   },
   reducers: {
     showFormElement: (state, action) => {
@@ -31,8 +31,8 @@ export const crudSlice = createSlice({
       state.saleDetails = action.payload
     },
     setSaleId: (state, action) => {
-      state.saleId = action.payload;
-    },
+      state.saleId = action.payload
+    }
   }
 })
 

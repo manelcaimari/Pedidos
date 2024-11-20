@@ -4,10 +4,15 @@
     "dev": "nodemon index.js"
   },
   "dependencies": {
+    "connect-redis": "^7.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
     "express": "^4.19.2",
+    "googleapis": "^144.0.0",
+    "ioredis": "^5.4.1",
     "mysql2": "^3.10.1",
+    "nodemailer": "^6.9.16",
     "sequelize": "^6.37.3",
     "stripe": "^17.3.1"
   },

@@ -16,71 +16,66 @@ class Activate extends HTMLElement {
   render() {
     this.shadow.innerHTML = /* html */`
         <style>
-        .order h1 {
-            font-size: 1.5rem;
-            text-transform: capitalize;
+        .container {
             text-align: center;
+            background-color: transparent;
+            padding: 20px;
+            border-radius: 8px;
         }
-        .login {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            column-gap: 0;
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
         }
-        label {
-            align-self: flex-start;
-            display: grid;
+
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
         }
-        input[type="email"],
+
+        ul li {
+            margin: 5px 0;
+        }
+
         input[type="password"] {
-            width: 300px;
-            padding: 6px;
-            border-radius: 3px;
-            background-color: #3333ff;
-            color: white;
-            border-right: 1px solid #3333ff;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
         }
-        .form-button input {
-            width: 300px;
-            padding: 8px;
-            border: none;
-            border-radius: 10px;
-            background-color: #703868;
+
+        button {
+            background-color: #6a5acd; 
             color: white;
-            font-size: 13px;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 4px;
             cursor: pointer;
         }
-        .remember {
-            text-align: center;
-            padding:1rem;
-            border: none;
-        }
-        .remember a {
-            font-size: 15px;
-            color: hsl(0, 0%, 100%);
-            text-decoration: none;
+
+        button:hover {
+            background-color: #483d8b; 
         }
         </style>
-        <div class="order">
-                <h1>pedidos</h1>
-            </div>
-            <form class="login" method="post">
-                <div class="form-email">
-                    <label for="email">Email</label>
-                    <input type="email"  name="email" >
-                </div>
-                <div class="form-key">
-                    <label for="password">Password</label>
-                    <input type="password"  name="password">
-                </div>
-                <div class="form-button">
-                    <input type="submit">
-                </div>
-            </form>
-            <div class="remember">
-                <a href="#">Olvidé mi contraseña</a>
-            </div>
+        <div class="container">
+        <h1>Elija una contraseña para su cuenta</h1>
+        <ul>
+            <li>- 8 caracteres como mínimo</li>
+            <li>- Al menos una letra mayúscula</li>
+            <li>- Al menos un número</li>
+        </ul>
+        <form>
+            <input type="password" placeholder="Contraseña" required>
+            <input type="password" placeholder="Repita la contraseña" required>
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
         `
   }
 }

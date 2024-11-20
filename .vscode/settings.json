@@ -1,0 +1,9 @@
+{
+  "standard.nodePath": "",
+  "standard.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ]
+}

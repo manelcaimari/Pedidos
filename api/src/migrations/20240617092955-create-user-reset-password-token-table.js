@@ -1,11 +1,9 @@
 'use strict'
 
-const { sequelize } = require('../models')
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('user_credentials', {
+    await queryInterface.createTable('user_reset_password_tokens', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -22,16 +20,16 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'NO ACTION'
       },
-      email: {
+      token: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      password: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      lastPasswodChange: {
+      expirationDate: {
         type: Sequelize.DATE,
+        allowNull: false
+      },
+      used: {
+        type: Sequelize.BOOLEAN,
         allowNull: false
       },
       createdAt: {
@@ -46,12 +44,12 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
-    await queryInterface.addIndex('user_credentials', ['userId'], {
-      name: 'user_credentials_userId_index'
+    await queryInterface.addIndex('user_reset_password_tokens', ['userId'], {
+      name: 'user_reset_password_tokens_userId_index'
     })
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('user_credentials')
+    await queryInterface.dropTable('user_reset_password_tokens')
   }
 }

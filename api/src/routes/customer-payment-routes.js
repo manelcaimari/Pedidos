@@ -2,8 +2,7 @@ module.exports = (app) => {
   const router = require('express').Router()
   const paymentController = require('../controllers/customer/payment-controller.js')
 
-  router.post('/create-customer', paymentController.createCustomer)
-  router.post('/create-payment-intent', paymentController.createPaymentIntent)
+  router.post('/create', paymentController.create)
   router.get('/', paymentController.findAll)
   router.get('/:id', paymentController.findOne)
   router.post('/:id/cancel', paymentController.cancel)

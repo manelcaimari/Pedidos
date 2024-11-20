@@ -1,135 +1,191 @@
-import { StripeElements } from '../stripe-elements.js';
+import { loadStripe } from '@stripe/stripe-js'
+
 class CheckoutComponent extends HTMLElement {
   constructor() {
-    super();
-    this.stripeElements = null; // Aquí almacenamos la instancia de StripeElements
-    this.customerData = {};
-    this.attachShadow({ mode: 'open' }); // Attach the shadow root
+    super()
+    this.shadow = this.attachShadow({ mode: 'open' })
+    this.stripe = null
+    this.elements = null
+    this.cardElement = null
+    this.customerData = {}
+    this.customerForm = null
+    this.paymentElementContainer = null
   }
+
   async connectedCallback() {
-    document.addEventListener('showCheckoutModal', this.handleMessage.bind(this));
+    document.addEventListener('showCheckoutModal', this.handleMessage.bind(this))
     try {
-      console.log('Iniciando renderizado...');
-      await this.render();
-      console.log('Componente renderizado con éxito');
+      await this.render()
+      console.log('Rendered checkout component')
 
-      this.setupEventListeners();
-      console.log('Event listeners configurados');
+      // Store references to the elements to avoid repeated DOM queries
+      this.customerForm = this.shadowRoot.querySelector('#customer-form')
+      this.paymentElementContainer = this.shadowRoot.querySelector('#payment-element-container')
 
-      this.stripeElements = new StripeElements('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S');
-      console.log('StripeElements creado con la clave proporcionada');
+      if (!this.customerForm || !this.paymentElementContainer) {
+        throw new Error('Essential form elements are missing.')
+      }
 
-      await this.stripeElements.initializeStripe();
-      console.log('Stripe inicializado con éxito');
-
-      this.setupStripe(); // Asegúrate de que esto se ejecute después de la inicialización
-      console.log('Stripe configurado');
+      this.setupEventListeners()
+      await this.initializeStripe()
+      console.log('Stripe initialized')
     } catch (error) {
-      console.error('Error en connectedCallback:', error);
-    }
-  }
-
-  setupStripe() {
-    const paymentElementContainer = document.querySelector('#payment-element-container');
-    if (paymentElementContainer) {
-      console.log('Contenedor de Stripe encontrado, montando el elemento...');
-      this.stripeElements.mountCardElement(paymentElementContainer);
-    } else {
-      console.error('Contenedor #payment-element-container no encontrado en el Light DOM');
-    }
-  }
-
-  setupEventListeners() {
-    const form = this.querySelector('#customer-form');
-    if (form) {
-      form.addEventListener('submit', this.handleCustomerFormSubmit.bind(this));
-    } else {
-      console.error('Form not found when setting up event listeners.');
+      console.error('Error in connectedCallback:', error)
+      this.showMessage('Error initializing checkout. Please try again later.')
     }
   }
 
   handleMessage(event) {
-    const { name, email, total } = event.detail;
-    this.customerData = { name, email, total };
-    const checkoutElement = this.shadowRoot.querySelector('.checkout');
+    const { name, email, total } = event.detail
+    let sanitizedTotal = total.toString().replace(/[,.]/g, '')
+
+    // Simplify the sanitization logic for the total
+    if (sanitizedTotal.endsWith('00')) {
+      sanitizedTotal = sanitizedTotal.slice(0, -2)
+    }
+
+    const finalTotal = parseFloat(sanitizedTotal)
+    this.customerData = {
+      name,
+      email,
+      total: finalTotal * 100 // Convert amount to cents for Stripe
+    }
+
+    console.log('Customer data and total:', this.customerData)
+    const checkoutElement = this.shadowRoot.querySelector('.checkout')
     if (checkoutElement) {
-      checkoutElement.classList.add('visible');
+      checkoutElement.classList.add('visible')
     } else {
-      console.error('Elemento ".checkout" no encontrado.');
+      console.error('Checkout element not found.')
     }
   }
 
-  async initiatePayment() {
-    const paymentMethod = await this.stripeElements.createPaymentMethod(this.stripeElements.cardElement, this.customerData);
-    if (!paymentMethod) {
-      this.showMessage('No se pudo crear el método de pago. Intenta nuevamente.');
-      return;
+  setupEventListeners() {
+    if (this.customerForm) {
+      this.customerForm.addEventListener('submit', this.handleCustomerFormSubmit.bind(this))
     }
+  }
 
-    const paymentResponse = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/client/payments/create-payment-intent`,
-      {
+  async initializeStripe() {
+    try {
+      if (this.stripe) {
+        return // Avoid reinitializing if Stripe is already initialized
+      }
+
+      // Initialize Stripe
+      this.stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
+
+      if (!this.stripe) {
+        throw new Error('Stripe failed to load')
+      }
+
+      // Initialize elements
+      this.elements = this.stripe.elements()
+      this.cardElement = this.elements.create('card')
+
+      // Mount the card element
+      this.cardElement.mount(this.paymentElementContainer)
+      this.cardElement.on('ready', () => {
+        console.log('Card element is ready for use')
+      })
+    } catch (error) {
+      console.error('Error initializing Stripe:', error)
+      this.showMessage('There was an issue initializing Stripe. Please try again later.')
+    }
+  }
+
+  async createPaymentIntent(total, customerData) {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: this.customerData.total * 100, // Convertir a céntimos
+          amount: total,
           currency: 'eur',
-          customerId: this.customerData.customerId,
-          payment_method: paymentMethod.id,
-          receipt_email: this.customerData.email,
-        }),
+          customer: customerData
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${await response.text()}`)
       }
-    );
 
-    const paymentResponseJson = await paymentResponse.json();
-    console.log('Respuesta del servidor:', paymentResponseJson);
+      const { clientSecret } = await response.json()
+      if (!clientSecret) {
+        throw new Error('No client secret received from API')
+      }
 
-    const { clientSecret } = paymentResponseJson;
-    if (!clientSecret) {
-      console.error('No se recibió el clientSecret del servidor');
-      return;
+      await this.handleStripePayment(clientSecret)
+    } catch (error) {
+      console.error('Error processing payment intent:', error)
+      this.showMessage('There was an issue processing your payment. Please try again.')
+    }
+  }
+
+  async handleCustomerFormSubmit(event) {
+    event.preventDefault()
+
+    const { name, email, total } = this.customerData
+
+    if (!name || !email || !total || total <= 0) {
+      this.showMessage('Please check your input data.')
+      return
     }
 
-    const result = await this.stripeElements.confirmPayment(clientSecret, paymentMethod.id);
-    if (result.success) {
-      console.log('Pago completado con éxito:', result.paymentIntent);
-      this.showMessage('¡Pago completado con éxito!');
-    } else {
-      console.error('Error al procesar el pago:', result.message);
-      this.showMessage('Ocurrió un error al procesar el pago. Intenta nuevamente.');
+    try {
+      // Create payment method (ID)
+      await this.createPaymentIntent(total, { name, email })
+    } catch (error) {
+      console.error('Error processing form submission:', error)
+      this.showMessage('There was an issue processing your payment.')
+    }
+  }
+
+  async handleStripePayment(clientSecret) {
+    try {
+      const { error, paymentIntent } = await this.stripe.confirmCardPayment(clientSecret, {
+        payment_method: this.cardElement
+      })
+
+      if (error) {
+        throw new Error(`Error confirming payment: ${error.message}`)
+      }
+
+      if (paymentIntent.status === 'succeeded') {
+        console.log('Payment successful')
+        this.showMessage('Payment successful')
+      } else {
+        console.log('Payment failed:', paymentIntent.status)
+        this.showMessage('Payment failed. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error confirming payment:', error)
+      this.showMessage('There was an issue processing your payment. Please try again later.')
     }
   }
 
   showMessage(message) {
-    const messageContainer = this.shadowRoot.querySelector('.message-container');
+    const messageContainer = this.shadowRoot.querySelector('.message-container')
     if (messageContainer) {
-      messageContainer.textContent = message;
-      messageContainer.style.display = 'block';
+      messageContainer.textContent = message
+      messageContainer.style.display = 'block'
     }
   }
 
-
-
   async render() {
-    this.shadowRoot.innerHTML =
-      /* html */`
-      <style>
-      .hidden {
-  display: none;
-}
+    this.shadow.innerHTML = /* html */`
+    <style>
         * {
           box-sizing: border-box;
           margin: 0;
           padding: 0;
           font-family: 'Arial', sans-serif;
         }
-
         #payment-element-container {
-          border: 1px solid red;
-          min-height: 200px;
-          display: block;
-        }
-
+  border: 1px solid red; /* Para visualizarlo */
+  min-height: 200px; /* Asegura espacio suficiente */
+  display: block; /* Asegúrate de que esté visible */
+}
         .checkout {
           position: fixed;
           top: 0;
@@ -144,12 +200,10 @@ class CheckoutComponent extends HTMLElement {
           opacity: 0;
           transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
-
         .checkout.visible {
           visibility: visible;
           opacity: 1;
         }
-
         form {
           background: #ffffff;
           padding: 30px;
@@ -161,20 +215,17 @@ class CheckoutComponent extends HTMLElement {
           flex-direction: column;
           gap: 15px;
         }
-
         h2 {
           font-size: 1.5em;
           margin-bottom: 15px;
           color: #333;
           text-align: center;
         }
-
         label {
           font-size: 0.9em;
           color: #555;
           margin-bottom: 5px;
         }
-
         input {
           padding: 10px;
           font-size: 1em;
@@ -183,12 +234,10 @@ class CheckoutComponent extends HTMLElement {
           margin-bottom: 15px;
           transition: border-color 0.3s;
         }
-
         input:focus {
           border-color: #0055DE;
           outline: none;
         }
-
         button {
           background: #0055DE;
           color: white;
@@ -202,16 +251,13 @@ class CheckoutComponent extends HTMLElement {
           align-items: center;
           justify-content: center;
         }
-
         button:disabled {
           opacity: 0.6;
           cursor: not-allowed;
         }
-
         button:hover:not(:disabled) {
           background: #003bb5;
         }
-
         #spinner {
           border: 3px solid #f3f3f3;
           border-top: 3px solid #333;
@@ -222,47 +268,35 @@ class CheckoutComponent extends HTMLElement {
           margin-left: 10px;
           display: none;
         }
-
         #payment-message {
           display: none;
           color: red;
           font-size: 0.9em;
           text-align: center;
         }
-
         .hidden {
           display: none;
         }
-
         .payment-form-container {
           display: none;
           margin-top: 30px;
         }
-
         .payment-form-container.visible {
           display: block;
         }
-
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
       </style>
-
       <div class="checkout">
       <form id="customer-form">
-          <h2>Datos de Pago</h2>
-          <div id="payment-element-container"></div>
-          <button type="submit">Submit</button>
-        </form>
-      </div>
+        <h2>Datos de Pago</h2>
+        <div id="payment-element-container"></div>
+        <button type="submit">Submit</button>
+      </form>
+     
     `
-    const checkoutElement = this.shadowRoot.querySelector('.checkout');
-    if (checkoutElement) {
-      console.log('Elemento de checkout encontrado en el Shadow DOM');
-    } else {
-      console.error('No se encontró el elemento .checkout en el Shadow DOM');
-    }
   }
 }
 customElements.define('checkout-component', CheckoutComponent)
