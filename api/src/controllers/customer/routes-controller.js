@@ -3,7 +3,7 @@ exports.findAll = (req, res) => {
     '/cliente': 'menu.html',
     '/cliente/nuevo-pedido': 'new-orders.html',
     '/cliente/pedidos-anteriores': 'previous-orders.html',
-    '/cliente/compra': 'summary-orders.html',
+    '/cliente/compra': 'compra.html',
     '/cliente/reference': 'reference.html'
   }
 

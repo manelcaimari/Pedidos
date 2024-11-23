@@ -6,12 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>parte 6</title>
   <link rel="stylesheet" href="style/app.css">
+  <script src="https://js.stripe.com/v3/" defer></script>
   <script type="module" src="src/index.js"></script>
 </head>
 
 <body>
   <font-loader-component></font-loader-component>
   <page-component base-path="/cliente"></page-component>
+  <form id="payment-form" class="hidden">
+    <div id="payment-element"></div>
+    <button id="submit">Pay</button>
+    <div id="spinner" class="hidden">Loading...</div>
+    <div id="button-text">Submit</div>
+    <div id="payment-message" class="hidden"></div>
+  </form>
+  <div id="dpm-annotation" class="hidden">
+    <p>
+      Payment methods are dynamically displayed based on customer location, order amount, and currency.&nbsp;
+      <a href="#" target="_blank" rel="noopener noreferrer" id="dpm-integration-checker">Preview payment methods by
+        transaction</a>
+    </p>
+  </div>
 </body>
 
 </html>
