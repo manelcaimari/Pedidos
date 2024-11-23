@@ -27,3 +27,20 @@ body {
 .hidden {
     display: none;
 }
+
+#payment-form {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Centra el formulario en el centro de la pantalla */
+    background-color: #fff;
+    /* Fondo blanco para el formulario */
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    /* Máxima anchura para el formulario */
+    z-index: 20;
+    /* Asegúrate de que esté encima de otros elementos */
+}

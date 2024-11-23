@@ -230,25 +230,88 @@ class Shoppingcart extends HTMLElement {
   }
 
   async buttonfinality() {
-    const finishOrderBtn = this.shadow.querySelector('.orders button')
+    const finishOrderBtn = this.shadow.querySelector('.orders button');
 
     finishOrderBtn.addEventListener('click', () => {
-      // Obtener los datos del cliente y el total
-      const customerName = this.customerDetails.name
-      const customerEmail = this.customerDetails.email
-      const totalAmount = this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)
-
-      // Emisión de un evento con los datos del cliente y el total
-      document.dispatchEvent(new CustomEvent('showCheckoutModal', {
-        detail: {
-          name: customerName,
-          email: customerEmail,
-          total: totalAmount
-        }
-      }))
 
       this.shadow.querySelector('.filter-modal').classList.remove('visible')
-    })
+
+      // Eliminar la clase 'hidden' del formulario de pago para mostrarlo
+      document.getElementById('payment-form').classList.remove('hidden');
+
+    });
   }
+
+
+
 }
+
+
+// async buttonfinality() {
+//   const finishOrderBtn = this.shadow.querySelector('.orders button')
+
+//   finishOrderBtn.addEventListener('click', async () => {
+//     if (this.cartItems.length === 0) {
+//       document.dispatchEvent(new CustomEvent('message', {
+//         detail: {
+//           type: 'error',
+//           message: 'Tu carrito está vacío. Añade productos antes de finalizar el pedido.'
+//         }
+//       }))
+//       return
+//     }
+
+//     const saleData = {
+//       customerId: this.customerDetails.Id,
+//       items: this.cartItems.map(item => ({
+//         productId: item.productId,
+//         priceId: item.priceId,
+//         productName: item.name,
+//         basePrice: item.price,
+//         quantity: item.quantity
+//       }))
+//     }
+
+//     try {
+//       const response = await fetch(this.endpoint, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(saleData)
+//       })
+
+//       if (response.ok) {
+//         const data = await response.json()
+
+//         this.shadow.querySelector('.filter-modal').classList.remove('visible')
+//         document.dispatchEvent(new CustomEvent('showrenferentModal', {
+//           detail: { reference: data.reference }
+//         }))
+//       } else {
+//         const errorData = await response.json()
+//         console.error('Error al crear la venta:', errorData)
+
+//         document.dispatchEvent(new CustomEvent('message', {
+//           detail: {
+//             type: 'error',
+//             message: 'No se pudo finalizar el pedido. Inténtalo de nuevo.'
+//           }
+//         }))
+//       }
+//     } catch (error) {
+//       console.error('Error en la solicitud:', error)
+
+//       document.dispatchEvent(new CustomEvent('message', {
+//         detail: {
+//           type: 'error',
+//           message: 'Ocurrió un error al finalizar el pedido. Verifica tu conexión a internet.'
+//         }
+//       }))
+//     }
+//   })
+// }
+// }
+// customElements.define('shop-component', Shoppingcart)
+
 customElements.define('shop-component', Shoppingcart)

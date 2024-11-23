@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    paymentElement.mount('#payment-element');  // Montar el PaymentElement
+    paymentElement.mount('#payment-element');
 
     const paymentForm = document.querySelector("#payment-form");
     if (!paymentForm) {
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    paymentForm.addEventListener("submit", handleSubmit); // Llamar al submit cuando el usuario envíe el formulario
+    paymentForm.addEventListener("submit", handleSubmit);
   }
 
   // Inicialización
@@ -55,11 +55,10 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     setLoading(true);
 
-    // Confirmar el pago usando el PaymentElement
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: "http://localhost:4242/complete.html", // La URL donde se redirige después del pago
+        return_url: "http://localhost:4242/complete.html",
       },
     });
 
