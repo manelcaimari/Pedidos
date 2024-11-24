@@ -1,14 +1,23 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 module.exports = {
   createpaymentintent: async (req, res) => {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 1000,  // El monto de la transacción en centavos (1000 = $10.00)
-      currency: 'usd',
-      payment_method_types: ['card']  // Especifica que solo se aceptan tarjetas
-    });
+    const { amount } = req.body
 
-    // Devolver el clientSecret al frontend
-    res.json({ clientSecret: paymentIntent.client_secret })
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: 'El monto debe ser mayor a 0.' })
+    }
+
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency: 'eur',
+        payment_method_types: ['card']
+      })
+      res.json({ clientSecret: paymentIntent.client_secret })
+    } catch (error) {
+      console.error('Error al crear el PaymentIntent:', error)
+      res.status(500).json({ error: 'Error al procesar el pago.' })
+    }
   }
-}
+};

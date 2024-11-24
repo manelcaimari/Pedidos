@@ -1,101 +1,112 @@
 import { loadStripe } from '@stripe/stripe-js';
 
-document.addEventListener("DOMContentLoaded", () => {
-  let stripe;
-  let elements;
-  let clientSecret;
+document.addEventListener('initializeStripePayment', async (event) => {
+  const { totalAmount } = event.detail
 
-  // Función para obtener el clientSecret desde el backend
-  async function fetchClientSecret() {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-payment-intent`, {
-      method: 'POST',
-    });
+  try {
+    const amountInCents = Math.round(totalAmount * 100)
+    const clientSecret = await fetchClientSecret(amountInCents)
+    await initializeStripe(clientSecret)
+  } catch (error) {
+    console.error("Error al inicializar el pago:", error)
+    showMessage("No se pudo inicializar el pago. Intenta de nuevo.")
+  }
+});
 
-    if (!response.ok) {
-      throw new Error("Error al obtener el clientSecret");
-    }
+let stripe
+let elements
 
-    const data = await response.json();
-    return data.clientSecret;
+async function fetchClientSecret(amountInCents) {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-payment-intent`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ amount: amountInCents })
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al obtener el clientSecret")
   }
 
-  async function initialize() {
-    stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S');
+  const data = await response.json()
+  return data.clientSecret;
+}
 
-    clientSecret = await fetchClientSecret(); // Obtienes el clientSecret desde el backend
-
-    // 2. Crear un PaymentElement en lugar de CardElement
-    elements = stripe.elements({ clientSecret });
-
-    const paymentElement = elements.create('payment');  // Usa el PaymentElement
-
-    // 3. Monta el PaymentElement en el contenedor adecuado
-    const paymentElementDiv = document.querySelector('#payment-element');
-    if (!paymentElementDiv) {
-      console.error("El contenedor #payment-element no fue encontrado en el DOM.");
-      return;
-    }
-
-    paymentElement.mount('#payment-element');
-
-    const paymentForm = document.querySelector("#payment-form");
-    if (!paymentForm) {
-      console.error("Formulario de pago no encontrado");
-      return;
-    }
-
-    paymentForm.addEventListener("submit", handleSubmit);
+// Inicializar Stripe con el clientSecret
+async function initializeStripe(clientSecret) {
+  if (!clientSecret) {
+    console.error("El clientSecret no está definido. No se puede inicializar Stripe.")
+    return;
   }
 
-  // Inicialización
-  initialize();
+  stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
 
-  // Función para manejar el submit del formulario
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setLoading(true);
+  elements = stripe.elements({ clientSecret })
 
+  const paymentElement = elements.create('payment')
+  paymentElement.mount('#payment-element')
+
+  const paymentForm = document.querySelector("#payment-form")
+  if (!paymentForm) {
+    console.error("Formulario de pago no encontrado.")
+    return;
+  }
+
+  paymentForm.addEventListener("submit", handleSubmit)
+}
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: "http://localhost:4242/complete.html",
+        return_url: "https://dev-pedidos.com/cliente/reference",
       },
     });
 
     if (error) {
-      if (error.type === "card_error" || error.type === "validation_error") {
-        showMessage(error.message); // Muestra un mensaje de error
-      } else {
-        showMessage("Ocurrió un error inesperado.");
-      }
-    } else if (paymentIntent.status === 'succeeded') {
+      showMessage(error.message || "Ocurrió un error al procesar el pago.")
+    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
       showMessage("¡Pago exitoso!");
-    }
-
-    setLoading(false); // Detiene el loading
-  }
-  // Función para controlar el estado de carga del botón de pago
-  function setLoading(isLoading) {
-    if (isLoading) {
-      document.querySelector("#submit").disabled = true;
-      document.querySelector("#spinner").classList.remove("hidden");
-      document.querySelector("#button-text").classList.add("hidden");
     } else {
-      document.querySelector("#submit").disabled = false;
-      document.querySelector("#spinner").classList.add("hidden");
-      document.querySelector("#button-text").classList.remove("hidden");
+      showMessage("El pago no se completó. Verifica tu información e inténtalo de nuevo.")
     }
+  } catch (error) {
+    console.error("Error al confirmar el pago:", error)
+    showMessage("Ocurrió un error inesperado. Por favor, intenta de nuevo.")
   }
 
-  // Función para mostrar mensajes de error o éxito
-  function showMessage(messageText) {
-    const messageContainer = document.querySelector("#payment-message");
-    messageContainer.classList.remove("hidden");
-    messageContainer.textContent = messageText;
+  setLoading(false)
+}
 
-    setTimeout(function () {
-      messageContainer.classList.add("hidden");
-      messageContainer.textContent = "";
-    }, 4000);
+function showMessage(messageText) {
+  const messageContainer = document.querySelector("#payment-message")
+  if (!messageContainer) return;
+
+  messageContainer.classList.remove("hidden")
+  messageContainer.textContent = messageText
+
+  setTimeout(() => {
+    messageContainer.classList.add("hidden")
+    messageContainer.textContent = ""
+  }, 4000);
+}
+function setLoading(isLoading) {
+  const submitBtn = document.querySelector("#submit")
+  const spinner = document.querySelector("#spinner")
+  const buttonText = document.querySelector("#button-text")
+
+  if (isLoading) {
+    submitBtn.disabled = true;
+    spinner.classList.remove("hidden");
+    buttonText.classList.add("hidden");
+  } else {
+    submitBtn.disabled = false;
+    spinner.classList.add("hidden");
+    buttonText.classList.remove("hidden");
   }
-});
+}

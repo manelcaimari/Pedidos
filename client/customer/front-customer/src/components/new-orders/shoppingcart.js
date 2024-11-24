@@ -232,16 +232,21 @@ class Shoppingcart extends HTMLElement {
   async buttonfinality() {
     const finishOrderBtn = this.shadow.querySelector('.orders button');
 
-    finishOrderBtn.addEventListener('click', () => {
+    finishOrderBtn.addEventListener('click', async () => {
+      this.shadow.querySelector('.filter-modal').classList.remove('visible');
 
-      this.shadow.querySelector('.filter-modal').classList.remove('visible')
+      // Obtener el total del carrito
+      const totalAmount = parseFloat(
+        this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
+      );
 
       // Eliminar la clase 'hidden' del formulario de pago para mostrarlo
       document.getElementById('payment-form').classList.remove('hidden');
 
+      // Llama a la inicialización del flujo de Stripe con el total del carrito
+      document.dispatchEvent(new CustomEvent('initializeStripePayment', { detail: { totalAmount } }));
     });
   }
-
 
 
 }

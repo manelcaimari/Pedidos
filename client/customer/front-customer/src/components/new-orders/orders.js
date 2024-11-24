@@ -36,17 +36,13 @@ class orders extends HTMLElement {
           height: 100%;
           background-color: #1D055B;
           padding: 10px;
-          visibility: hidden;
-          opacity: 0;
-          transform: translateX(100%);
-          transition: transform 0.5s ease, opacity 0.5s ease;
-          z-index: 10;
-        }
-        .reference.visible {
           opacity: 1;
           transform: translateX(0);
           visibility: visible;
+          transition: transform 0.5s ease, opacity 0.5s ease;
+          z-index: 10;
         }
+      
         .main{
           display:grid;
           align-content: center;
@@ -90,7 +86,7 @@ class orders extends HTMLElement {
           font-weight: 700;
         }
         </style>
-        <div class="reference ">
+        <div class="reference visible ">
           <div class='main'>
             <div class="order-title">
               <h2>pedido realizado con èxito.</h2>
