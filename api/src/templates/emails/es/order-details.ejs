@@ -1,0 +1,48 @@
+<div style='text-align: center; padding: 1rem; font-family: Arial, sans-serif;'>
+  <h1 style='color: #444; margin-bottom: 1rem;'>¡Tu pedido ya está en camino!</h1>
+  <p style='color: #666; font-size: 1.2rem; margin-bottom: 2rem;'>Gracias por realizar tu pedido con nosotros, aquí
+    tienes los detalles de tu compra:</p>
+
+  <div
+    style='text-align: left; margin: 0 auto; width: 600px; background: #f9f9f9; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;'>
+    <h2 style='color: #333; margin-bottom: 1rem;'>Detalles de la Venta</h2>
+    <p><strong>Cliente ID:</strong>
+      <%= data.customerId %>
+    </p>
+    <p><strong>Referencia:</strong>
+      <%= data.reference %>
+    </p>
+    <p><strong>Fecha:</strong>
+      <%= data.saleDate %> <strong>Hora:</strong>
+        <%= data.saleTime %>
+    </p>
+    <p><strong>Total:</strong> $<%= data.totalBasePrice %>
+    </p>
+  </div>
+
+
+  <table
+    style='background: #f9f9f9; margin: 0 auto; width: 600px;  padding: 1rem; border: 1px solid #ddd; border-radius: 8px;'>
+    <thead>
+      <tr>
+        <th style='border: 1px solid #ddd; padding: 8px; text-align: left;'>Producto</th>
+        <th style='border: 1px solid #ddd; padding: 8px; text-align: left;'>Precio</th>
+        <th style='border: 1px solid #ddd; padding: 8px; text-align: left;'>Cantidad</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (let i=0; i < data.saleDetails.length; i++) { %>
+        <tr>
+          <td style='border: 1px solid #ddd; padding: 8px;'>
+            <%= data.saleDetails[i].productName %>
+          </td>
+          <td style='border: 1px solid #ddd; padding: 8px;'>
+            <%= data.saleDetails[i].basePrice %>
+          </td>
+          <td style='border: 1px solid #ddd; padding: 8px;'>
+            <%= data.saleDetails[i].quantity %>
+          </td>
+        </tr>
+        <% } %>
+    </tbody>
+  </table>

@@ -16,9 +16,7 @@ document.addEventListener('initializeStripePayment', async (event) => {
     showMessage('No se pudieron obtener los datos de la venta. Intenta de nuevo.')
     return
   }
-  saleDataGlobal = { ...saleData, customerEmail }
-
-  console.log('Datos de la venta asignados a saleDataGlobal:', saleDataGlobal)
+  saleDataGlobal = saleData
 
   try {
     const amountInCents = Math.round(totalAmount * 100)
@@ -33,7 +31,6 @@ let stripe
 let elements
 
 async function fetchClientSecret(amountInCents, customerName, customerEmail) {
-  console.log('Enviando datos al servidor:', { amountInCents, customerName, customerEmail })
   const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-payment-intent`, {
     method: 'POST',
     headers: {
@@ -79,34 +76,24 @@ async function initializeStripe(clientSecret) {
 async function handleSubmit(e) {
   e.preventDefault()
   setLoading(true)
-
   try {
-    if (saleDataGlobal) {
-      const saleResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sales`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(saleDataGlobal)
-      })
-
-      if (!saleResponse.ok) {
-        throw new Error('Error al enviar los datos de la venta')
-      }
-
-      console.log('Datos de venta enviados con éxito:', saleDataGlobal)
+    if (!saleDataGlobal) {
+      console.error('No se encontraron datos de venta para enviar.')
+      showMessage('No se pudieron obtener los datos de la venta. Intenta de nuevo.')
+      return
     }
-  } catch (saleError) {
-    console.error('Error al enviar los datos de la venta:', saleError)
-    showMessage('El pago fue exitoso, pero ocurrió un problema al registrar la venta. Por favor, contacta soporte.')
-    setLoading(false)
-    return // Si ocurre un error en el envío de la venta, no continuar con el siguiente paso.
-  }
 
-  try {
-    // Confirmar el pago con Stripe
+    const saleResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sales`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(saleDataGlobal)
+    })
+
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
+      saleResponse,
       confirmParams: {
         return_url: 'https://dev-pedidos.com/cliente/reference'
       }

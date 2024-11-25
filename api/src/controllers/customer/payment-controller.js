@@ -4,8 +4,6 @@ module.exports = {
   createpaymentintent: async (req, res) => {
     const { amount, customerName, customerEmail } = req.body
 
-    console.log('Datos recibidos:', { amount, customerName, customerEmail }) // <-- Verifica los datos aquí
-
     if (!amount || amount <= 0) {
       return res.status(400).json({ error: 'El monto debe ser mayor a 0.' })
     }

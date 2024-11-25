@@ -2,12 +2,21 @@ const sequelizeDb = require('../../models')
 const Sale = sequelizeDb.Sale
 const SaleDetail = sequelizeDb.SaleDetail
 const Op = sequelizeDb.Sequelize.Op
+const Customer = sequelizeDb.Customer
 
 exports.create = async (req, res) => {
   try {
-    console.log('Datos recibidos:', req.body)
     const items = req.body.items || []
+    const { customerId } = req.body
 
+    const customer = await Customer.findByPk(customerId)
+    if (!customer) {
+      return res.status(404).send({ message: `Cliente no encontrado con id=${customerId}` })
+    }
+
+    if (!customer.id) {
+      return res.status(400).send({ message: 'Cliente no tiene un ID válido.' })
+    }
     const totalBasePrice = items.reduce((acc, item) => acc + item.basePrice * item.quantity, 0).toFixed(2)
 
     const now = new Date()
@@ -20,7 +29,7 @@ exports.create = async (req, res) => {
     const saleTime = now.toISOString().split('T')[1].split('.')[0]
 
     const newSaleData = {
-      ...req.body,
+      customerId,
       reference: newReference,
       totalBasePrice,
       saleDate,
@@ -40,6 +49,21 @@ exports.create = async (req, res) => {
 
     await SaleDetail.bulkCreate(saleDetails)
 
+    const data = {
+      customerId,
+      email: customer.email,
+      customerName: customer.name,
+      reference: sale.reference,
+      totalBasePrice: sale.totalBasePrice,
+      saleDate: sale.saleDate,
+      saleTime: sale.saleTime,
+      saleDetails
+    }
+
+    data.id = data.customerId
+
+    req.redisClient.publish('new-sale', JSON.stringify(data))
+    res.render('venta-completa', { data })
     res.status(200).send(sale)
   } catch (err) {
     if (err.errors) {
