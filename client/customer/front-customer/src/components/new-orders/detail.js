@@ -21,13 +21,13 @@ class DetailComponent extends HTMLElement {
   }
 
   async fetchData() {
-    const cosita = await fetch(`${import.meta.env.VITE_API_URL}/api/client/customers?Id=1`)
-    console.log(cosita)
-    if (!cosita.ok) {
-      throw new Error('Error al obtener los detalles del cliente: ' + cosita.statusText)
+    const customer = await fetch(`${import.meta.env.VITE_API_URL}/api/client/customers?Id=1`)
+    console.log(customer)
+    if (!customer.ok) {
+      throw new Error('Error al obtener los detalles del cliente: ' + customer.statusText)
     }
-    const customerData = await cosita.json()
-    console.log(cosita)
+    const customerData = await customer.json()
+    console.log(customer)
     const { email, id, name } = customerData.rows[0]
     this.customer = { id, name, email }
     console.log('Detalles del cliente a enviar al store:', this.customer)

@@ -4,6 +4,5 @@ module.exports = (app) => {
 
   router.post('/create-payment-intent', paymentController.createpaymentintent)
 
-
   app.use('/api/client/payments', router)
 }

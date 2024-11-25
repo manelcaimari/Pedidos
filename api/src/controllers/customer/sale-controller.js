@@ -5,6 +5,7 @@ const Op = sequelizeDb.Sequelize.Op
 
 exports.create = async (req, res) => {
   try {
+    console.log('Datos recibidos:', req.body)
     const items = req.body.items || []
 
     const totalBasePrice = items.reduce((acc, item) => acc + item.basePrice * item.quantity, 0).toFixed(2)

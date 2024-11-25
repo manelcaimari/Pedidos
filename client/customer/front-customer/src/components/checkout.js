@@ -1,43 +1,63 @@
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js'
+
+let saleDataGlobal = null
 
 document.addEventListener('initializeStripePayment', async (event) => {
-  const { totalAmount } = event.detail
+  const { totalAmount, saleData, customerName, customerEmail } = event.detail
+
+  if (!customerName || !customerEmail) {
+    console.error('Faltan datos del cliente:', { customerName, customerEmail })
+    showMessage('Faltan datos del cliente. Por favor, intenta de nuevo.')
+    return
+  }
+
+  if (!saleData) {
+    console.error('Faltan los datos de la venta.')
+    showMessage('No se pudieron obtener los datos de la venta. Intenta de nuevo.')
+    return
+  }
+  saleDataGlobal = { ...saleData, customerEmail }
+
+  console.log('Datos de la venta asignados a saleDataGlobal:', saleDataGlobal)
 
   try {
     const amountInCents = Math.round(totalAmount * 100)
-    const clientSecret = await fetchClientSecret(amountInCents)
+    const clientSecret = await fetchClientSecret(amountInCents, customerName, customerEmail)
     await initializeStripe(clientSecret)
   } catch (error) {
-    console.error("Error al inicializar el pago:", error)
-    showMessage("No se pudo inicializar el pago. Intenta de nuevo.")
+    console.error('Error al inicializar el pago:', error)
+    showMessage('No se pudo inicializar el pago. Intenta de nuevo.')
   }
-});
-
+})
 let stripe
 let elements
 
-async function fetchClientSecret(amountInCents) {
+async function fetchClientSecret(amountInCents, customerName, customerEmail) {
+  console.log('Enviando datos al servidor:', { amountInCents, customerName, customerEmail })
   const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-payment-intent`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ amount: amountInCents })
-  });
+    body: JSON.stringify({
+      amount: amountInCents,
+      customerName,
+      customerEmail
+    })
+  })
 
   if (!response.ok) {
-    throw new Error("Error al obtener el clientSecret")
+    throw new Error('Error al obtener el clientSecret')
   }
 
   const data = await response.json()
-  return data.clientSecret;
+  return data.clientSecret
 }
 
-// Inicializar Stripe con el clientSecret
 async function initializeStripe(clientSecret) {
   if (!clientSecret) {
-    console.error("El clientSecret no está definido. No se puede inicializar Stripe.")
-    return;
+    console.error('El clientSecret no está definido. No se puede inicializar Stripe.')
+    return
   }
 
   stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
@@ -47,66 +67,91 @@ async function initializeStripe(clientSecret) {
   const paymentElement = elements.create('payment')
   paymentElement.mount('#payment-element')
 
-  const paymentForm = document.querySelector("#payment-form")
+  const paymentForm = document.querySelector('#payment-form')
   if (!paymentForm) {
-    console.error("Formulario de pago no encontrado.")
-    return;
+    console.error('Formulario de pago no encontrado.')
+    return
   }
 
-  paymentForm.addEventListener("submit", handleSubmit)
+  paymentForm.addEventListener('submit', handleSubmit)
 }
 
 async function handleSubmit(e) {
-  e.preventDefault();
-  setLoading(true);
+  e.preventDefault()
+  setLoading(true)
 
   try {
+    if (saleDataGlobal) {
+      const saleResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sales`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(saleDataGlobal)
+      })
+
+      if (!saleResponse.ok) {
+        throw new Error('Error al enviar los datos de la venta')
+      }
+
+      console.log('Datos de venta enviados con éxito:', saleDataGlobal)
+    }
+  } catch (saleError) {
+    console.error('Error al enviar los datos de la venta:', saleError)
+    showMessage('El pago fue exitoso, pero ocurrió un problema al registrar la venta. Por favor, contacta soporte.')
+    setLoading(false)
+    return // Si ocurre un error en el envío de la venta, no continuar con el siguiente paso.
+  }
+
+  try {
+    // Confirmar el pago con Stripe
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: "https://dev-pedidos.com/cliente/reference",
-      },
-    });
+        return_url: 'https://dev-pedidos.com/cliente/reference'
+      }
+    })
 
     if (error) {
-      showMessage(error.message || "Ocurrió un error al procesar el pago.")
+      showMessage(error.message || 'Ocurrió un error al procesar el pago.')
     } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-      showMessage("¡Pago exitoso!");
+      showMessage('¡Pago exitoso!')
     } else {
-      showMessage("El pago no se completó. Verifica tu información e inténtalo de nuevo.")
+      showMessage('El pago no se completó. Verifica tu información e inténtalo de nuevo.')
     }
   } catch (error) {
-    console.error("Error al confirmar el pago:", error)
-    showMessage("Ocurrió un error inesperado. Por favor, intenta de nuevo.")
+    console.error('Error al confirmar el pago:', error)
+    showMessage('Ocurrió un error inesperado. Por favor, intenta de nuevo.')
   }
 
   setLoading(false)
 }
 
 function showMessage(messageText) {
-  const messageContainer = document.querySelector("#payment-message")
-  if (!messageContainer) return;
+  const messageContainer = document.querySelector('#payment-message')
+  if (!messageContainer) return
 
-  messageContainer.classList.remove("hidden")
+  messageContainer.classList.remove('hidden')
   messageContainer.textContent = messageText
 
   setTimeout(() => {
-    messageContainer.classList.add("hidden")
-    messageContainer.textContent = ""
-  }, 4000);
+    messageContainer.classList.add('hidden')
+    messageContainer.textContent = ''
+  }, 4000)
 }
+
 function setLoading(isLoading) {
-  const submitBtn = document.querySelector("#submit")
-  const spinner = document.querySelector("#spinner")
-  const buttonText = document.querySelector("#button-text")
+  const submitBtn = document.querySelector('#submit')
+  const spinner = document.querySelector('#spinner')
+  const buttonText = document.querySelector('#button-text')
 
   if (isLoading) {
-    submitBtn.disabled = true;
-    spinner.classList.remove("hidden");
-    buttonText.classList.add("hidden");
+    submitBtn.disabled = true
+    spinner.classList.remove('hidden')
+    buttonText.classList.add('hidden')
   } else {
-    submitBtn.disabled = false;
-    spinner.classList.add("hidden");
-    buttonText.classList.remove("hidden");
+    submitBtn.disabled = false
+    spinner.classList.add('hidden')
+    buttonText.classList.remove('hidden')
   }
 }

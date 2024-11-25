@@ -230,93 +230,42 @@ class Shoppingcart extends HTMLElement {
   }
 
   async buttonfinality() {
-    const finishOrderBtn = this.shadow.querySelector('.orders button');
+    const finishOrderBtn = this.shadow.querySelector('.orders button')
 
     finishOrderBtn.addEventListener('click', async () => {
-      this.shadow.querySelector('.filter-modal').classList.remove('visible');
+      if (this.cartItems.length === 0) {
+        document.dispatchEvent(new CustomEvent('message', {
+          detail: {
+            type: 'error',
+            message: 'Tu carrito está vacío. Añade productos antes de finalizar el pedido.'
+          }
+        }))
+        return
+      }
 
-      // Obtener el total del carrito
+      this.shadow.querySelector('.filter-modal').classList.remove('visible')
       const totalAmount = parseFloat(
         this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
-      );
+      )
 
-      // Eliminar la clase 'hidden' del formulario de pago para mostrarlo
-      document.getElementById('payment-form').classList.remove('hidden');
+      const customerName = this.customerDetails.name
+      const customerEmail = this.customerDetails.email
+      const saleData = {
+        customerId: this.customerDetails.id,
+        items: this.cartItems.map(item => ({
+          productId: item.productId,
+          priceId: item.priceId,
+          productName: item.name,
+          basePrice: item.price,
+          quantity: item.quantity
+        }))
+      }
 
-      // Llama a la inicialización del flujo de Stripe con el total del carrito
-      document.dispatchEvent(new CustomEvent('initializeStripePayment', { detail: { totalAmount } }));
-    });
+      document.getElementById('payment-form').classList.remove('hidden')
+
+      document.dispatchEvent(new CustomEvent('initializeStripePayment', { detail: { totalAmount, saleData, customerName, customerEmail } }))
+    })
   }
-
-
 }
-
-
-// async buttonfinality() {
-//   const finishOrderBtn = this.shadow.querySelector('.orders button')
-
-//   finishOrderBtn.addEventListener('click', async () => {
-//     if (this.cartItems.length === 0) {
-//       document.dispatchEvent(new CustomEvent('message', {
-//         detail: {
-//           type: 'error',
-//           message: 'Tu carrito está vacío. Añade productos antes de finalizar el pedido.'
-//         }
-//       }))
-//       return
-//     }
-
-//     const saleData = {
-//       customerId: this.customerDetails.Id,
-//       items: this.cartItems.map(item => ({
-//         productId: item.productId,
-//         priceId: item.priceId,
-//         productName: item.name,
-//         basePrice: item.price,
-//         quantity: item.quantity
-//       }))
-//     }
-
-//     try {
-//       const response = await fetch(this.endpoint, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify(saleData)
-//       })
-
-//       if (response.ok) {
-//         const data = await response.json()
-
-//         this.shadow.querySelector('.filter-modal').classList.remove('visible')
-//         document.dispatchEvent(new CustomEvent('showrenferentModal', {
-//           detail: { reference: data.reference }
-//         }))
-//       } else {
-//         const errorData = await response.json()
-//         console.error('Error al crear la venta:', errorData)
-
-//         document.dispatchEvent(new CustomEvent('message', {
-//           detail: {
-//             type: 'error',
-//             message: 'No se pudo finalizar el pedido. Inténtalo de nuevo.'
-//           }
-//         }))
-//       }
-//     } catch (error) {
-//       console.error('Error en la solicitud:', error)
-
-//       document.dispatchEvent(new CustomEvent('message', {
-//         detail: {
-//           type: 'error',
-//           message: 'Ocurrió un error al finalizar el pedido. Verifica tu conexión a internet.'
-//         }
-//       }))
-//     }
-//   })
-// }
-// }
-// customElements.define('shop-component', Shoppingcart)
 
 customElements.define('shop-component', Shoppingcart)
