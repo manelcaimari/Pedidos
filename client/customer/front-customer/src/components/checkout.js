@@ -59,9 +59,55 @@ async function initializeStripe(clientSecret) {
 
   stripe = await loadStripe('pk_test_51QItNYCxHwnRPqw5rQLiDaPD9RD0zU6h8kHd9qcSjU5g2Mhum5ER4sDPQFfhNtLx5bBCvHgXCKCCtB4gHUXY6DJI00bagmow9S')
 
-  elements = stripe.elements({ clientSecret })
+  const appearance = {
+    theme: 'flat',
+    variables: {
+      fontFamily: '"Gill Sans", sans-serif',
+      fontLineHeight: '1.5',
+      borderRadius: '10px',
+      colorBackground: '#F6F8FA',
+      accessibleColorOnColorPrimary: '#262626',
+      // Estilo para pantallas móviles
+      inputPadding: '16px', // mayor espacio en el móvil
+      buttonPadding: '14px 18px' // mayor espacio en el móvil
+    },
+    rules: {
+      '.Block': {
+        backgroundColor: 'var(--colorBackground)',
+        boxShadow: 'none',
+        padding: '12px'
+      },
+      '.Input': {
+        padding: '16px' // más espaciado
+      },
+      '.Tab': {
+        padding: '10px 12px 8px 12px',
+        border: 'none'
+      },
+      '.Tab:hover': {
+        border: 'none',
+        boxShadow: '0px 1px 1px rgba(0, 0, 0, 0.03), 0px 3px 7px rgba(18, 42, 66, 0.04)'
+      },
+      '.Tab--selected, .Tab--selected:focus, .Tab--selected:hover': {
+        border: 'none',
+        backgroundColor: '#fff',
+        boxShadow: '0 0 0 1.5px var(--colorPrimaryText), 0px 1px 1px rgba(0, 0, 0, 0.03), 0px 3px 7px rgba(18, 42, 66, 0.04)'
+      },
+      '.Label': {
+        fontWeight: '500'
+      }
+    }
+  }
+  const options = {
+    layout: {
+      type: 'tabs',
+      defaultCollapsed: false,
+      radios: false
+    }
+  }
+  elements = stripe.elements({ clientSecret, appearance })
 
-  const paymentElement = elements.create('payment')
+  const paymentElement = elements.create('payment', options)
   paymentElement.mount('#payment-element')
 
   const paymentForm = document.querySelector('#payment-form')
@@ -83,26 +129,25 @@ async function handleSubmit(e) {
       return
     }
 
-    const saleResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sales`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(saleDataGlobal)
-    })
-
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
-      saleResponse,
-      confirmParams: {
-        return_url: 'https://dev-pedidos.com/cliente/reference'
-      }
+      redirect: 'if_required'
     })
 
     if (error) {
       showMessage(error.message || 'Ocurrió un error al procesar el pago.')
     } else if (paymentIntent && paymentIntent.status === 'succeeded') {
       showMessage('¡Pago exitoso!')
+
+      await fetch(`${import.meta.env.VITE_API_URL}/api/client/sales`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(saleDataGlobal)
+
+      })
+      window.location.href = 'https://dev-pedidos.com/cliente/reference'
     } else {
       showMessage('El pago no se completó. Verifica tu información e inténtalo de nuevo.')
     }

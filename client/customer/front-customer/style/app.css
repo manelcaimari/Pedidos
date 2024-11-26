@@ -40,3 +40,28 @@ body {
     max-width: 500px;
     z-index: 20;
 }
+
+button {
+    background-color: #3498db;
+    color: white;
+    font-size: 16px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    width: 100%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+#spinner {
+    display: none;
+}
+
+#payment-message {
+    margin-top: 20px;
+}

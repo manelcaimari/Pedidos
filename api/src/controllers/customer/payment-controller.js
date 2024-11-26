@@ -18,7 +18,6 @@ module.exports = {
         amount,
         currency: 'eur',
         customer: customer.id,
-        payment_method_types: ['card'],
         metadata: {
           customerName,
           customerEmail
