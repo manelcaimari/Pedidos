@@ -2,7 +2,6 @@ class orders extends HTMLElement {
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
-    this.data = null
   }
 
   connectedCallback() {
@@ -15,7 +14,6 @@ class orders extends HTMLElement {
   }
 
   handleMessage(event) {
-    this.data = event.detail
     this.render()
     this.shadow.querySelector('.reference').classList.add('visible')
   }

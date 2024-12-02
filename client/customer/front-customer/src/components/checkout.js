@@ -61,42 +61,63 @@ async function initializeStripe(clientSecret) {
 
   const appearance = {
     theme: 'flat',
+    labels: 'floating',
     variables: {
       fontFamily: '"Gill Sans", sans-serif',
       fontLineHeight: '1.5',
       borderRadius: '10px',
       colorBackground: '#F6F8FA',
       accessibleColorOnColorPrimary: '#262626',
-      // Estilo para pantallas móviles
-      inputPadding: '16px', // mayor espacio en el móvil
-      buttonPadding: '14px 18px' // mayor espacio en el móvil
+      inputPadding: '16px',
+      buttonPadding: '14px 18px',
+      colorPrimary: '#1D72B8',
+      colorSecondary: '#4A90E2'
     },
     rules: {
       '.Block': {
         backgroundColor: 'var(--colorBackground)',
         boxShadow: 'none',
-        padding: '12px'
+        padding: '12px',
+        borderRadius: '10px',
+        transition: 'background-color 0.3s ease'
       },
       '.Input': {
-        padding: '16px' // más espaciado
+        padding: '8px',
+        borderRadius: '5px',
+        border: '1px solid #E0E0E0',
+        fontSize: '14px',
+        transition: 'border-color 0.3s ease'
+      },
+      '.Input:focus': {
+        borderColor: 'var(--colorPrimary)'
       },
       '.Tab': {
         padding: '10px 12px 8px 12px',
-        border: 'none'
+        border: 'none',
+        borderRadius: '8px',
+        backgroundColor: '#FFFFFF',
+        fontWeight: '600',
+        color: '#333333',
+        transition: 'all 0.3s ease'
       },
       '.Tab:hover': {
-        border: 'none',
-        boxShadow: '0px 1px 1px rgba(0, 0, 0, 0.03), 0px 3px 7px rgba(18, 42, 66, 0.04)'
+        boxShadow: '0 1px 5px rgba(0, 0, 0, 0.1)',
+        backgroundColor: '#F0F4F8'
       },
       '.Tab--selected, .Tab--selected:focus, .Tab--selected:hover': {
-        border: 'none',
-        backgroundColor: '#fff',
-        boxShadow: '0 0 0 1.5px var(--colorPrimaryText), 0px 1px 1px rgba(0, 0, 0, 0.03), 0px 3px 7px rgba(18, 42, 66, 0.04)'
+        backgroundColor: '#F6F8FA',
+        color: 'var(--colorPrimary)',
+        boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)'
       },
       '.Label': {
-        fontWeight: '500'
+        fontWeight: '500',
+        color: '#333333'
+      },
+      '.Icon': {
+        transition: 'transform 0.2s ease'
       }
     }
+
   }
   const options = {
     layout: {

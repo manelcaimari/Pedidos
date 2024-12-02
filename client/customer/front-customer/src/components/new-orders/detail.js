@@ -143,6 +143,9 @@ class DetailComponent extends HTMLElement {
           cursor: pointer;
           font-weight: 600;
         }
+        .hidden {
+          display: none; 
+        }
         </style>
       <div class="order-item"></div>
       <div class="button-order">
@@ -253,9 +256,12 @@ class DetailComponent extends HTMLElement {
 
   async renderOrderButton() {
     const orderButton = this.shadow.querySelector('.view-order-button')
+    const orderItem = this.shadow.querySelector('.order-item')
 
     orderButton.addEventListener('click', () => {
       store.dispatch(toggleCart())
+      orderItem.classList.add('hidden')
+      orderButton.classList.add('hidden')
       document.dispatchEvent(new CustomEvent('showFilterModal'))
       document.dispatchEvent(new CustomEvent('changeHeader', {
         detail: {
