@@ -2,7 +2,7 @@ const { defineConfig } = require('vite')
 const fs = require('fs')
 
 export default defineConfig({
-  base: '/auth',
+  base: '/cuenta',
   server: {
     host: 'dev-pedidos.com',
     port: 5180,

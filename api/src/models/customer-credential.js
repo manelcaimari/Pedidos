@@ -45,15 +45,7 @@ module.exports = function (sequelize, DataTypes) {
       },
       lastPasswodChange: {
         type: DataTypes.DATE,
-        allowNull: false,
-        validate: {
-          notNull: {
-            msg: 'Por favor, rellena el campo "Nombre".'
-          },
-          notEmpty: {
-            msg: 'Por favor, rellena el campo "Nombre".'
-          }
-        }
+        allowNull: true
       },
       createdAt: {
         type: DataTypes.DATE

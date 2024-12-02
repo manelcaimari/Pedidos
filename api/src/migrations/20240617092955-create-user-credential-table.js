@@ -29,8 +29,7 @@ module.exports = {
         allowNull: false
       },
       lastPasswodChange: {
-        type: Sequelize.DATE,
-        allowNull: false
+        type: Sequelize.DATE
       },
       createdAt: {
         type: Sequelize.DATE,

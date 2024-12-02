@@ -1,6 +1,6 @@
 exports.findAll = (req, res) => {
   const routes = {
-    '/auth/activate': 'activate.html'
+    '/cuenta/activacion': 'activate.html'
   }
 
   res.status(200).send(routes)
