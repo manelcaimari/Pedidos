@@ -16,11 +16,7 @@ class PageComponent extends HTMLElement {
   }
 
   async getRoutes () {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/routes`, {
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
-      }
-    })
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/routes`)
 
     if (response.ok) {
       this.routes = await response.json()
