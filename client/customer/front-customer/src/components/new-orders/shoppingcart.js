@@ -20,7 +20,6 @@ class Shoppingcart extends HTMLElement {
       } else {
         console.log('Token no encontrado en localStorage')
       }
-
       this.render()
     })
     this.render()
@@ -271,10 +270,40 @@ class Shoppingcart extends HTMLElement {
           quantity: item.quantity
         }))
       }
+      const token = localStorage.getItem('customerAccessToken')
+      if (token) {
+        try {
+          const decodedToken = JSON.parse(atob(token.split('.')[1]))
+          const customerId = decodedToken.customerId
+
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/customers/${customerId}`, {
+            method: 'GET',
+            headers: {
+              Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+            }
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            const customerName = data.name
+            const customerEmail = data.email
+            document.dispatchEvent(new CustomEvent('initializeStripePayment', {
+              detail: {
+                totalAmount,
+                saleData,
+                customerName,
+                customerEmail
+              }
+            }))
+          } else {
+            console.log('No se pudo obtener los datos del cliente.')
+          }
+        } catch (error) {
+          console.error('Error al obtener los datos del cliente:', error)
+        }
+      }
 
       document.getElementById('payment-form').classList.remove('hidden')
-
-      document.dispatchEvent(new CustomEvent('initializeStripePayment', { detail: { totalAmount, saleData } }))
     })
   }
 }

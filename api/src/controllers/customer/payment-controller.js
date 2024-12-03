@@ -2,21 +2,24 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 module.exports = {
   createpaymentintent: async (req, res) => {
-    const { amount } = req.body
-    const customerId = req.customerId
-    console.log(customerId)
+    const { amount, customerName, customerEmail } = req.body
 
     if (!amount || amount <= 0) {
       return res.status(400).json({ error: 'El monto debe ser mayor a 0.' })
     }
 
     try {
+      const customer = await stripe.customers.create({
+        name: customerName,
+        email: customerEmail
+      })
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
         currency: 'eur',
-
+        customer: customer.id,
         metadata: {
-
+          customerName,
+          customerEmail
         }
       })
       res.json({ clientSecret: paymentIntent.client_secret })

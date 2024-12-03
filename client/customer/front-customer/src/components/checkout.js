@@ -3,18 +3,23 @@ import { loadStripe } from '@stripe/stripe-js'
 let saleDataGlobal = null
 
 document.addEventListener('initializeStripePayment', async (event) => {
-  const { totalAmount, saleData } = event.detail
+  const { totalAmount, saleData, customerName, customerEmail } = event.detail
 
   if (!saleData) {
     console.error('Faltan los datos de la venta.')
     showMessage('No se pudieron obtener los datos de la venta. Intenta de nuevo.')
     return
   }
+  if (!customerName || !customerEmail) {
+    console.error('Faltan datos del cliente:', { customerName, customerEmail })
+    showMessage('Faltan datos del cliente. Por favor, intenta de nuevo.')
+    return
+  }
   saleDataGlobal = saleData
 
   try {
     const amountInCents = Math.round(totalAmount * 100)
-    const clientSecret = await fetchClientSecret(amountInCents)
+    const clientSecret = await fetchClientSecret(amountInCents, customerName, customerEmail)
     await initializeStripe(clientSecret)
   } catch (error) {
     console.error('Error al inicializar el pago:', error)
@@ -24,14 +29,16 @@ document.addEventListener('initializeStripePayment', async (event) => {
 let stripe
 let elements
 
-async function fetchClientSecret(amountInCents) {
+async function fetchClientSecret(amountInCents, customerName, customerEmail) {
   const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-payment-intent`, {
     method: 'POST',
     headers: {
       Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
     },
     body: JSON.stringify({
-      amount: amountInCents
+      amount: amountInCents,
+      customerName,
+      customerEmail
 
     })
   })
