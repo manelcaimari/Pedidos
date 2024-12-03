@@ -5,7 +5,6 @@ class menu extends HTMLElement {
   }
 
   connectedCallback() {
-    this.data = {}
     this.render()
   }
 

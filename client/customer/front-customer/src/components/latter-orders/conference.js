@@ -34,8 +34,11 @@ class Conference extends HTMLElement {
 
   async loadData() {
     const endpoint = this.queryString ? `${this.endpoint}?${this.queryString}` : this.endpoint
-    const response = await fetch(endpoint)
-
+    const response = await fetch(endpoint, {
+      headers: {
+        Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+      }
+    })
     this.data = await response.json()
   }
 

@@ -51,9 +51,6 @@ module.exports = {
         type: Sequelize.DATE
       }
     })
-    await queryInterface.addIndex('sent_emails', ['userId'], {
-      name: 'sent_emails_userId_index'
-    })
   },
 
   down: async (queryInterface, Sequelize) => {

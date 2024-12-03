@@ -13,7 +13,14 @@ class Shoppingcart extends HTMLElement {
     this.unsubscribe = store.subscribe(() => {
       const state = store.getState()
       this.cartItems = state.crud.cart
-      this.customerDetails = state.crud.customerDetails
+      const token = localStorage.getItem('customerAccessToken')
+
+      if (token) {
+        console.log('Token:', token)
+      } else {
+        console.log('Token no encontrado en localStorage')
+      }
+
       this.render()
     })
     this.render()
@@ -255,10 +262,7 @@ class Shoppingcart extends HTMLElement {
         this.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
       )
 
-      const customerName = this.customerDetails.name
-      const customerEmail = this.customerDetails.email
       const saleData = {
-        customerId: this.customerDetails.id,
         items: this.cartItems.map(item => ({
           productId: item.productId,
           priceId: item.priceId,
@@ -270,7 +274,7 @@ class Shoppingcart extends HTMLElement {
 
       document.getElementById('payment-form').classList.remove('hidden')
 
-      document.dispatchEvent(new CustomEvent('initializeStripePayment', { detail: { totalAmount, saleData, customerName, customerEmail } }))
+      document.dispatchEvent(new CustomEvent('initializeStripePayment', { detail: { totalAmount, saleData } }))
     })
   }
 }

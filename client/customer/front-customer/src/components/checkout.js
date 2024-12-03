@@ -3,13 +3,7 @@ import { loadStripe } from '@stripe/stripe-js'
 let saleDataGlobal = null
 
 document.addEventListener('initializeStripePayment', async (event) => {
-  const { totalAmount, saleData, customerName, customerEmail } = event.detail
-
-  if (!customerName || !customerEmail) {
-    console.error('Faltan datos del cliente:', { customerName, customerEmail })
-    showMessage('Faltan datos del cliente. Por favor, intenta de nuevo.')
-    return
-  }
+  const { totalAmount, saleData } = event.detail
 
   if (!saleData) {
     console.error('Faltan los datos de la venta.')
@@ -20,7 +14,7 @@ document.addEventListener('initializeStripePayment', async (event) => {
 
   try {
     const amountInCents = Math.round(totalAmount * 100)
-    const clientSecret = await fetchClientSecret(amountInCents, customerName, customerEmail)
+    const clientSecret = await fetchClientSecret(amountInCents)
     await initializeStripe(clientSecret)
   } catch (error) {
     console.error('Error al inicializar el pago:', error)
@@ -30,16 +24,15 @@ document.addEventListener('initializeStripePayment', async (event) => {
 let stripe
 let elements
 
-async function fetchClientSecret(amountInCents, customerName, customerEmail) {
+async function fetchClientSecret(amountInCents) {
   const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-payment-intent`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
     },
     body: JSON.stringify({
-      amount: amountInCents,
-      customerName,
-      customerEmail
+      amount: amountInCents
+
     })
   })
 
@@ -163,7 +156,7 @@ async function handleSubmit(e) {
       await fetch(`${import.meta.env.VITE_API_URL}/api/client/sales`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
         },
         body: JSON.stringify(saleDataGlobal)
 

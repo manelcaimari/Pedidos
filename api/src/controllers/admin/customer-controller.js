@@ -4,6 +4,8 @@ const Op = sequelizeDb.Sequelize.Op
 
 exports.create = (req, res) => {
   Customer.create(req.body).then(async data => {
+    req.redisClient.publish('new-customer', JSON.stringify(data))
+
     res.status(200).send(data)
   }).catch(err => {
     if (err.errors) {

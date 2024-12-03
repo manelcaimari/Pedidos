@@ -12,13 +12,7 @@ module.exports = {
       },
       customerId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'sales',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'NO ACTION'
+        allowNull: false
       },
       reference: {
         type: Sequelize.STRING,

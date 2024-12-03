@@ -176,9 +176,11 @@ class Repayment extends HTMLElement {
     if (!saleId) return
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?Id=${saleId}`)
-
-      if (!response.ok) return null
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?Id=${saleId}`, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+        }
+      })
 
       const data = await response.json()
 
@@ -369,7 +371,9 @@ class Repayment extends HTMLElement {
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/returns`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+          },
           body: JSON.stringify(returnData)
         })
 

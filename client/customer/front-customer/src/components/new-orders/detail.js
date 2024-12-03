@@ -1,5 +1,5 @@
 import { store } from '../../redux/store.js'
-import { toggleCart, setCart, setCustomerDetails } from '../../redux/crud-slice.js'
+import { toggleCart, setCart } from '../../redux/crud-slice.js'
 
 class DetailComponent extends HTMLElement {
   constructor() {
@@ -17,25 +17,14 @@ class DetailComponent extends HTMLElement {
     await this.loadData()
     await this.render()
     await this.getBasePrices()
-    await this.fetchData()
-  }
-
-  async fetchData() {
-    const customer = await fetch(`${import.meta.env.VITE_API_URL}/api/client/customers?Id=1`)
-    console.log(customer)
-    if (!customer.ok) {
-      throw new Error('Error al obtener los detalles del cliente: ' + customer.statusText)
-    }
-    const customerData = await customer.json()
-    console.log(customer)
-    const { email, id, name } = customerData.rows[0]
-    this.customer = { id, name, email }
-    console.log('Detalles del cliente a enviar al store:', this.customer)
-    store.dispatch(setCustomerDetails(this.customer))
   }
 
   async loadData() {
-    const response = await fetch(this.endpoint)
+    const response = await fetch(this.endpoint, {
+      headers: {
+        Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+      }
+    })
     this.data = await response.json()
     await this.getBasePrices()
   }
@@ -279,7 +268,11 @@ class DetailComponent extends HTMLElement {
   }
 
   async getBasePrices() {
-    const pricesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/prices`)
+    const pricesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/client/prices`, {
+      headers: {
+        Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+      }
+    })
     this.pricesCategories = await pricesResponse.json()
     this.basePricesMap = {}
 

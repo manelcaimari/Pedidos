@@ -180,10 +180,12 @@ class Devolution extends HTMLElement {
       if (returnId) {
         await this.getReturnDetails(returnId)
       }
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`)
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`)
-      }
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+        }
+      })
+
       this.data = await response.json()
       this.populateOrderItems(this.data.rows)
       this.totalPrice()
@@ -194,10 +196,12 @@ class Devolution extends HTMLElement {
 
   async getReturns(saleId) {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/returns?saleId=${saleId}`)
-      if (!response.ok) {
-        throw new Error('Network response was not ok')
-      }
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/returns?saleId=${saleId}`, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+        }
+      })
+
       const data = await response.json()
       if (data.rows && data.rows.length > 0) {
         const returnIds = data.rows.map(row => row.id)
@@ -214,10 +218,12 @@ class Devolution extends HTMLElement {
 
   async getReturnDetails(returnId) {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/return-details?returnId=${returnId}`)
-      if (!response.ok) {
-        throw new Error('Error al obtener los detalles de la devolución: ' + response.statusText)
-      }
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/return-details?returnId=${returnId}`, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+        }
+      })
+
       const data = await response.json()
       if (data.rows && data.rows.length > 0) {
         const groupedItems = {}

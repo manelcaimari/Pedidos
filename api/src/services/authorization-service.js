@@ -9,7 +9,7 @@ const entities = {
     resetPasswordTokenModel: sequelizeDb.UserResetPasswordToken,
     credentialModel: sequelizeDb.UserCredential
   },
-  customerStaff: {
+  customer: {
     model: sequelizeDb.Customer,
     tokenModel: sequelizeDb.CustomerActivationToken,
     resetPasswordTokenModel: sequelizeDb.CustomerResetPasswordToken,
