@@ -12,14 +12,7 @@ module.exports = {
       },
       productId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'products',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'NO ACTION'
-
+        allowNull: false
       },
       basePrice: {
         type: Sequelize.DECIMAL,
@@ -40,9 +33,6 @@ module.exports = {
       deletedAt: {
         type: Sequelize.DATE
       }
-    })
-    await queryInterface.addIndex('prices', ['productId'], {
-      name: 'prices_productId_index'
     })
   },
 

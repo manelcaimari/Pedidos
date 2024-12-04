@@ -12,13 +12,7 @@ module.exports = {
       },
       fingerprintId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'fingerprints',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'NO ACTION'
+        allowNull: false
       },
       name: {
         type: Sequelize.STRING,
@@ -47,10 +41,6 @@ module.exports = {
       deletedAt: {
         type: Sequelize.DATE
       }
-    })
-
-    await queryInterface.addIndex('contacts', ['fingerprintId'], {
-      name: 'contacts_fingerprintId_index'
     })
   },
 

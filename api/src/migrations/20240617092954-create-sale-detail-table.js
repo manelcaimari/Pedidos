@@ -12,33 +12,18 @@ module.exports = {
       },
       saleId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'sales',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'NO ACTION'
+        allowNull: false
+
       },
       productId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'products',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'NO ACTION'
+        allowNull: false
+
       },
       priceId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'prices',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'NO ACTION'
+        allowNull: false
+
       },
       productName: {
         type: Sequelize.STRING,
@@ -63,17 +48,6 @@ module.exports = {
       deletedAt: {
         type: Sequelize.DATE
       }
-    })
-    await queryInterface.addIndex('sale_details', ['saleId'], {
-      name: 'unique_sale_details_saleId_index'
-    })
-
-    await queryInterface.addIndex('sale_details', ['productId'], {
-      name: 'unique_sale_details_productId_index'
-    })
-
-    await queryInterface.addIndex('sale_details', ['priceId'], {
-      name: 'unique_sale_details_priceId_index'
     })
   },
 

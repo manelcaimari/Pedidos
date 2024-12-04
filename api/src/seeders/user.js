@@ -7,7 +7,7 @@ module.exports = {
       {
         id: 1,
         name: 'manel',
-        email: 'manelcaimari@gmail.com',
+        email: 'manelcaimari@gmail.com', // cambiar tu correo por el tuyo
         createdAt: new Date(),
         updatedAt: new Date()
       }

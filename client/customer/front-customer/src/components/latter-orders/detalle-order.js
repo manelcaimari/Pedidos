@@ -182,7 +182,7 @@ class Devolution extends HTMLElement {
       }
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?saleId=${saleId}`, {
         headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+          'Content-Type': 'application/json'
         }
       })
 
@@ -198,7 +198,7 @@ class Devolution extends HTMLElement {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/returns?saleId=${saleId}`, {
         headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+          'Content-Type': 'application/json'
         }
       })
 
@@ -220,7 +220,7 @@ class Devolution extends HTMLElement {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/return-details?returnId=${returnId}`, {
         headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+          'Content-Type': 'application/json'
         }
       })
 

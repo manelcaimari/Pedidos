@@ -1,5 +1,5 @@
 import { store } from '../../redux/store.js'
-import { setSaleId, setReference, setQueryString } from '../../redux/crud-slice.js'
+import { setSaleId, setReference, setQueryString, setCustomerDetails } from '../../redux/crud-slice.js'
 
 class Conference extends HTMLElement {
   constructor() {
@@ -13,33 +13,71 @@ class Conference extends HTMLElement {
   async connectedCallback() {
     this.unsubscribe = store.subscribe(async () => {
       const currentState = store.getState()
+      this.customer = currentState.crud.customer
       const newQueryString = currentState.crud.queryString
 
-      if (this.queryString !== newQueryString) {
-        this.queryString = newQueryString
-        await this.loadData()
-        this.render()
+      if (this.customer && this.customer.id) {
+        if (this.queryString !== newQueryString) {
+          this.queryString = newQueryString
+          await this.loadData()
+          await this.render()
+        }
       }
     })
 
     store.dispatch(setQueryString(this.queryString))
+    await this.getActivationToken()
+  }
 
-    await this.loadData()
-    this.render()
+  async getActivationToken() {
+    const token = localStorage.getItem('customerAccessToken')
+    if (!token) {
+      return
+    }
+    try {
+      const decodedToken = JSON.parse(atob(token.split('.')[1]))
+      const customerId = decodedToken.customerId
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/customers/${customerId}`, {
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+        }
+      })
+
+      if (response.ok) {
+        const customerData = await response.json()
+        await this.loadData(customerData)
+      }
+    } catch (error) {
+      console.error('Error al obtener el token de activación:', error)
+    }
   }
 
   disconnectedCallback() {
     this.unsubscribe()
   }
 
-  async loadData() {
-    const endpoint = this.queryString ? `${this.endpoint}?${this.queryString}` : this.endpoint
-    const response = await fetch(endpoint, {
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
-      }
-    })
-    this.data = await response.json()
+  async loadData(customerData) {
+    store.dispatch(setCustomerDetails(customerData))
+    const algo = customerData.id
+
+    const endpoint = this.queryString ? `${this.endpoint}?${this.queryString}&customerId=${algo}` : `${this.endpoint}?customerId=${algo}`
+    try {
+      const response = await fetch(endpoint, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const allSales = await response.json()
+      console.log('Datos de ventas:', allSales)
+      this.data.rows = allSales.rows.filter(sale => sale.customerId === customerData.id)
+
+      this.render()
+    } catch (error) {
+      console.error('Error al obtener los datos:', error)
+    }
   }
 
   render() {

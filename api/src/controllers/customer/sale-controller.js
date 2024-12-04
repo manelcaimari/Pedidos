@@ -7,10 +7,9 @@ const Customer = sequelizeDb.Customer
 exports.create = async (req, res) => {
   try {
     const items = req.body.items || []
-    const customerId = req.customerId
+    const { customerId } = req.body
 
     const customer = await Customer.findByPk(customerId)
-
     if (!customer) {
       return res.status(404).send({ message: `Cliente no encontrado con id=${customerId}` })
     }

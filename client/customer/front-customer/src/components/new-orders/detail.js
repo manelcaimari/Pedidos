@@ -1,5 +1,5 @@
 import { store } from '../../redux/store.js'
-import { toggleCart, setCart } from '../../redux/crud-slice.js'
+import { toggleCart, setCart, setCustomerDetails } from '../../redux/crud-slice.js'
 
 class DetailComponent extends HTMLElement {
   constructor() {
@@ -17,6 +17,34 @@ class DetailComponent extends HTMLElement {
     await this.loadData()
     await this.render()
     await this.getBasePrices()
+    await this.getActivationToken()
+  }
+
+  async getActivationToken() {
+    const token = localStorage.getItem('customerAccessToken')
+    if (!token) {
+      return
+    }
+    try {
+      const decodedToken = JSON.parse(atob(token.split('.')[1]))
+      const customerId = decodedToken.customerId
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/customers/${customerId}`, {
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+        }
+      })
+
+      console.log('Estado de la respuesta:', response.status)
+      if (response.ok) {
+        const customerData = await response.json()
+        this.customer = customerData
+        store.dispatch(setCustomerDetails(this.customer))
+      }
+    } catch (error) {
+      console.error('Error al obtener el token de activación:', error)
+    }
   }
 
   async loadData() {

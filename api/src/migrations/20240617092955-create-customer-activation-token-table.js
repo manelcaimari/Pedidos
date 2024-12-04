@@ -12,13 +12,7 @@ module.exports = {
       },
       customerId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'customers',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'NO ACTION'
+        allowNull: false
       },
       token: {
         type: Sequelize.STRING,
@@ -43,9 +37,6 @@ module.exports = {
       deletedAt: {
         type: Sequelize.DATE
       }
-    })
-    await queryInterface.addIndex('customer_activation_tokens', ['customerId'], {
-      name: 'customer_activation_tokens_customerId_index'
     })
   },
 

@@ -1,11 +1,11 @@
 module.exports = (app) => {
   const router = require('express').Router()
-  const authCustomerJwt = require('../middlewares/auth-customer-jwt.js')
+
   const controller = require('../controllers/customer/sale-controller.js')
 
-  router.post('/', [authCustomerJwt.verifyCustomerToken], controller.create)
-  router.get('/', [authCustomerJwt.verifyCustomerToken], controller.findAll)
-  router.get('/:id', [authCustomerJwt.verifyCustomerToken], controller.findOne)
+  router.post('/', controller.create)
+  router.get('/', controller.findAll)
+  router.get('/:id', controller.findOne)
 
   app.use('/api/client/sales', router)
 }

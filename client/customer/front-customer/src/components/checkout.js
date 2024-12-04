@@ -4,19 +4,19 @@ let saleDataGlobal = null
 
 document.addEventListener('initializeStripePayment', async (event) => {
   const { totalAmount, saleData, customerName, customerEmail } = event.detail
-
-  if (!saleData) {
-    console.error('Faltan los datos de la venta.')
-    showMessage('No se pudieron obtener los datos de la venta. Intenta de nuevo.')
-    return
-  }
   if (!customerName || !customerEmail) {
     console.error('Faltan datos del cliente:', { customerName, customerEmail })
     showMessage('Faltan datos del cliente. Por favor, intenta de nuevo.')
     return
   }
+  console.log('Evento recibido:', event.detail)
+  if (!saleData) {
+    console.error('Faltan los datos de la venta.')
+    showMessage('No se pudieron obtener los datos de la venta. Intenta de nuevo.')
+    return
+  }
   saleDataGlobal = saleData
-
+  console.log(saleDataGlobal)
   try {
     const amountInCents = Math.round(totalAmount * 100)
     const clientSecret = await fetchClientSecret(amountInCents, customerName, customerEmail)
@@ -33,13 +33,12 @@ async function fetchClientSecret(amountInCents, customerName, customerEmail) {
   const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/payments/create-payment-intent`, {
     method: 'POST',
     headers: {
-      Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       amount: amountInCents,
       customerName,
       customerEmail
-
     })
   })
 
@@ -163,7 +162,7 @@ async function handleSubmit(e) {
       await fetch(`${import.meta.env.VITE_API_URL}/api/client/sales`, {
         method: 'POST',
         headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(saleDataGlobal)
 

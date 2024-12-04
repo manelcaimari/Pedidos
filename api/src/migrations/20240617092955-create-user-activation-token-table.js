@@ -12,13 +12,8 @@ module.exports = {
       },
       userId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'users',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'NO ACTION'
+        allowNull: false
+
       },
       token: {
         type: Sequelize.STRING,
@@ -43,9 +38,6 @@ module.exports = {
       deletedAt: {
         type: Sequelize.DATE
       }
-    })
-    await queryInterface.addIndex('user_activation_tokens', ['userId'], {
-      name: 'user_activation_tokens_userId_index'
     })
   },
 

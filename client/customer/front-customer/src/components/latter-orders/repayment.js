@@ -16,7 +16,7 @@ class Repayment extends HTMLElement {
       const state = store.getState()
       const newSaleId = state.crud.saleId
       const newOrderDetails = state.crud.orderDetails
-
+      this.customerDetails = state.crud.customerDetails
       if (newSaleId !== this.saleId) {
         this.saleId = newSaleId
         this.getSaleDetails(this.saleId)
@@ -178,7 +178,7 @@ class Repayment extends HTMLElement {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/sale-details?Id=${saleId}`, {
         headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+          'Content-Type': 'application/json'
         }
       })
 
@@ -319,7 +319,8 @@ class Repayment extends HTMLElement {
 
       const state = store.getState()
       const saleId = state.crud.saleId
-      const customerId = state.crud.customerId || 1
+      const customerId = this.customerDetails.Id
+      console.log(customerId)
       let totalBasePrice = 0
 
       const reference = state.crud.reference
@@ -357,22 +358,16 @@ class Repayment extends HTMLElement {
         returnTime: new Date().toLocaleTimeString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        returnDetails: orderDetails.map(product => {
-          return {
-            productName: product.productName,
-            productId: product.productId,
-            priceId: product.priceId,
-            quantity: product.quantity,
-            saledetailId: product.saledetailId
-          }
-        })
+        returnDetails: orderDetails
       }
+
+      console.log('Datos enviados al backend para devolución:', returnData)
 
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/client/returns`, {
           method: 'POST',
           headers: {
-            Authorization: 'Bearer ' + localStorage.getItem('customerAccessToken')
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(returnData)
         })
