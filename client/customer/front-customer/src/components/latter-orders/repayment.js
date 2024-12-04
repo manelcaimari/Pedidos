@@ -278,6 +278,7 @@ class Repayment extends HTMLElement {
     const productDetails = []
     const orderItems = this.shadow.querySelectorAll('.order')
     const state = store.getState()
+    console.log(state)
 
     const productsInOrderDetails = state.crud.orderDetails
 
@@ -319,7 +320,8 @@ class Repayment extends HTMLElement {
 
       const state = store.getState()
       const saleId = state.crud.saleId
-      const customerId = this.customerDetails.Id
+      this.customerDetails = state.crud.customerDetails
+      const customerId = this.customerDetails.id
       console.log(customerId)
       let totalBasePrice = 0
 
